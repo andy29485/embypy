@@ -4,10 +4,28 @@ import embypy.utils.connector
 
 class EmbyObject:
   def __init__(self, object_dict, connector):
-    self.id               = object_dict.get('ItemId')
-    self.name             = object_dict.get('Name')
-    self.community_rating = object_dict.get('CommunityRating')
-    self.connector        = connector
+    self.connector   = connector
+    self.object_dict = object_dict
+
+  @property
+  def id(self):
+    return self.object_dict.get('ItemId')
+
+  @property
+  def name(self):
+    return self.object_dict.get('Name')
+
+  @property
+  def type(self):
+    return self.object_dict.get('Type')
+
+  @property
+  def media_type(self):
+    return self.object_dict.get('MediaType')
+
+  @property
+  def community_rating(self):
+    return self.object_dict.get('CommunityRating')
 
   def process(self, object_dict):
     if object_dict['Type'] == 'Audio':
@@ -56,45 +74,115 @@ class EmbyObject:
                        '', '', ''
     ))
 
+  def __str__(self):
+    return self.name
+
+  def __repr__(self):
+    return '<{} {}>'.format(self.type, self.id)
+
 # Generic classes
 class Audio(EmbyObject):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.album                   = object_dict.get('Album')
-    self.album_artist            = object_dict.get('AlbumArtist')
-    self.artists                 = object_dict.get('Artists')
-    self.album_id                = object_dict.get('AlbumId')
-    self.album_primary_image_tag = object_dict.get('AlbumPrimaryImageTag')
-    self.media_type              = object_dict.get('MediaType')
-    self.type                    = object_dict.get('Type')
-    self.index_number            = object_dict.get('IndexNumber')
-    self.genres                  = object_dict.get('Genres')
-    self.tags                    = object_dict.get('Tags')
+
+  @property
+  def album(self):
+    return self.object_dict.get('Album')
+
+  @property
+  def album_artist(self):
+    return self.object_dict.get('AlbumArtist')
+
+  @property
+  def artists(self):
+    return self.object_dict.get('Artists')
+
+  @property
+  def album_id(self):
+    return self.object_dict.get('AlbumId')
+
+  @property
+  def album_primary_image_tag(self):
+    return self.object_dict.get('AlbumPrimaryImageTag')
+
+  @property
+  def media_type(self):
+    return self.object_dict.get('MediaType')
+
+  @property
+  def type(self):
+    return self.object_dict.get('Type')
+
+  @property
+  def index_number(self):
+    return self.object_dict.get('IndexNumber')
+
+  @property
+  def genres(self):
+    return self.object_dict.get('Genres')
+
+  @property
+  def tags(self):
+    return self.object_dict.get('Tags')
+
 
 class Video(EmbyObject):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.aspect_ratio = object_dict.get('AspectRatio')
-    self.chapters     = object_dict.get('Chapters')
-    self.genres       = object_dict.get('Genres')
+  @property
+  def aspect_ratio(self):
+    return self.object_dict.get('AspectRatio')
+
+  @property
+  def chapters(self):
+    return self.object_dict.get('Chapters')
+
+  @property
+  def genres(self):
+    return self.object_dict.get('Genres')
+
 
 
 class Folder(EmbyObject):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.child_count         = object_dict.get('ChildCount')
-    self.cumulative_run_time = object_dict.get('CumulativeRunTimeTicks')
-    self.genres              = object_dict.get('Genres')
+  @property
+  def child_count(self):
+    return self.object_dict.get('ChildCount')
+
+  @property
+  def cumulative_run_time(self):
+    return self.object_dict.get('CumulativeRunTimeTicks')
+
+  @property
+  def genres(self):
+    return self.object_dict.get('Genres')
+
 
 
 class Person(EmbyObject):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.name              = object_dict.get('Name')
-    self.role              = object_dict.get('Role')
-    self.type              = object_dict.get('Type')
-    self.primary_image_tag = object_dict.get('PrimaryImageTag')
-    self.premiere_date     = object_dict.get('PremiereDate')
+  @property
+  def name(self):
+    return self.object_dict.get('Name')
+
+  @property
+  def role(self):
+    return self.object_dict.get('Role')
+
+  @property
+  def type(self):
+    return self.object_dict.get('Type')
+
+  @property
+  def primary_image_tag(self):
+    return self.object_dict.get('PrimaryImageTag')
+
+  @property
+  def premiere_date(self):
+    return self.object_dict.get('PremiereDate')
+
 
 class Image(EmbyObject):
   def __init__(self, object_dict, connector):
@@ -105,15 +193,30 @@ class Image(EmbyObject):
 class Movie(Video):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.premiere_date = object_dict.get('PremiereDate')
+  @property
+  def premiere_date(self):
+    return self.object_dict.get('PremiereDate')
+
 
 class Episode(Video):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.index_number  = object_dict.get('IndexNumber')
-    self.premiere_date = object_dict.get('PremiereDate')
-    self.series_id     = object_dict.get('SeriesId')
-    self.series_name   = object_dict.get('SeriesName')
+  @property
+  def index_number(self):
+    return self.object_dict.get('IndexNumber')
+
+  @property
+  def premiere_date(self):
+    return self.object_dict.get('PremiereDate')
+
+  @property
+  def series_id(self):
+    return self.object_dict.get('SeriesId')
+
+  @property
+  def series_name(self):
+    return self.object_dict.get('SeriesName')
+
 
 class Trailer(Video):
   def __init__(self, object_dict, connector):
@@ -135,34 +238,82 @@ class BoxSet(Folder):
 class MusicAlbum(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.album                   = object_dict.get('Album')
-    self.album_artist            = object_dict.get('AlbumArtist')
-    self.artists                 = object_dict.get('Artists')
-    self.album_id                = object_dict.get('AlbumId')
-    self.album_primary_image_tag = object_dict.get('AlbumPrimaryImageTag')
-    self.premiere_date           = object_dict.get('PremiereDate')
+  @property
+  def album(self):
+    return self.object_dict.get('Album')
+
+  @property
+  def album_artist(self):
+    return self.object_dict.get('AlbumArtist')
+
+  @property
+  def artists(self):
+    return self.object_dict.get('Artists')
+
+  @property
+  def album_id(self):
+    return self.object_dict.get('AlbumId')
+
+  @property
+  def album_primary_image_tag(self):
+    return self.object_dict.get('AlbumPrimaryImageTag')
+
+  @property
+  def premiere_date(self):
+    return self.object_dict.get('PremiereDate')
+
 
 class MusicArtist(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.premiere_date = object_dict.get('PremiereDate')
+  @property
+  def premiere_date(self):
+    return self.object_dict.get('PremiereDate')
+
 
 class Season(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.index_number      = object_dict.get('IndexNumber')
-    self.played_percentage = object_dict.get('PlayedPercentage')
-    self.series_id         = object_dict.get('SeriesId')
-    self.series_name       = object_dict.get('SeriesName')
+  @property
+  def index_number(self):
+    return self.object_dict.get('IndexNumber')
+
+  @property
+  def played_percentage(self):
+    return self.object_dict.get('PlayedPercentage')
+
+  @property
+  def series_id(self):
+    return self.object_dict.get('SeriesId')
+
+  @property
+  def series_name(self):
+    return self.object_dict.get('SeriesName')
+
 
 class Series(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-    self.air_days      = object_dict.get('AirDays')
-    self.air_time      = object_dict.get('AirTime')
-    self.status        = object_dict.get('Status')
-    self.premiere_date = object_dict.get('PremiereDate')
-    self.season_count  = object_dict.get('SeasonCount')
+  @property
+  def air_days(self):
+    return self.object_dict.get('AirDays')
+
+  @property
+  def air_time(self):
+    return self.object_dict.get('AirTime')
+
+  @property
+  def status(self):
+    return self.object_dict.get('Status')
+
+  @property
+  def premiere_date(self):
+    return self.object_dict.get('PremiereDate')
+
+  @property
+  def season_count(self):
+    return self.object_dict.get('SeasonCount')
+
 
 # Game
 class Game(EmbyObject):
