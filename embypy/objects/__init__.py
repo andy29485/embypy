@@ -29,7 +29,12 @@ class EmbyObject:
 
   @property
   def primary_image_url(self):
-    path = 'Items/{}/Images/Primary'.format(self.id)
+    path = '/Items/{}/Images/Primary'.format(self.id)
+    return self.connector.get_url(path)
+
+  @property
+  def url(self):
+    path = '/web/itemdetails.html?id={}'.format(self.id)
     return self.connector.get_url(path)
 
   def update(self):
