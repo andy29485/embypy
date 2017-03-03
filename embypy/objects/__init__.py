@@ -9,7 +9,7 @@ class EmbyObject:
 
   @property
   def id(self):
-    return self.object_dict.get('ItemId')
+    return self.object_dict.get('Id') or self.object_dict.get('ItemId')
 
   @property
   def name(self):
@@ -26,6 +26,17 @@ class EmbyObject:
   @property
   def community_rating(self):
     return self.object_dict.get('CommunityRating')
+
+  @property
+  def primary_image_url(self):
+    path = 'Items/{}/Images/Primary'.format(self.id)
+    return self.connector.get_url(path)
+
+  def update(self):
+    path = 'Users/{}/Items/{}'.format(self.connector.userid, self.id)
+    info = self.connector.getJson(path)
+    self.object_dict.update(info)
+    #return info
 
   def process(self, object_dict):
     if object_dict['Type'] == 'Audio':
@@ -138,6 +149,10 @@ class Video(EmbyObject):
     return self.object_dict.get('Chapters')
 
   @property
+  def overview(self):
+    return self.object_dict.get('Overview')
+
+  @property
   def genres(self):
     return self.object_dict.get('Genres')
 
@@ -217,6 +232,9 @@ class Episode(Video):
   def series_name(self):
     return self.object_dict.get('SeriesName')
 
+  @property
+  def genres(self):
+    return self.object_dict.get('SeriesGenres')
 
 class Trailer(Video):
   def __init__(self, object_dict, connector):
@@ -234,6 +252,10 @@ class MusicVideo(Video):
 class BoxSet(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
+
+  @property
+  def overview(self):
+    return self.object_dict.get('Overview')
 
 class MusicAlbum(Folder):
   def __init__(self, object_dict, connector):
@@ -283,6 +305,10 @@ class Season(Folder):
     return self.object_dict.get('PlayedPercentage')
 
   @property
+  def overview(self):
+    return self.object_dict.get('Overview')
+
+  @property
   def series_id(self):
     return self.object_dict.get('SeriesId')
 
@@ -309,6 +335,10 @@ class Series(Folder):
   @property
   def premiere_date(self):
     return self.object_dict.get('PremiereDate')
+
+  @property
+  def overview(self):
+    return self.object_dict.get('Overview')
 
   @property
   def season_count(self):

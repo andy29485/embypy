@@ -17,23 +17,19 @@ class WebSocket(WebSocketClient):
 
 class Connector:
   def __init__(self, url, **kargs):
-    if 'api_key' in kargs and 'device_id' in kargs:
-      self.api_key   = kargs['api_key']
-      self.device_id = kargs['device_id']
-      self.username  = None
-      self.password  = None
-    elif 'username' in kargs and 'password' in kargs:
-      self.api_key   = None
-      self.device_id = None
-      self.username  = kargs['username']
-      self.password  = kargs['password']
-    else:
+    if ('api_key'  not in kargs or 'device_id' not in kargs) and \
+       ('username' not in kargs or 'password'  not in kargs):
       raise ValueError('provide api key and device id or username/password')
+    self.userid    = kargs.get('userid')
+    self.api_key   = kargs.get('api_key')
+    self.username  = kargs.get('username')
+    self.password  = kargs.get('password')
+    self.device_id = kargs.get('device_id')
 
-    p = urlparse(url)
-    self.scheme    = p.scheme
-    self.netloc    = p.netloc
-    self.session   = Session()
+    p            = urlparse(url)
+    self.scheme  = p.scheme
+    self.netloc  = p.netloc
+    self.session = Session()
 
     #connect to websocket is user wants to
     if 'ws' in kargs and callable(kargs['ws']):
@@ -50,7 +46,7 @@ class Connector:
 
   def getJson(self, path, **query):
     url = self.get_url(path)
-    
+
     query.update({'api_key':self.api_key, 'deviceId': self.device_id})
     return self.session.get(url, params=query).json()
 
