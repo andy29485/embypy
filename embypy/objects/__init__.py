@@ -82,6 +82,7 @@ class EmbyObject:
       return Book(object_dict, self.connector)
     if object_dict['Type'] == 'Image':
       return Image(object_dict, self.connector)
+    return EmbyObject(object_dict, self.connector)
 
   def getPrimaryImageUrl(self):
     path = '/Items/' + self.id + '/Images/Primary'
