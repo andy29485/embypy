@@ -51,8 +51,8 @@ class Connector:
 
     query.update({'api_key':self.api_key, 'deviceId': self.device_id})
     try:
-      return self.session.get(url, params=query, timeout=(4, 7)).json()
+      return self.session.get(url, params=query, timeout=27).json()
     except exceptions.Timeout:
       raise exceptions.Timeout('Timeout '+url)
-    except ConnectionError:
-      raise ConnectionError('emby server is probably down')
+    except exceptions.ConnectionError:
+      raise exceptions.ConnectionError('emby server is probably down')

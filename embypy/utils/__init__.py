@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
 
-from .connector import Connector
+from embypy.utils.connector import Connector
 
