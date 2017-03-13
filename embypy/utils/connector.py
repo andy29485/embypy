@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import json
-from requests import Session
+from requests import Session, adapters, exceptions
 from requests.utils import urlparse, urlunparse
 from ws4py.client.threadedclient import WebSocketClient
+
+adapters.DEFAULT_RETRIES = 5
 
 class WebSocket(WebSocketClient):
   def opened(self):
@@ -48,5 +50,9 @@ class Connector:
     url = self.get_url(path)
 
     query.update({'api_key':self.api_key, 'deviceId': self.device_id})
-    return self.session.get(url, params=query).json()
-
+    try:
+      return self.session.get(url, params=query, timeout=(4, 7)).json()
+    except exceptions.Timeout:
+      raise exceptions.Timeout('Timeout '+url)
+    except ConnectionError:
+      raise ConnectionError('emby server is probably down')
