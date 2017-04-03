@@ -51,7 +51,7 @@ class Connector:
 
     query.update({'api_key':self.api_key, 'deviceId': self.device_id})
     try:
-      return self.session.get(url, params=query, timeout=27).json()
+      return self.session.get(url,params=query,timeout=27,verify=False).json()
     except exceptions.Timeout:
       raise exceptions.Timeout('Timeout '+url)
     except exceptions.ConnectionError:
