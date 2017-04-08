@@ -14,7 +14,7 @@ class WebSocket:
     self.url        = url
 
   def connect(self):
-    self.ws = await websockets.connect(url)
+    self.ws = websockets.connect(url)
     asyncio.get_event_loop().run_until_complete(self.handler())
 
   async def handler(self, websocket, path):
