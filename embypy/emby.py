@@ -30,4 +30,3 @@ class Emby(objects.EmbyObject):
     for item in json["SearchHints"]:
       items.append(self.process(item))
     return items
-

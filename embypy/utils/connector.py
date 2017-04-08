@@ -3,19 +3,29 @@
 import json
 from requests import Session, adapters, exceptions
 from requests.utils import urlparse, urlunparse
-from ws4py.client.threadedclient import WebSocketClient
+import asyncio
+import websockets
 
 adapters.DEFAULT_RETRIES = 5
 
-class WebSocket(WebSocketClient):
-  def opened(self):
-    pass #on_open
+class WebSocket:
+  def __init__(self, url):
+    self.on_message = None
+    self.url        = url
 
-  def closed(self, code, reason=None):
-     pass #on_close
+  def connect(self):
+    self.ws = await websockets.connect(url)
+    asyncio.get_event_loop().run_until_complete(self.handler())
 
-  def received_message(self, m):
-    pass #on_message
+  async def handler(self, websocket, path):
+    while True:
+      message = await self.ws.recv()
+      if self.on_message:
+        await self.on_message(message)
+
+  def close(self):
+    self.ws.close()
+    self.ws = None
 
 class Connector:
   def __init__(self, url, **kargs):
@@ -34,8 +44,8 @@ class Connector:
     self.session = Session()
 
     #connect to websocket is user wants to
-    if 'ws' in kargs and callable(kargs['ws']):
-      self.ws = WebSocket(self.get_url(True), protocols=['http-only', 'chat'])
+    if 'ws' in kargs:
+      self.ws = WebSocket(self.get_url(True))
     else:
       self.ws = None
 
@@ -45,6 +55,9 @@ class Connector:
       return urlunparse((scheme, self.netloc, path, '', '', ''))
     else:
       return urlunparse((self.scheme, self.netloc, path, '', '', ''))
+
+  def set_on_message(self, func):
+    self.ws.on_message = func
 
   def getJson(self, path, **query):
     url = self.get_url(path)
