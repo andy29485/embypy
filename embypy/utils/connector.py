@@ -45,7 +45,7 @@ class Connector:
 
     #connect to websocket is user wants to
     if 'ws' in kargs:
-      self.ws = WebSocket(self.get_url(True))
+      self.ws = WebSocket(self.get_url(websocket=True))
     else:
       self.ws = None
 
