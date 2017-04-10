@@ -22,6 +22,11 @@ class Video(EmbyObject):
   def genres(self):
     return self.object_dict.get('Genres')
 
+  @property
+  def stream_url(self):
+    path = '/Videos/{}/stream.mp4'.format(self.id)
+    return self.connector.get_url(path)
+
 # Videos
 class Movie(Video):
   def __init__(self, object_dict, connector):
@@ -65,4 +70,3 @@ class AdultVideo(Video):
 class MusicVideo(Video):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-

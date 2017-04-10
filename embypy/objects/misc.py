@@ -47,6 +47,11 @@ class Audio(EmbyObject):
   def tags(self):
     return self.object_dict.get('Tags')
 
+  @property
+  def stream_url(self):
+    path = '/Audio/{}/stream.mp3'.format(self.id)
+    return self.connector.get_url(path)
+
 
 class Person(EmbyObject):
   def __init__(self, object_dict, connector):
@@ -86,5 +91,3 @@ class Game(EmbyObject):
 class Book(EmbyObject):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-
-
