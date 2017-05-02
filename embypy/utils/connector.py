@@ -10,14 +10,14 @@ import ssl
 adapters.DEFAULT_RETRIES = 5
 
 class WebSocket:
-  def __init__(self, url, ssl=None):
+  def __init__(self, url, ssl_str=None):
     self.on_message = None
     self.url        = url
-    if not ssl:
+    if not ssl_str:
       self.ssl      = None
     else:
       self.ssl      = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-      self.ssl.load_verify_locations(cafile=ssl)
+      self.ssl.load_verify_locations(cafile=ssl_str)
 
   def connect(self):
     self.ws = websockets.connect(url, ssl=ssl)
