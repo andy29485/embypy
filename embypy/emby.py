@@ -30,3 +30,10 @@ class Emby(objects.EmbyObject):
     for item in json["SearchHints"]:
       items.append(self.process(item))
     return items
+
+  def latest(self):
+    json  = self.connector.getJson('/Users/{UserId}/Items/Latest')
+    items = []
+    for item in json:
+      items.append(self.process(item))
+    return items

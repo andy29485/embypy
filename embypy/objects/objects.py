@@ -40,6 +40,10 @@ class EmbyObject:
     path = '/web/itemdetails.html?id={}'.format(self.id)
     return self.connector.get_url(path)
 
+  @property
+  def parent_id(self):
+    return self.object_dict.get('ParentId')
+
   def update(self):
     path = 'Users/{}/Items/{}'.format(self.connector.userid, self.id)
     info = self.connector.getJson(path)

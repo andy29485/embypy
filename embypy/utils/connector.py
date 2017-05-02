@@ -5,19 +5,21 @@ from requests import Session, adapters, exceptions
 from requests.utils import urlparse, urlunparse
 import asyncio
 import websockets
+import ssl
 
 adapters.DEFAULT_RETRIES = 5
 
 class WebSocket:
-  def __init__(self, url):
+  def __init__(self, url, ssl=None):
     self.on_message = None
     self.url        = url
+    self.ssl        = ssl
 
   def connect(self):
-    self.ws = websockets.connect(url)
+    self.ws = websockets.connect(url, ssl=ssl)
     asyncio.get_event_loop().run_until_complete(self.handler())
 
-  async def handler(self, websocket, path):
+  async def handler(self):
     while True:
       message = await self.ws.recv()
       if self.on_message:
@@ -32,6 +34,15 @@ class Connector:
     if ('api_key'  not in kargs or 'device_id' not in kargs) and \
        ('username' not in kargs or 'password'  not in kargs):
       raise ValueError('provide api key and device id or username/password')
+
+    if 'ssl' in kargs:
+      if type(ssl) == str:
+        self.ssl = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        self.ssl.load_verify_locations(cafile=kargs['ssl'])
+      else:
+        self.ssl = ssl
+    else:
+      self.ssl = None
     self.userid    = kargs.get('userid')
     self.api_key   = kargs.get('api_key')
     self.username  = kargs.get('username')
@@ -45,16 +56,24 @@ class Connector:
 
     #connect to websocket is user wants to
     if 'ws' in kargs:
-      self.ws = WebSocket(self.get_url(websocket=True))
+      self.ws = WebSocket(self.get_url(websocket=True), self.ssl)
     else:
       self.ws = None
 
   def get_url(self, path='/', websocket=False):
     if websocket:
       scheme = {'http':'ws', 'https':'wss'}[self.scheme]
-      return urlunparse((scheme, self.netloc, path, '', '', ''))
+      return urlunparse((scheme, self.netloc, path, '', '', '')).format(
+        UserId   = self.userid,
+        ApiKey   = self.api_key,
+        DeviceId = self.device_id
+      )
     else:
-      return urlunparse((self.scheme, self.netloc, path, '', '', ''))
+      return urlunparse((self.scheme, self.netloc, path, '', '', '')).format(
+        UserId   = self.userid,
+        ApiKey   = self.api_key,
+        DeviceId = self.device_id
+      )
 
   def set_on_message(self, func):
     self.ws.on_message = func
