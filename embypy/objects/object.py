@@ -33,6 +33,10 @@ class EmbyObject:
     return self.connector.get_url(path)
 
   @property
+  def parent_id(self):
+    return self.object_dict.get('ParentId')
+
+  @property
   def url(self):
     path = '/web/itemdetails.html?id={}'.format(self.id)
     return self.connector.get_url(path)
@@ -100,4 +104,3 @@ class EmbyObject:
 
   def __repr__(self):
     return '<{} {}>'.format(self.type, self.id)
-
