@@ -13,7 +13,11 @@ class WebSocket:
   def __init__(self, url, ssl=None):
     self.on_message = None
     self.url        = url
-    self.ssl        = ssl
+    if not ssl:
+      self.ssl      = None
+    else:
+      self.ssl      = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+      self.ssl.load_verify_locations(cafile=ssl)
 
   def connect(self):
     self.ws = websockets.connect(url, ssl=ssl)
@@ -36,13 +40,7 @@ class Connector:
       raise ValueError('provide api key and device id or username/password')
 
     if 'ssl' in kargs:
-      if type(ssl) == str:
-        self.ssl = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-        self.ssl.load_verify_locations(cafile=kargs['ssl'])
-      else:
-        self.ssl = ssl
-    else:
-      self.ssl = None
+      self.ssl     = kargs.get('ssl', False)
     self.userid    = kargs.get('userid')
     self.api_key   = kargs.get('api_key')
     self.username  = kargs.get('username')
@@ -83,7 +81,10 @@ class Connector:
 
     query.update({'api_key':self.api_key, 'deviceId': self.device_id})
     try:
-      return self.session.get(url,params=query,timeout=27,verify=False).json()
+      return self.session.get(url,params=query,
+                              timeout=27,
+                              verify=self.ssl
+      ).json()
     except exceptions.Timeout:
       raise exceptions.Timeout('Timeout '+url)
     except exceptions.ConnectionError:
