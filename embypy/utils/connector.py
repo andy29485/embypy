@@ -58,6 +58,9 @@ class Connector:
     else:
       self.ws = None
 
+  def get_stream(self, url):
+    self.session.get(url, stream=True, verify=self.ssl).raw
+
   def get_url(self, path='/', websocket=False):
     if websocket:
       scheme = {'http':'ws', 'https':'wss'}[self.scheme]

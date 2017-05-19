@@ -47,6 +47,9 @@ class Audio(EmbyObject):
   def tags(self):
     return self.object_dict.get('Tags')
 
+  def stream(self):
+    return self.connector.get_stream(self.stream_url)
+
   @property
   def stream_url(self):
     path = '/Audio/{}/stream.mp3'.format(self.id)
