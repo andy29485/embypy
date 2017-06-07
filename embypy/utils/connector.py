@@ -59,7 +59,13 @@ class Connector:
       self.ws = None
 
   def get_stream(self, url):
-    self.session.get(url, stream=True, verify=self.ssl).raw
+    class A:
+      def __init__(self, g):
+        self.g = g
+      def read(self):
+        return g.__next__()
+    g = self.session.get(url, stream=True, verify=self.ssl) #.raw
+    return A(g.iter_lines())
 
   def get_url(self, path='/', websocket=False):
     if websocket:
