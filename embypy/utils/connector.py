@@ -39,8 +39,7 @@ class Connector:
        ('username' not in kargs or 'password'  not in kargs):
       raise ValueError('provide api key and device id or username/password')
 
-    if 'ssl' in kargs:
-      self.ssl     = kargs.get('ssl', False)
+    self.ssl       = kargs.get('ssl', False)
     self.userid    = kargs.get('userid')
     self.api_key   = kargs.get('api_key')
     self.username  = kargs.get('username')
@@ -96,12 +95,8 @@ class Connector:
                                 verify=self.ssl
         ).json()
       except exceptions.Timeout:
-        if i < 2:
-          pass
-        else:
-          raise exceptions.Timeout('Timeout '+url)
+        if i>= 2:
+          raise exceptions.Timeout('Timeout ', url)
       except exceptions.ConnectionError:
-        if i < 2:
-          pass
-        else:
-          raise exceptions.ConnectionError('emby server is probably down')
+        if i>= 2:
+          raise exceptions.ConnectionError('Emby server is probably down')
