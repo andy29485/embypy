@@ -2,7 +2,7 @@
 
 import json
 from requests import Session, adapters, exceptions
-from requests.utils import urlparse, urlunparse
+from requests.compat import urlparse, urlunparse, urlencode
 import asyncio
 import websockets
 import ssl
@@ -66,7 +66,7 @@ class Connector:
     g = self.session.get(url, stream=True, verify=self.ssl) #.raw
     return A(g.iter_lines())
 
-  def get_url(self, path='/', websocket=False):
+  def get_url(self, path='/', websocket=False, **query):
     if websocket:
       scheme = {'http':'ws', 'https':'wss'}[self.scheme]
       return urlunparse((scheme, self.netloc, path, '', '', '')).format(
@@ -75,19 +75,19 @@ class Connector:
         DeviceId = self.device_id
       )
     else:
-      return urlunparse((self.scheme, self.netloc, path, '', '', '')).format(
+      return urlunparse((self.scheme,self.netloc,path,'','{params}','')).format(
         UserId   = self.userid,
         ApiKey   = self.api_key,
         DeviceId = self.device_id
+        params   = urlencode(query)
       )
 
   def set_on_message(self, func):
     self.ws.on_message = func
 
   def getJson(self, path, **query):
-    url = self.get_url(path)
+    url = self.get_url(path, **query)
 
-    query.update({'api_key':self.api_key, 'deviceId': self.device_id})
     for i in range(4):
       try:
         return self.session.get(url, params=query,
