@@ -67,18 +67,21 @@ class Connector:
     return A(g.iter_lines())
 
   def get_url(self, path='/', websocket=False, **query):
+    query.update({'api_key':self.api_key, 'deviceId': self.device_id})
+
     if websocket:
       scheme = {'http':'ws', 'https':'wss'}[self.scheme]
-      return urlunparse((scheme, self.netloc, path, '', '', '')).format(
+      return urlunparse((scheme,self.netloc,path,'','{params}','')).format(
         UserId   = self.userid,
         ApiKey   = self.api_key,
-        DeviceId = self.device_id
+        DeviceId = self.device_id,
+        params   = urlencode(query)
       )
     else:
       return urlunparse((self.scheme,self.netloc,path,'','{params}','')).format(
         UserId   = self.userid,
         ApiKey   = self.api_key,
-        DeviceId = self.device_id
+        DeviceId = self.device_id,
         params   = urlencode(query)
       )
 
