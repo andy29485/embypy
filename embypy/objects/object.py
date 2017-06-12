@@ -37,12 +37,20 @@ class EmbyObject:
     return self.object_dict.get('ParentId')
 
   @property
+  def parent(self):
+    if self.parent_id:
+      obj  = EmbyObject({"Id":obj_id}, self.connector)
+      return self.process(obj.update().object_dict)
+    else:
+      return None
+
+  @property
   def url(self):
     path = '/web/itemdetails.html?id={}'.format(self.id)
     return self.connector.get_url(path)
 
   def update(self):
-    path = 'Users/{}/Items/{}'.format(self.connector.userid, self.id)
+    path = 'Users/{{UserId}}/Items/{}'.format(self.id)
     info = self.connector.getJson(path)
     self.object_dict.update(info)
     return self
@@ -51,6 +59,20 @@ class EmbyObject:
     import embypy.objects.folders
     import embypy.objects.videos
     import embypy.objects.misc
+
+    if type(object_dict)       == dict and \
+       set(object_dict.keys()) == {'Items', 'TotalRecordCount'}:
+      object_dict = object_dict['Items']
+
+    if type(object_dict) == list:
+      items = []
+      for item in object_dict:
+        items.append(self.process(item))
+      return items
+
+    if type(object_dict) == str:
+      obj = objects.EmbyObject({"Id":object_dict}, self.connector)
+      return self.process(obj.update().object_dict)
 
     if object_dict['Type'] == 'Audio':
       return embypy.objects.misc.Audio(object_dict, self.connector)

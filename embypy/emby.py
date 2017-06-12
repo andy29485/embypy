@@ -17,18 +17,25 @@ class Emby(objects.EmbyObject):
   def info(self, obj_id=None):
     if obj_id:
       try:
-        obj = objects.EmbyObject({"Id":obj_id}, self.connector)
-        return self.process(obj.update().object_dict)
+        return self.process(obj_id)
       except JSONDecodeError:
         raise LookupError('Error object with that id does not exist', obj_id)
     else:
       return self.connector.getJson('/system/info/public')
 
-  def search(self, query):
+  def search(self, query,
+             sort_map = {'BoxSet':0,'Series':1,'Movie':2,'Audio':3,'Person':4},
+             strict_sort = False):
     json  = self.connector.getJson('/Search/Hints/', searchTerm=query)
     items = []
     for item in json["SearchHints"]:
-      items.append(self.process(item))
+      item = self.process(item)
+      if not strict_sort or item.type in sort_map:
+        items.append(item)
+
+    m_size   = len(sort_map)
+    items    = sorted(items, key = lambda x : sort_map.get(x.type, m_size))
+
     return items
 
   def latest(self):

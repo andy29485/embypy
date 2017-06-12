@@ -35,16 +35,38 @@ class MusicAlbum(Folder):
     return self.object_dict.get('Album')
 
   @property
-  def album_artist(self):
+  def album_artist_id(self):
     return self.object_dict.get('AlbumArtist')
 
   @property
-  def artists(self):
+  def album_artist(self):
+    return self.process(self.album_artist_id)
+
+  @property
+  def artist_ids(self):
     return self.object_dict.get('Artists')
+
+  @property
+  def artists(self):
+    artists = []
+    for aid in self.artists_ids:
+      artists.append(self.process(aid))
+    return artists
 
   @property
   def album_id(self):
     return self.object_dict.get('AlbumId')
+
+  @property
+  def songs(self):
+    json = self.connector.getJson('/Users/{UserId}/Items',
+                                  format            = 'json',
+                                  SortOrder         = 'Ascending',
+                                  AlbumIds          = self.id,
+                                  Recursive         = 'true',
+                                  IncludeItemTypes  = 'Audio'
+    )
+    return self.process(json)
 
   @property
   def album_primary_image_tag(self):
@@ -54,14 +76,35 @@ class MusicAlbum(Folder):
   def premiere_date(self):
     return self.object_dict.get('PremiereDate')
 
-
 class MusicArtist(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
+
   @property
   def premiere_date(self):
     return self.object_dict.get('PremiereDate')
 
+  @property
+  def albums(self):
+    json = self.connector.getJson('/Users/{UserId}/Items',
+                                  format            = 'json',
+                                  SortOrder         = 'Ascending',
+                                  ArtistIds         = self.id,
+                                  Recursive         = 'true',
+                                  IncludeItemTypes  = 'MusicAlbum'
+    )
+    return self.process(json)
+
+  @property
+  def songs(self):
+    json = self.connector.getJson('/Users/{UserId}/Items',
+                                  format            = 'json',
+                                  SortOrder         = 'Ascending',
+                                  ArtistIds         = self.id,
+                                  Recursive         = 'true',
+                                  IncludeItemTypes  = 'Audio'
+    )
+    return self.process(json)
 
 class Season(Folder):
   def __init__(self, object_dict, connector):
@@ -85,7 +128,6 @@ class Season(Folder):
   @property
   def series_name(self):
     return self.object_dict.get('SeriesName')
-
 
 class Series(Folder):
   def __init__(self, object_dict, connector):
@@ -114,9 +156,7 @@ class Series(Folder):
   def season_count(self):
     return self.object_dict.get('SeasonCount')
 
-
 # Game
 class GameSystem(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-

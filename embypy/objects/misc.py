@@ -8,20 +8,24 @@ class Audio(EmbyObject):
     super().__init__(object_dict, connector)
 
   @property
-  def album(self):
-    return self.object_dict.get('Album')
+  def album_id(self):
+    return self.object_dict.get('AlbumId')
 
   @property
-  def album_artist(self):
-    return self.object_dict.get('AlbumArtist')
+  def album(self):
+    return self.process(self.album_id)
+
+  @property
+  def album_artist_ids(self):
+    return [a['Id'] for a in self.object_dict.get('AlbumArtists', [])]
+
+  @property
+  def album_artists(self):
+    return self.process(self.album_artist_ids)
 
   @property
   def artists(self):
-    return self.object_dict.get('Artists')
-
-  @property
-  def album_id(self):
-    return self.object_dict.get('AlbumId')
+    return self.album_artists
 
   @property
   def album_primary_image_tag(self):
@@ -29,31 +33,31 @@ class Audio(EmbyObject):
 
   @property
   def media_type(self):
-    return self.object_dict.get('MediaType')
+    return self.object_dict.get('MediaType', 'Audio')
 
   @property
   def type(self):
-    return self.object_dict.get('Type')
+    return self.object_dict.get('Type', 'Audio')
 
   @property
   def index_number(self):
-    return self.object_dict.get('IndexNumber')
+    return self.object_dict.get('IndexNumber', 0)
 
   @property
   def genres(self):
-    return self.object_dict.get('Genres')
+    return self.object_dict.get('Genres', [])
 
   @property
   def tags(self):
-    return self.object_dict.get('Tags')
+    return self.object_dict.get('Tags', [])
 
   def stream(self):
     return self.connector.get_stream(self.stream_url)
 
   @property
   def stream_url(self):
-    path = '/Audio/{}/stream.mp3'.format(self.id)
-    return self.connector.get_url(path)
+    path = '/Audio/{}/stream'.format(self.id)
+    return self.connector.get_url(path, static='true')
 
 
 class Person(EmbyObject):
@@ -61,15 +65,15 @@ class Person(EmbyObject):
     super().__init__(object_dict, connector)
   @property
   def name(self):
-    return self.object_dict.get('Name')
+    return self.object_dict.get('Name', '')
 
   @property
   def role(self):
-    return self.object_dict.get('Role')
+    return self.object_dict.get('Role', '')
 
   @property
   def type(self):
-    return self.object_dict.get('Type')
+    return self.object_dict.get('Type', 'Person')
 
   @property
   def primary_image_tag(self):
