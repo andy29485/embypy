@@ -71,7 +71,7 @@ class EmbyObject:
       return items
 
     if type(object_dict) == str:
-      obj = objects.EmbyObject({"Id":object_dict}, self.connector)
+      obj = embypy.objects.EmbyObject({"Id":object_dict}, self.connector)
       return self.process(obj.update().object_dict)
 
     if object_dict['Type'] == 'Audio':
