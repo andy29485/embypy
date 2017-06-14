@@ -30,9 +30,6 @@ class BoxSet(Folder):
 class MusicAlbum(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-  @property
-  def album(self):
-    return self.object_dict.get('Album')
 
   @property
   def album_artist_id(self):
@@ -56,6 +53,10 @@ class MusicAlbum(Folder):
   @property
   def album_id(self):
     return self.object_dict.get('AlbumId')
+
+  @property
+  def album(self):
+    return self.object_dict.get('Album')
 
   @property
   def songs(self):
@@ -124,6 +125,14 @@ class Season(Folder):
   @property
   def series_id(self):
     return self.object_dict.get('SeriesId')
+
+  @property
+  def series(self):
+    return self.process(self.series_id)
+
+  @property
+  def show(self):
+    return self.series
 
   @property
   def series_name(self):

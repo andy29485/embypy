@@ -39,8 +39,7 @@ class EmbyObject:
   @property
   def parent(self):
     if self.parent_id:
-      obj  = EmbyObject({"Id":obj_id}, self.connector)
-      return self.process(obj.update().object_dict)
+      return self.process(self.parent_id)
     else:
       return None
 
@@ -56,9 +55,8 @@ class EmbyObject:
     return self
 
   def process(self, object_dict):
-    import embypy.objects.folders
-    import embypy.objects.videos
-    import embypy.objects.misc
+    if not object_dict:
+      return object_dict
 
     if type(object_dict)       == dict and \
        set(object_dict.keys()) == {'Items', 'TotalRecordCount'}:
@@ -70,9 +68,13 @@ class EmbyObject:
         items.append(self.process(item))
       return items
 
+    import embypy.objects.folders
+    import embypy.objects.videos
+    import embypy.objects.misc
+
     if type(object_dict) == str:
       obj = embypy.objects.EmbyObject({"Id":object_dict}, self.connector)
-      return self.process(obj.update().object_dict)
+      object_dict = obj.update().object_dict
 
     if object_dict['Type'] == 'Audio':
       return embypy.objects.misc.Audio(object_dict, self.connector)

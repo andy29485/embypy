@@ -16,6 +16,14 @@ class Audio(EmbyObject):
     return self.process(self.album_id)
 
   @property
+  def index_number(self):
+    return self.object_dict.get('IndexNumber')
+
+  @property
+  def track_number(self):
+    return self.index_number
+
+  @property
   def album_artist_ids(self):
     return [a['Id'] for a in self.object_dict.get('AlbumArtists', [])]
 

@@ -48,8 +48,32 @@ class Episode(Video):
     return self.object_dict.get('PremiereDate')
 
   @property
+  def index_number(self):
+    return self.object_dict.get('IndexNumber')
+
+  @property
+  def episode_number(self):
+    return self.index_number
+
+  @property
   def series_id(self):
     return self.object_dict.get('SeriesId')
+
+  @property
+  def series(self):
+    return self.process(self.series_id)
+
+  @property
+  def show(self):
+    return self.series
+
+  @property
+  def season_id(self):
+    return self.object_dict.get('SeasonId')
+
+  @property
+  def season(self):
+    return self.process(self.season_id)
 
   @property
   def series_name(self):
