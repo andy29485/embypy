@@ -25,7 +25,7 @@ class Video(EmbyObject):
   @property
   def stream_url(self):
     path = '/Videos/{}/stream.mp4'.format(self.id)
-    return self.connector.get_url(path)
+    return self.connector.get_url(path, attach_api_key=False)
 
 # Videos
 class Movie(Video):

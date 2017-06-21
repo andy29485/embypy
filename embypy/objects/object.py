@@ -30,7 +30,7 @@ class EmbyObject:
   @property
   def primary_image_url(self):
     path = '/Items/{}/Images/Primary'.format(self.id)
-    return self.connector.get_url(path)
+    return self.connector.get_url(path, attach_api_key=False)
 
   @property
   def parent_id(self):
@@ -46,7 +46,7 @@ class EmbyObject:
   @property
   def url(self):
     path = '/web/itemdetails.html?id={}'.format(self.id)
-    return self.connector.get_url(path)
+    return self.connector.get_url(path, attach_api_key=False)
 
   def update(self):
     path = 'Users/{{UserId}}/Items/{}'.format(self.id)

@@ -28,12 +28,24 @@ class Audio(EmbyObject):
     return [a['Id'] for a in self.object_dict.get('AlbumArtists', [])]
 
   @property
+  def album_artist_name(self):
+    return self.object_dict.get('AlbumArtist', [])
+
+  @property
   def album_artists(self):
     return self.process(self.album_artist_ids)
 
   @property
+  def artist_ids(self):
+    return [a['Id'] for a in self.object_dict.get('ArtistItems', [])]
+
+  @property
+  def artist_names(self):
+    return self.object_dict.get('Artists', [])
+
+  @property
   def artists(self):
-    return self.album_artists
+    return self.process(self.artist_ids)
 
   @property
   def album_primary_image_tag(self):
@@ -64,8 +76,16 @@ class Audio(EmbyObject):
 
   @property
   def stream_url(self):
-    path = '/Audio/{}/stream'.format(self.id)
-    return self.connector.get_url(path, static='true')
+    path = '/Audio/{}/universal'.format(self.id)
+    return self.connector.get_url(path,
+                                  userId=self.connector.userid,
+                                  MaxStreamingBitrate=140000000,
+                                  Container='opus',
+                                  TranscodingContainer='opus',
+                                  AudioCodec='opus',
+                                  MaxSampleRate=48000,
+                                  PlaySessionId=1496213367201 #TODO no hard code
+    )
 
 
 class Person(EmbyObject):
