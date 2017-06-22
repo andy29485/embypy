@@ -19,6 +19,25 @@ class Folder(EmbyObject):
     return self.object_dict.get('Genres')
 
 # Folders
+class Playlist(Folder):
+  def __init__(self, object_dict, connector):
+    super().__init__(object_dict, connector)
+
+  @property
+  def items(self):
+    items = self.connector.getJson('/Playlists/{Id}/Items'.format(Id=self.id))
+    return self.process(items)
+
+  @property
+  def songs(self):
+    items = []
+    for i in self.items:
+      if i.type == 'Audio':
+        items.append(i)
+      elif hasattr(i, 'songs'):
+        items.extend(i.songs)
+    return items
+
 class BoxSet(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)

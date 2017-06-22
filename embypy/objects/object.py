@@ -94,6 +94,8 @@ class EmbyObject:
       return embypy.objects.videos.Episode(object_dict, self.connector)
     if object_dict['Type'] == 'Folder':
       return embypy.objects.folders.Folder(object_dict, self.connector)
+    if object_dict['Type'] == 'Playlist':
+      return embypy.objects.folders.Playlist(object_dict, self.connector)
     if object_dict['Type'] == 'BoxSet':
       return embypy.objects.folders.BoxSet(object_dict, self.connector)
     if object_dict['Type'] == 'MusicAlbum':

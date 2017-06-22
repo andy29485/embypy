@@ -26,12 +26,19 @@ class Emby(objects.EmbyObject):
   def search(self, query,
              sort_map = {'BoxSet':0,'Series':1,'Movie':2,'Audio':3,'Person':4},
              strict_sort = False):
-    json  = self.connector.getJson('/Search/Hints/', searchTerm=query)
-    items = []
+    if strict_sort:
+      json = self.connector.getJson('/Search/Hints/',
+                                    searchTerm=query,
+                                    IncludeItemTypes=','.join(sort_map.keys())
+      )
+    else:
+      json = self.connector.getJson('/Search/Hints/',
+                                    searchTerm=query
+      )
+    items  = []
     for item in json["SearchHints"]:
       item = self.process(item)
-      if not strict_sort or item.type in sort_map:
-        items.append(item)
+      items.append(item)
 
     m_size   = len(sort_map)
     items    = sorted(items, key = lambda x : sort_map.get(x.type, m_size))
