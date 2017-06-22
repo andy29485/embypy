@@ -95,7 +95,7 @@ class Connector:
   def set_on_message(self, func):
     self.ws.on_message = func
 
-  def post(self, path, data={}, params={}):
+  def post(self, path, data={}, **params):
     url = self.get_url(path, **params)
     for i in range(4):
       try:
@@ -103,7 +103,7 @@ class Connector:
                                 json=data,
                                 timeout=11,
                                 verify=self.ssl
-        ).json()
+        )
       except exceptions.Timeout:
         if i>= 3:
           raise exceptions.Timeout('Timeout ', url)

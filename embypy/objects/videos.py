@@ -40,10 +40,6 @@ class Episode(Video):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
   @property
-  def index_number(self):
-    return self.object_dict.get('IndexNumber')
-
-  @property
   def premiere_date(self):
     return self.object_dict.get('PremiereDate')
 
