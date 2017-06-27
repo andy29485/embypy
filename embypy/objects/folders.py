@@ -82,7 +82,7 @@ class MusicAlbum(Folder):
     json = self.connector.getJson('/Users/{UserId}/Items',
                                   format            = 'json',
                                   SortOrder         = 'Ascending',
-                                  AlbumId           = self.id,
+                                  AlbumIds          = self.id,
                                   Recursive         = 'true',
                                   IncludeItemTypes  = 'Audio'
     )
