@@ -25,8 +25,12 @@ class Playlist(Folder):
 
   @property
   def items(self):
-    items = self.connector.getJson('/Playlists/{Id}/Items'.format(Id=self.id))
-    return self.process(items)
+    items = self.extras.get('items', [])
+    if not items:
+      items = self.connector.getJson('/Playlists/{Id}/Items'.format(Id=self.id))
+      items = self.process(items)
+      self.extras['items'] = items
+    return items
 
   @property
   def songs(self):
@@ -79,14 +83,18 @@ class MusicAlbum(Folder):
 
   @property
   def songs(self):
-    json = self.connector.getJson('/Users/{UserId}/Items',
-                                  format            = 'json',
-                                  SortOrder         = 'Ascending',
-                                  AlbumIds          = self.id,
-                                  Recursive         = 'true',
-                                  IncludeItemTypes  = 'Audio'
-    )
-    return self.process(json)
+    items = self.extras.get('songs', [])
+    if not items:
+      items = self.connector.getJson('/Users/{UserId}/Items',
+                                     format            = 'json',
+                                     SortOrder         = 'Ascending',
+                                     AlbumIds          = self.id,
+                                     Recursive         = 'true',
+                                     IncludeItemTypes  = 'Audio'
+      )
+      items = self.process(items)
+      self.extras['songs'] = items
+    return items
 
   @property
   def album_primary_image_tag(self):
@@ -106,25 +114,33 @@ class MusicArtist(Folder):
 
   @property
   def albums(self):
-    json = self.connector.getJson('/Users/{UserId}/Items',
-                                  format            = 'json',
-                                  SortOrder         = 'Ascending',
-                                  ArtistIds         = self.id,
-                                  Recursive         = 'true',
-                                  IncludeItemTypes  = 'MusicAlbum'
-    )
-    return self.process(json)
+    items = self.extras.get('albums', [])
+    if not items:
+      items = self.connector.getJson('/Users/{UserId}/Items',
+                                     format            = 'json',
+                                     SortOrder         = 'Ascending',
+                                     ArtistIds         = self.id,
+                                     Recursive         = 'true',
+                                     IncludeItemTypes  = 'MusicAlbum'
+      )
+      items = self.process(items)
+      self.extras['albums'] = items
+    return items
 
   @property
   def songs(self):
-    json = self.connector.getJson('/Users/{UserId}/Items',
-                                  format            = 'json',
-                                  SortOrder         = 'Ascending',
-                                  ArtistIds         = self.id,
-                                  Recursive         = 'true',
-                                  IncludeItemTypes  = 'Audio'
-    )
-    return self.process(json)
+    items = self.extras.get('songs', [])
+    if not items:
+      item = self.connector.getJson('/Users/{UserId}/Items',
+                                     format            = 'json',
+                                     SortOrder         = 'Ascending',
+                                     ArtistIds         = self.id,
+                                     Recursive         = 'true',
+                                     IncludeItemTypes  = 'Audio'
+      )
+      items = self.process(items)
+      self.extras['songs'] = items
+    return items
 
 class Season(Folder):
   def __init__(self, object_dict, connector):

@@ -51,3 +51,59 @@ class Emby(objects.EmbyObject):
     for item in json:
       items.append(self.process(item))
     return items
+
+  @property
+  def albums(self):
+    items = self.extras.get('albums', [])
+    if not items:
+      items = self.connector.getJson('/Users/{UserId}/Items',
+                                     format            = 'json',
+                                     SortOrder         = 'Ascending',
+                                     Recursive         = 'true',
+                                     IncludeItemTypes  = 'MusicAlbum'
+      )
+      items = self.process(items)
+      self.extras['albums'] = items
+    return items
+
+  @property
+  def songs(self):
+    items = self.extras.get('songs', [])
+    if not items:
+      items = self.connector.getJson('/Users/{UserId}/Items',
+                                     format            = 'json',
+                                     SortOrder         = 'Ascending',
+                                     Recursive         = 'true',
+                                     IncludeItemTypes  = 'Audio'
+      )
+      items = self.process(items)
+      self.extras['songs'] = items
+    return items
+
+  @property
+  def movies(self):
+    items = self.extras.get('movies', [])
+    if not items:
+      items = self.connector.getJson('/Users/{UserId}/Items',
+                                     format            = 'json',
+                                     SortOrder         = 'Ascending',
+                                     Recursive         = 'true',
+                                     IncludeItemTypes  = 'Movie'
+      )
+      items = self.process(items)
+      self.extras['movies'] = items
+    return items
+
+  @property
+  def episodes(self):
+    items = self.extras.get('episodes', [])
+    if not items:
+      items = self.connector.getJson('/Users/{UserId}/Items',
+                                     format            = 'json',
+                                     SortOrder         = 'Ascending',
+                                     Recursive         = 'true',
+                                     IncludeItemTypes  = 'Episode'
+      )
+      items = self.process(items)
+      self.extras['episodes'] = items
+    return items

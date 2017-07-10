@@ -6,6 +6,7 @@ class EmbyObject:
   def __init__(self, object_dict, connector):
     self.connector   = connector
     self.object_dict = object_dict
+    self.extras      = {}
 
   @property
   def id(self):
@@ -52,6 +53,7 @@ class EmbyObject:
     path = 'Users/{{UserId}}/Items/{}'.format(self.id)
     info = self.connector.getJson(path)
     self.object_dict.update(info)
+    self.extras = {}
     return self
 
   def process(self, object_dict):
