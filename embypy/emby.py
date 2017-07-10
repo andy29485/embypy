@@ -52,6 +52,9 @@ class Emby(objects.EmbyObject):
       items.append(self.process(item))
     return items
 
+  def update(self):
+    self.extras = {}
+
   @property
   def albums(self):
     items = self.extras.get('albums', [])
