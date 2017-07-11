@@ -90,7 +90,7 @@ class MusicAlbum(Folder):
                                      SortOrder         = 'Ascending',
                                      AlbumIds          = self.id,
                                      Recursive         = 'true',
-                                     IncludeItemTypes  = 'Audio'
+                                     IncludeItemTypes  = 'Audio',
                                      Fields            = 'Path,ParentId'
       )
       items = self.process(items)
@@ -122,7 +122,7 @@ class MusicArtist(Folder):
                                      SortOrder         = 'Ascending',
                                      ArtistIds         = self.id,
                                      Recursive         = 'true',
-                                     IncludeItemTypes  = 'MusicAlbum'
+                                     IncludeItemTypes  = 'MusicAlbum',
                                      Fields            = 'Path,ParentId'
       )
       items = self.process(items)
@@ -138,7 +138,7 @@ class MusicArtist(Folder):
                                      SortOrder         = 'Ascending',
                                      ArtistIds         = self.id,
                                      Recursive         = 'true',
-                                     IncludeItemTypes  = 'Audio'
+                                     IncludeItemTypes  = 'Audio',
                                      Fields            = 'Path,ParentId'
       )
       items = self.process(items)
