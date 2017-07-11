@@ -91,6 +91,7 @@ class MusicAlbum(Folder):
                                      AlbumIds          = self.id,
                                      Recursive         = 'true',
                                      IncludeItemTypes  = 'Audio'
+                                     Fields            = 'Path,ParentId'
       )
       items = self.process(items)
       self.extras['songs'] = items
@@ -122,6 +123,7 @@ class MusicArtist(Folder):
                                      ArtistIds         = self.id,
                                      Recursive         = 'true',
                                      IncludeItemTypes  = 'MusicAlbum'
+                                     Fields            = 'Path,ParentId'
       )
       items = self.process(items)
       self.extras['albums'] = items
@@ -137,6 +139,7 @@ class MusicArtist(Folder):
                                      ArtistIds         = self.id,
                                      Recursive         = 'true',
                                      IncludeItemTypes  = 'Audio'
+                                     Fields            = 'Path,ParentId'
       )
       items = self.process(items)
       self.extras['songs'] = items

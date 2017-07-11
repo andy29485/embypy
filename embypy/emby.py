@@ -63,7 +63,8 @@ class Emby(objects.EmbyObject):
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
-                                     IncludeItemTypes  = 'MusicAlbum'
+                                     IncludeItemTypes  = 'MusicAlbum',
+                                     Fields            = 'Path,ParentId'
       )
       items = self.process(items)
       self.extras['albums'] = items
@@ -77,7 +78,8 @@ class Emby(objects.EmbyObject):
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
-                                     IncludeItemTypes  = 'Audio'
+                                     IncludeItemTypes  = 'Audio',
+                                     Fields            = 'Path,ParentId'
       )
       items = self.process(items)
       self.extras['songs'] = items
@@ -91,7 +93,8 @@ class Emby(objects.EmbyObject):
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
-                                     IncludeItemTypes  = 'Playlist'
+                                     IncludeItemTypes  = 'Playlist',
+                                     Fields            = 'Path,ParentId'
       )
       items = self.process(items)
       self.extras['playlists'] = items
@@ -105,7 +108,8 @@ class Emby(objects.EmbyObject):
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
-                                     IncludeItemTypes  = 'MusicArtist'
+                                     IncludeItemTypes  = 'MusicArtist',
+                                     Fields            = 'Path,ParentId'
       )
       items = self.process(items)
       self.extras['artists'] = items
@@ -119,7 +123,8 @@ class Emby(objects.EmbyObject):
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
-                                     IncludeItemTypes  = 'Movie'
+                                     IncludeItemTypes  = 'Movie',
+                                     Fields            = 'Path,ParentId'
       )
       items = self.process(items)
       self.extras['movies'] = items
@@ -133,7 +138,8 @@ class Emby(objects.EmbyObject):
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
-                                     IncludeItemTypes  = 'Episode'
+                                     IncludeItemTypes  = 'Episode',
+                                     Fields            = 'Path,ParentId'
       )
       items = self.process(items)
       self.extras['episodes'] = items
