@@ -84,6 +84,34 @@ class Emby(objects.EmbyObject):
     return items
 
   @property
+  def playlists(self):
+    items = self.extras.get('playlists', [])
+    if not items:
+      items = self.connector.getJson('/Users/{UserId}/Items',
+                                     format            = 'json',
+                                     SortOrder         = 'Ascending',
+                                     Recursive         = 'true',
+                                     IncludeItemTypes  = 'Playlist'
+      )
+      items = self.process(items)
+      self.extras['playlists'] = items
+    return items
+
+  @property
+  def artists(self):
+    items = self.extras.get('artists', [])
+    if not items:
+      items = self.connector.getJson('/Users/{UserId}/Items',
+                                     format            = 'json',
+                                     SortOrder         = 'Ascending',
+                                     Recursive         = 'true',
+                                     IncludeItemTypes  = 'MusicArtist'
+      )
+      items = self.process(items)
+      self.extras['artists'] = items
+    return items
+
+  @property
   def movies(self):
     items = self.extras.get('movies', [])
     if not items:

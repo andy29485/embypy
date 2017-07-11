@@ -14,7 +14,11 @@ class EmbyObject:
 
   @property
   def name(self):
-    return self.object_dict.get('Name')
+    return self.object_dict.get('Name', '')
+
+  @property
+  def path(self):
+    return self.object_dict.get('Path', '')
 
   @property
   def type(self):
