@@ -108,15 +108,15 @@ class Connector:
   def getJson(self, path, **query):
     url = self.get_url(path, **query)
 
-    for i in range(4):
+    for i in range(2):
       try:
         return self.session.get(url,
-                                timeout=11,
+                                timeout=21,
                                 verify=self.ssl
         ).json()
       except exceptions.Timeout:
-        if i>= 3:
+        if i>= 1:
           raise exceptions.Timeout('Timeout ', url)
       except exceptions.ConnectionError:
-        if i>= 3:
+        if i>= 1:
           raise exceptions.ConnectionError('Emby server is probably down')
