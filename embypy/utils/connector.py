@@ -43,6 +43,7 @@ class Connector:
        ('username' not in kargs or 'password'  not in kargs):
       raise ValueError('provide api key and device id or username/password')
 
+    urlremote      = kargs.get('address-remote')
     self.ssl       = kargs.get('ssl', False)
     self.userid    = kargs.get('userid')
     self.api_key   = kargs.get('api_key')
@@ -50,12 +51,10 @@ class Connector:
     self.password  = kargs.get('password')
     self.device_id = kargs.get('device_id')
     self.loop      = kargs.get('loop', asyncio.get_event_loop())
-
-    p            = urlparse(url)
-    conn         = aiohttp.TCPConnector(verify_ssl=self.ssl)
-    self.scheme  = p.scheme
-    self.netloc  = p.netloc
-    self.session = Session()
+    self.url       = urlparse(url)
+    self.urlremote = urlparse(urlremote) if urlremote else urlremote
+    conn           = aiohttp.TCPConnector(verify_ssl=self.ssl)
+    self.session   = Session()
 
     #connect to websocket is user wants to
     if 'ws' in kargs:
@@ -63,34 +62,28 @@ class Connector:
     else:
       self.ws = None
 
-  def get_stream(self, url):
-    class A:
-      def __init__(self, g):
-        self.g = g
-      def read(self):
-        return g.__next__()
-    g = self.session.get(url, stream=True, verify=self.ssl) #.raw
-    return A(g.iter_lines())
-
-  def get_url(self, path='/', websocket=False, attach_api_key=True, **query):
+  def get_url(self, path='/', websocket=False, remote=True,
+              attach_api_key=True, userId=None, **query):
     if attach_api_key:
       query.update({'api_key':self.api_key, 'deviceId': self.device_id})
 
-    if websocket:
-      scheme = {'http':'ws', 'https':'wss'}[self.scheme]
-      return urlunparse((scheme, self.netloc,path, '', '{params}', '')).format(
-        UserId   = self.userid,
-        ApiKey   = self.api_key,
-        DeviceId = self.device_id,
-        params   = urlencode(query)
-      )
+    if remote:
+      url = self.urlremote or self.url
     else:
-      return urlunparse((self.scheme,self.netloc,path,'','{params}','')).format(
-        UserId   = self.userid,
-        ApiKey   = self.api_key,
-        DeviceId = self.device_id,
-        params   = urlencode(query)
-      )
+      url = self.url
+
+    if websocket:
+      scheme = {'http':'ws', 'https':'wss'}[url.scheme]
+    else:
+      scheme = url.scheme
+    netloc = url.netloc + '/emby'
+
+    return urlunparse((scheme, netloc, path, '', '{params}', '')).format(
+      UserId   = userId or self.userid,
+      ApiKey   = self.api_key,
+      DeviceId = self.device_id,
+      params   = urlencode(query)
+    )
 
   def set_on_message(self, func):
     self.ws.on_message = func
@@ -100,9 +93,9 @@ class Connector:
     for i in range(4):
       try:
         return self.session.post(url,
-                                json=data,
-                                timeout=11,
-                                verify=self.ssl
+                                 json=data,
+                                 timeout=11,
+                                 verify=self.ssl
         )
       except exceptions.Timeout:
         if i>= 3:

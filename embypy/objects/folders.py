@@ -27,7 +27,9 @@ class Playlist(Folder):
   def items(self):
     items = self.extras.get('items', [])
     if not items:
-      items = self.connector.getJson('/Playlists/{Id}/Items'.format(Id=self.id))
+      items = self.connector.getJson(
+            'Playlists/{Id}/Items'.format(Id=self.id), remote=False
+      )
       items = self.process(items)
       self.extras['items'] = items
     return items
@@ -86,6 +88,7 @@ class MusicAlbum(Folder):
     items = self.extras.get('songs', [])
     if not items:
       items = self.connector.getJson('/Users/{UserId}/Items',
+                                     remote            = False,
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      SortBy            = 'SortName',
@@ -119,6 +122,7 @@ class MusicArtist(Folder):
     items = self.extras.get('albums', [])
     if not items:
       items = self.connector.getJson('/Users/{UserId}/Items',
+                                     remote            = False,
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      SortBy            = 'SortName',
@@ -136,6 +140,7 @@ class MusicArtist(Folder):
     items = self.extras.get('songs', [])
     if not items:
       item = self.connector.getJson('/Users/{UserId}/Items',
+                                     remote            = False,
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      SortBy            = 'SortName',

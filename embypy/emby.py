@@ -21,18 +21,20 @@ class Emby(objects.EmbyObject):
       except JSONDecodeError:
         raise LookupError('Error object with that id does not exist', obj_id)
     else:
-      return self.connector.getJson('/system/info/public')
+      return self.connector.getJson('/system/info/public', remote=False)
 
   def search(self, query,
              sort_map = {'BoxSet':0,'Series':1,'Movie':2,'Audio':3,'Person':4},
              strict_sort = False):
     if strict_sort:
       json = self.connector.getJson('/Search/Hints/',
+                                    remote=False,
                                     searchTerm=query,
                                     IncludeItemTypes=','.join(sort_map.keys())
       )
     else:
       json = self.connector.getJson('/Search/Hints/',
+                                    remote=False,
                                     searchTerm=query
       )
     items  = []
@@ -46,7 +48,7 @@ class Emby(objects.EmbyObject):
     return items
 
   def latest(self):
-    json  = self.connector.getJson('/Users/{UserId}/Items/Latest')
+    json  = self.connector.getJson('/Users/{UserId}/Items/Latest', remote=False)
     items = []
     for item in json:
       items.append(self.process(item))
@@ -60,6 +62,7 @@ class Emby(objects.EmbyObject):
     items = self.extras.get('albums', [])
     if not items:
       items = self.connector.getJson('/Users/{UserId}/Items',
+                                     remote            = False,
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
@@ -75,6 +78,7 @@ class Emby(objects.EmbyObject):
     items = self.extras.get('songs', [])
     if not items:
       items = self.connector.getJson('/Users/{UserId}/Items',
+                                     remote            = False,
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
@@ -90,6 +94,7 @@ class Emby(objects.EmbyObject):
     items = self.extras.get('playlists', [])
     if not items:
       items = self.connector.getJson('/Users/{UserId}/Items',
+                                     remote            = False,
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
@@ -105,6 +110,7 @@ class Emby(objects.EmbyObject):
     items = self.extras.get('artists', [])
     if not items:
       items = self.connector.getJson('/Users/{UserId}/Items',
+                                     remote            = False,
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
@@ -120,6 +126,7 @@ class Emby(objects.EmbyObject):
     items = self.extras.get('movies', [])
     if not items:
       items = self.connector.getJson('/Users/{UserId}/Items',
+                                     remote            = False,
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',
@@ -135,6 +142,7 @@ class Emby(objects.EmbyObject):
     items = self.extras.get('episodes', [])
     if not items:
       items = self.connector.getJson('/Users/{UserId}/Items',
+                                     remote            = False,
                                      format            = 'json',
                                      SortOrder         = 'Ascending',
                                      Recursive         = 'true',

@@ -55,7 +55,7 @@ class EmbyObject:
 
   def update(self):
     path = 'Users/{{UserId}}/Items/{}'.format(self.id)
-    info = self.connector.getJson(path)
+    info = self.connector.getJson(path, remote=False)
     self.object_dict.update(info)
     self.extras = {}
     return self
