@@ -17,11 +17,11 @@ class WebSocket:
     self.on_message = []
     self.url        = url
     self.conn       = conn
-    if not ssl_str:
-      self.ssl      = None
-    else:
+    if type(ssl_str) == str:
       self.ssl      = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
       self.ssl.load_verify_locations(cafile=ssl_str)
+    else:
+      self.ssl = None
 
   def connect(self):
     asyncio.get_event_loop().create_task(self.handler())
@@ -44,7 +44,7 @@ class Connector:
       raise ValueError('provide api key and device id or username/password')
 
     urlremote      = kargs.get('address-remote')
-    self.ssl       = kargs.get('ssl', False)
+    self.ssl       = kargs.get('ssl', True)
     self.userid    = kargs.get('userid')
     self.api_key   = kargs.get('api_key')
     self.username  = kargs.get('username')
