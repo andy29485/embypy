@@ -63,9 +63,12 @@ class Connector:
       self.ws = None
 
   def get_url(self, path='/', websocket=False, remote=True,
-              attach_api_key=True, userId=None, **query):
+              attach_api_key=True, userId=None, pass_uid=False, **query):
+    userId = userId or self.userid
     if attach_api_key:
       query.update({'api_key':self.api_key, 'deviceId': self.device_id})
+    if pass_uid:
+      query['userId'] = userId
 
     if remote:
       url = self.urlremote or self.url
@@ -79,7 +82,7 @@ class Connector:
     netloc = url.netloc + '/emby'
 
     return urlunparse((scheme, netloc, path, '', '{params}', '')).format(
-      UserId   = userId or self.userid,
+      UserId   = userId,
       ApiKey   = self.api_key,
       DeviceId = self.device_id,
       params   = urlencode(query)

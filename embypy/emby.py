@@ -42,17 +42,22 @@ class Emby(objects.EmbyObject):
       item = self.process(item)
       items.append(item)
 
-    m_size   = len(sort_map)
-    items    = sorted(items, key = lambda x : sort_map.get(x.type, m_size))
+    m_size = len(sort_map)
+    items  = sorted(items, key = lambda x : sort_map.get(x.type, m_size))
 
     return items
 
-  def latest(self):
-    json  = self.connector.getJson('/Users/{UserId}/Items/Latest', remote=False)
-    items = []
-    for item in json:
-      items.append(self.process(item))
-    return items
+  def latest(self, userId=None):
+    json = self.connector.getJson('/Users/{UserId}/Items/Latest',
+                                   remote=False, userId=userId
+    )
+    return self.process(json)
+
+  def nextUp(self, userId=None):
+    json = self.connector.getJson('/Shows/NextUp', pass_uid=True,
+                                   remote=False,   userId=userId
+    )
+    return self.process(json)
 
   def update(self):
     self.extras = {}
