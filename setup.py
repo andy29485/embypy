@@ -17,5 +17,14 @@ setup(name='EmbyPy',
         'embypy.utils': embypy_utils,
         'embypy.objects': embypy_objs
       },
+      install_requires=[
+        'aiohttp',
+        'asyncio'
+        'json',
+        'requests',
+        'simplejson',
+        'ssl',
+        'websockets',
+      ],
       packages=['embypy', 'embypy.objects', 'embypy.utils'],
 )
