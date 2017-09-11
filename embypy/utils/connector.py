@@ -51,6 +51,7 @@ class Connector:
     self.password  = kargs.get('password')
     self.device_id = kargs.get('device_id')
     self.timeout   = kargs.get('timeout', 22)
+    self.tries     = kargs.get('tries', 4)
     self.loop      = kargs.get('loop', asyncio.get_event_loop())
     self.url       = urlparse(url)
     self.urlremote = urlparse(urlremote) if urlremote else urlremote
@@ -82,19 +83,53 @@ class Connector:
       scheme = url.scheme
     netloc = url.netloc + '/emby'
 
-    return urlunparse((scheme, netloc, path, '', '{params}', '')).format(
+    url = urlunparse((scheme, netloc, path, '', '{params}', '')).format(
       UserId   = userId,
       ApiKey   = self.api_key,
       DeviceId = self.device_id,
       params   = urlencode(query)
     )
 
+    return url[:-1] if url[-1] == '?' else url
+
   def set_on_message(self, func):
     self.ws.on_message = func
 
+  def get(self, path, **query):
+    url = self.get_url(path, **query)
+
+    for i in range(self.tries):
+      try:
+        return self.session.get(url,
+                                timeout=self.timeout,
+                                verify=self.ssl
+        )
+      except exceptions.Timeout:
+        if i>= self.tries-1:
+          raise exceptions.Timeout('Timeout ', url)
+      except exceptions.ConnectionError:
+        if i>= self.tries-1:
+          raise exceptions.ConnectionError('Emby server is probably down')
+
+  def delete(self, path, **query):
+    url = self.get_url(path, **query)
+
+    for i in range(self.tries):
+      try:
+        return self.session.delete(url,
+                                   timeout=self.timeout,
+                                   verify=self.ssl
+        )
+      except exceptions.Timeout:
+        if i>= self.tries-1:
+          raise exceptions.Timeout('Timeout ', url)
+      except exceptions.ConnectionError:
+        if i>= self.tries-1:
+          raise exceptions.ConnectionError('Emby server is probably down')
+
   def post(self, path, data={}, **params):
     url = self.get_url(path, **params)
-    for i in range(4):
+    for i in range(self.tries):
       try:
         return self.session.post(url,
                                  json=data,
@@ -102,25 +137,12 @@ class Connector:
                                  verify=self.ssl
         )
       except exceptions.Timeout:
-        if i>= 3:
+        if i>= self.tries-1:
           raise exceptions.Timeout('Timeout ', url)
       except exceptions.ConnectionError:
-        if i>= 3:
+        if i>= self.tries-1:
           raise exceptions.ConnectionError('Emby server is probably down')
 
 
   def getJson(self, path, **query):
-    url = self.get_url(path, **query)
-
-    for i in range(2):
-      try:
-        return self.session.get(url,
-                                timeout=self.timeout,
-                                verify=self.ssl
-        ).json()
-      except exceptions.Timeout:
-        if i>= 1:
-          raise exceptions.Timeout('Timeout ', url)
-      except exceptions.ConnectionError:
-        if i>= 1:
-          raise exceptions.ConnectionError('Emby server is probably down')
+    return self.get(path, **query).json()

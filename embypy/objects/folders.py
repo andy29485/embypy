@@ -58,7 +58,7 @@ class Playlist(Folder):
     if not items:
       return
 
-    self.connector.post('Playlists/{Id}/Items'.format(Id=self.id)
+    self.connector.post('Playlists/{Id}/Items'.format(Id=self.id),
       data={'Ids': ','.join(items)},
       remote=False
     )
@@ -67,7 +67,11 @@ class Playlist(Folder):
     items = [item.id for item in self.process(items) if item in self.items]
     if not items:
       return
-    pass #TODO remove song from playlist
+
+    self.connector.delete('Playlists/{Id}/Items'.format(Id=self.id),
+      EntryIds=','.join(items)
+      remote=False
+    )
 
 class BoxSet(Folder):
   def __init__(self, object_dict, connector):

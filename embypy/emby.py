@@ -71,7 +71,7 @@ class Emby(objects.EmbyObject):
         pass
 
   def create_playlist(self, name, *song_ids):
-    self.connector.post('/Playlists'
+    self.connector.post('/Playlists',
       data={
         'Name': name,
         'Ids': ','.join([item.id for item in self.process(song_ids)])
