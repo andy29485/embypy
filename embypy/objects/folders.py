@@ -6,22 +6,14 @@ from embypy.objects.object import *
 class Folder(EmbyObject):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
+
   @property
   def child_count(self):
-    return self.object_dict.get('ChildCount')
+    return self.object_dict.get('ChildCount', 0)
 
   @property
   def cumulative_run_time(self):
-    return self.object_dict.get('CumulativeRunTimeTicks')
-
-  @property
-  def genres(self):
-    return self.object_dict.get('Genres')
-
-# Folders
-class Playlist(Folder):
-  def __init__(self, object_dict, connector):
-    super().__init__(object_dict, connector)
+    return self.object_dict.get('CumulativeRunTimeTicks', 0)
 
   @property
   def items(self):
@@ -33,6 +25,11 @@ class Playlist(Folder):
       items = self.process(items)
       self.extras['items'] = items
     return items
+
+# Folders
+class Playlist(Folder):
+  def __init__(self, object_dict, connector):
+    super().__init__(object_dict, connector)
 
   @property
   def songs(self):
@@ -48,10 +45,6 @@ class BoxSet(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
-  @property
-  def overview(self):
-    return self.object_dict.get('Overview')
-
 class MusicAlbum(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
@@ -66,14 +59,11 @@ class MusicAlbum(Folder):
 
   @property
   def artist_ids(self):
-    return self.object_dict.get('Artists')
+    return self.object_dict.get('Artists', [])
 
   @property
   def artists(self):
-    artists = []
-    for aid in self.artists_ids:
-      artists.append(self.process(aid))
-    return artists
+    return self.process(self.artist_ids)
 
   @property
   def album_id(self):
@@ -81,7 +71,11 @@ class MusicAlbum(Folder):
 
   @property
   def album(self):
-    return self.object_dict.get('Album')
+    return self.object_dict.get('Album', '')
+
+  @album.setter
+  def album(self, value):
+    self.object_dict['Album'] = value
 
   @property
   def songs(self):
@@ -156,17 +150,18 @@ class MusicArtist(Folder):
 class Season(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
+
   @property
   def index_number(self):
-    return self.object_dict.get('IndexNumber')
+    return self.object_dict.get('IndexNumber', 1)
+
+  @index_number.setter
+  def index_number(self, value):
+    self.object_dict['IndexNumber'] = value
 
   @property
   def played_percentage(self):
-    return self.object_dict.get('PlayedPercentage')
-
-  @property
-  def overview(self):
-    return self.object_dict.get('Overview')
+    return self.object_dict.get('PlayedPercentage', 0)
 
   @property
   def series_id(self):
@@ -182,11 +177,12 @@ class Season(Folder):
 
   @property
   def series_name(self):
-    return self.object_dict.get('SeriesName')
+    return self.object_dict.get('SeriesName', '')
 
 class Series(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
+
   @property
   def air_days(self):
     return self.object_dict.get('AirDays')
@@ -204,12 +200,8 @@ class Series(Folder):
     return self.object_dict.get('PremiereDate')
 
   @property
-  def overview(self):
-    return self.object_dict.get('Overview')
-
-  @property
   def season_count(self):
-    return self.object_dict.get('SeasonCount')
+    return self.object_dict.get('SeasonCount', 0)
 
 # Game
 class GameSystem(Folder):

@@ -15,14 +15,6 @@ class Video(EmbyObject):
     return self.object_dict.get('Chapters')
 
   @property
-  def overview(self):
-    return self.object_dict.get('Overview')
-
-  @property
-  def genres(self):
-    return self.object_dict.get('Genres')
-
-  @property
   def stream_url(self):
     path = '/Videos/{}/stream.mp4'.format(self.id)
     return self.connector.get_url(path, attach_api_key=False)
@@ -39,17 +31,26 @@ class Movie(Video):
 class Episode(Video):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
+
   @property
   def premiere_date(self):
     return self.object_dict.get('PremiereDate')
 
   @property
   def index_number(self):
-    return self.object_dict.get('IndexNumber')
+    return self.object_dict.get('IndexNumber', 1)
+
+  @index_number.setter
+  def index_number(self, value):
+    self.object_dict['IndexNumber'] = value
 
   @property
   def episode_number(self):
     return self.index_number
+
+  @index_number.setter
+  def index_number(self, value):
+    self.index_number = value
 
   @property
   def series_id(self):
@@ -65,7 +66,11 @@ class Episode(Video):
 
   @property
   def season_id(self):
-    return self.object_dict.get('SeasonId')
+    return self.object_dict.get('SeasonId', 1)
+
+  @season_id.setter
+  def season_id(self, value):
+    self.object_dict['SeasonId'] = value
 
   @property
   def season(self):

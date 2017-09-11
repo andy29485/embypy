@@ -16,21 +16,73 @@ class EmbyObject:
   def name(self):
     return self.object_dict.get('Name', '')
 
+  @name.setter
+  def name(self, value):
+    self.object_dict['Name'] = value
+
+  @property
+  def title(self):
+    return self.name
+
+  @title.setter
+  def title(self, value):
+    self.name = value
+
   @property
   def path(self):
     return self.object_dict.get('Path', '')
 
+  @path.setter
+  def path(self, value):
+    self.object_dict['Path'] = value
+
   @property
   def type(self):
-    return self.object_dict.get('Type')
+    return self.object_dict.get('Type', 'Object')
+
+  @type.setter
+  def type(self, value):
+    self.object_dict['Type'] = value
 
   @property
   def media_type(self):
-    return self.object_dict.get('MediaType')
+    return self.object_dict.get('MediaType', 'Video')
+
+  @media_type.setter
+  def media_type(self, value):
+    self.object_dict['MediaType'] = value
+
+  @property
+  def genres(self):
+    return self.object_dict.get('Genres', [])
+
+  @genres.setter
+  def genres(self, genres : list):
+    self.object_dict['Genres'] = genres
+
+  @property
+  def tags(self):
+    return self.object_dict.get('Tags', [])
+
+  @tags.setter
+  def tags(self, tags : list):
+    self.object_dict['Tags'] = tags
+
+  @property
+  def overview(self):
+    return self.object_dict.get('Overview', '')
+
+  @overview.setter
+  def overview(self, value):
+    self.object_dict['Overview'] = value
 
   @property
   def community_rating(self):
-    return self.object_dict.get('CommunityRating')
+    return self.object_dict.get('CommunityRating', 0)
+
+  @community_rating.setter
+  def community_rating(self, value):
+    self.object_dict['CommunityRating'] = value
 
   @property
   def primary_image_url(self):
@@ -60,6 +112,20 @@ class EmbyObject:
     self.extras = {}
     return self
 
+  def refresh(self):
+    return self.update()
+
+  def send(self):
+    path = 'Items/{}'.format(self.id)
+    resp = self.connector.post(path, data=self.object_dict, remote=False)
+    if resp.status_code == 400:
+      EmbyObject(self.object_dict, self.connector).update()
+      resp = self.connector.post(path, data=self.object_dict, remote=False)
+    return resp
+
+  def post(self):
+    return self.send()
+
   def process(self, object_dict):
     if not object_dict:
       return object_dict
@@ -74,13 +140,13 @@ class EmbyObject:
         items.append(self.process(item))
       return items
 
+    if type(object_dict) == str:
+      obj = EmbyObject({"Id":object_dict}, self.connector)
+      object_dict = obj.update().object_dict
+
     import embypy.objects.folders
     import embypy.objects.videos
     import embypy.objects.misc
-
-    if type(object_dict) == str:
-      obj = embypy.objects.EmbyObject({"Id":object_dict}, self.connector)
-      object_dict = obj.update().object_dict
 
     if object_dict['Type'] == 'Audio':
       return embypy.objects.misc.Audio(object_dict, self.connector)
@@ -123,13 +189,6 @@ class EmbyObject:
     if object_dict['Type'] == 'Image':
       return embypy.objects.misc.Image(object_dict, self.connector)
     return EmbyObject(object_dict, self.connector)
-
-  def getPrimaryImageUrl(self):
-    path = '/Items/' + self.id + '/Images/Primary'
-    return urlunparse((self.connector.scheme,
-                       self.connector.netloc, path,
-                       '', '', ''
-    ))
 
   def __str__(self):
     return self.name

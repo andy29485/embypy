@@ -50,6 +50,7 @@ class Connector:
     self.username  = kargs.get('username')
     self.password  = kargs.get('password')
     self.device_id = kargs.get('device_id')
+    self.timeout   = kargs.get('timeout', 22)
     self.loop      = kargs.get('loop', asyncio.get_event_loop())
     self.url       = urlparse(url)
     self.urlremote = urlparse(urlremote) if urlremote else urlremote
@@ -97,7 +98,7 @@ class Connector:
       try:
         return self.session.post(url,
                                  json=data,
-                                 timeout=11,
+                                 timeout=self.timeout,
                                  verify=self.ssl
         )
       except exceptions.Timeout:
@@ -114,7 +115,7 @@ class Connector:
     for i in range(2):
       try:
         return self.session.get(url,
-                                timeout=21,
+                                timeout=self.timeout,
                                 verify=self.ssl
         ).json()
       except exceptions.Timeout:

@@ -17,11 +17,19 @@ class Audio(EmbyObject):
 
   @property
   def index_number(self):
-    return self.object_dict.get('IndexNumber')
+    return self.object_dict.get('IndexNumber', 1)
+
+  @index_number.setter
+  def index_number(self, value):
+    self.object_dict['IndexNumber'] = value
 
   @property
   def track_number(self):
     return self.index_number
+
+  @track_number.setter
+  def track_number(self, value):
+    self.index_number = value
 
   @property
   def album_artist_ids(self):
@@ -61,15 +69,11 @@ class Audio(EmbyObject):
 
   @property
   def index_number(self):
-    return self.object_dict.get('IndexNumber', 0)
+    return self.object_dict.get('IndexNumber', 1)
 
-  @property
-  def genres(self):
-    return self.object_dict.get('Genres', [])
-
-  @property
-  def tags(self):
-    return self.object_dict.get('Tags', [])
+  @index_number.setter
+  def index_number(self, value):
+    self.object_dict['IndexNumber'] = value
 
   def stream(self):
     return self.connector.get_stream(self.stream_url)
@@ -91,13 +95,14 @@ class Audio(EmbyObject):
 class Person(EmbyObject):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
-  @property
-  def name(self):
-    return self.object_dict.get('Name', '')
 
   @property
   def role(self):
     return self.object_dict.get('Role', '')
+
+  @role.setter
+  def role(self, value):
+    self.object_dict['Role'] = value
 
   @property
   def type(self):
