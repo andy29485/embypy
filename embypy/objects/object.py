@@ -8,6 +8,9 @@ class EmbyObject:
     self.object_dict = object_dict
     self.extras      = {}
 
+  def __eq__(self, other):
+    return isinstance(other, EmbyObject) and self.id == other.id
+
   @property
   def id(self):
     return self.object_dict.get('Id') or self.object_dict.get('ItemId')
@@ -127,7 +130,14 @@ class EmbyObject:
     return self.send()
 
   def process(self, object_dict):
-    if not object_dict:
+    try:
+      if type(object_dict) == str:
+        obj = EmbyObject({"Id":object_dict}, self.connector)
+        object_dict = obj.update().object_dict
+    except:
+      return None
+
+    if not object_dict or isinstance(object_dict, EmbyObject):
       return object_dict
 
     if type(object_dict)       == dict and \
@@ -137,12 +147,10 @@ class EmbyObject:
     if type(object_dict) == list:
       items = []
       for item in object_dict:
-        items.append(self.process(item))
+        item = self.process(item)
+        if item:
+          items.append(item)
       return items
-
-    if type(object_dict) == str:
-      obj = EmbyObject({"Id":object_dict}, self.connector)
-      object_dict = obj.update().object_dict
 
     import embypy.objects.folders
     import embypy.objects.videos

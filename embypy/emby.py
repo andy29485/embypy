@@ -70,98 +70,119 @@ class Emby(objects.EmbyObject):
       except:
         pass
 
+  def create_playlist(self, name, *song_ids):
+    self.connector.post('/Playlists'
+      data={
+        'Name': name,
+        'Ids': ','.join([item.id for item in self.process(song_ids)])
+      },
+      remote=False
+    )
+
   @property
   def albums(self):
-    items = self.extras.get('albums', [])
-    if not items:
-      items = self.connector.getJson('/Users/{UserId}/Items',
-                                     remote            = False,
-                                     format            = 'json',
-                                     SortOrder         = 'Ascending',
-                                     Recursive         = 'true',
-                                     IncludeItemTypes  = 'MusicAlbum',
-                                     Fields            = 'Path,ParentId'
-      )
-      items = self.process(items)
-      self.extras['albums'] = items
+    return self.extras.get('albums', []) or self.albums_force
+
+  @property
+  def albums_force(self):
+    items = self.connector.getJson('/Users/{UserId}/Items',
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'MusicAlbum',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['albums'] = items
     return items
 
   @property
   def songs(self):
-    items = self.extras.get('songs', [])
-    if not items:
-      items = self.connector.getJson('/Users/{UserId}/Items',
-                                     remote            = False,
-                                     format            = 'json',
-                                     SortOrder         = 'Ascending',
-                                     Recursive         = 'true',
-                                     IncludeItemTypes  = 'Audio',
-                                     Fields            = 'Path,ParentId'
-      )
-      items = self.process(items)
-      self.extras['songs'] = items
+    return self.extras.get('songs', []) or self.songs_force
+
+  @property
+  def songs_force(self):
+    items = self.connector.getJson('/Users/{UserId}/Items',
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'Audio',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['songs'] = items
     return items
 
   @property
   def playlists(self):
-    items = self.extras.get('playlists', [])
-    if not items:
-      items = self.connector.getJson('/Users/{UserId}/Items',
-                                     remote            = False,
-                                     format            = 'json',
-                                     SortOrder         = 'Ascending',
-                                     Recursive         = 'true',
-                                     IncludeItemTypes  = 'Playlist',
-                                     Fields            = 'Path,ParentId'
-      )
-      items = self.process(items)
-      self.extras['playlists'] = items
+    return self.extras.get('playlists', []) or self.playlists_force
+
+  @property
+  def playlists_force(self):
+    items = self.connector.getJson('/Users/{UserId}/Items',
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'Playlist',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['playlists'] = items
     return items
 
   @property
   def artists(self):
-    items = self.extras.get('artists', [])
-    if not items:
-      items = self.connector.getJson('/Users/{UserId}/Items',
-                                     remote            = False,
-                                     format            = 'json',
-                                     SortOrder         = 'Ascending',
-                                     Recursive         = 'true',
-                                     IncludeItemTypes  = 'MusicArtist',
-                                     Fields            = 'Path,ParentId'
-      )
-      items = self.process(items)
-      self.extras['artists'] = items
+    return self.extras.get('artists', []) or self.artists_force
+
+  @property
+  def artists_force(self):
+    items = self.connector.getJson('/Users/{UserId}/Items',
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'MusicArtist',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['artists'] = items
     return items
 
   @property
   def movies(self):
-    items = self.extras.get('movies', [])
-    if not items:
-      items = self.connector.getJson('/Users/{UserId}/Items',
-                                     remote            = False,
-                                     format            = 'json',
-                                     SortOrder         = 'Ascending',
-                                     Recursive         = 'true',
-                                     IncludeItemTypes  = 'Movie',
-                                     Fields            = 'Path,ParentId'
-      )
-      items = self.process(items)
-      self.extras['movies'] = items
+    return self.extras.get('movies', []) or self.movies_force
+
+  @property
+  def movies_force(self):
+    items = self.connector.getJson('/Users/{UserId}/Items',
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'Movie',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['movies'] = items
     return items
 
   @property
   def episodes(self):
-    items = self.extras.get('episodes', [])
-    if not items:
-      items = self.connector.getJson('/Users/{UserId}/Items',
-                                     remote            = False,
-                                     format            = 'json',
-                                     SortOrder         = 'Ascending',
-                                     Recursive         = 'true',
-                                     IncludeItemTypes  = 'Episode',
-                                     Fields            = 'Path,ParentId'
-      )
-      items = self.process(items)
-      self.extras['episodes'] = items
+    return self.extras.get('episodes', []) or self.episodes_force
+
+  @property
+  def episodes_force(self):
+    items = self.connector.getJson('/Users/{UserId}/Items',
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'Episode',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['episodes'] = items
     return items

@@ -17,13 +17,15 @@ class Folder(EmbyObject):
 
   @property
   def items(self):
-    items = self.extras.get('items', [])
-    if not items:
-      items = self.connector.getJson(
-            'Playlists/{Id}/Items'.format(Id=self.id), remote=False
-      )
-      items = self.process(items)
-      self.extras['items'] = items
+    return self.extras.get('items', []) or self.items_force
+
+  @property
+  def items_force(self):
+    items = self.connector.getJson(
+          'Playlists/{Id}/Items'.format(Id=self.id), remote=False
+    )
+    items = self.process(items)
+    self.extras['items'] = items
     return items
 
 # Folders
@@ -40,6 +42,32 @@ class Playlist(Folder):
       elif hasattr(i, 'songs'):
         items.extend(i.songs)
     return items
+
+  @property
+  def songs_force(self):
+    items = []
+    for i in self.items_force:
+      if i.type == 'Audio':
+        items.append(i)
+      elif hasattr(i, 'songs'):
+        items.extend(i.songs)
+    return items
+
+  def add_items(self, *items):
+    items = [item.id for item in self.process(items)]
+    if not items:
+      return
+
+    self.connector.post('Playlists/{Id}/Items'.format(Id=self.id)
+      data={'Ids': ','.join(items)},
+      remote=False
+    )
+
+  def remove_items(self, *items):
+    items = [item.id for item in self.process(items) if item in self.items]
+    if not items:
+      return
+    pass #TODO remove song from playlist
 
 class BoxSet(Folder):
   def __init__(self, object_dict, connector):
