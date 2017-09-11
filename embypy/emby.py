@@ -71,11 +71,15 @@ class Emby(objects.EmbyObject):
         pass
 
   def create_playlist(self, name, *song_ids):
-    self.connector.post('/Playlists',
-      data={
-        'Name': name,
-        'Ids': ','.join([item.id for item in self.process(song_ids)])
-      },
+    data = {'Name': name}
+
+    ids = ','.join([item.id for item in self.process(song_ids)])
+    if ids:
+      data['Ids'] = ids
+
+    return self.connector.post('/Playlists',
+      data=data,
+      pass_uid=True,
       remote=False
     )
 
