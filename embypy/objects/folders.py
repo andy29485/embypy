@@ -69,7 +69,7 @@ class Playlist(Folder):
       return
 
     self.connector.delete('Playlists/{Id}/Items'.format(Id=self.id),
-      EntryIds=','.join(items)
+      EntryIds=','.join(items),
       remote=False
     )
 
