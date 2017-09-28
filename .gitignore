@@ -15,7 +15,6 @@ MANIFEST
 env/
 build/
 .templates/
-[^i]*.rst
 .build/
 develop-eggs/
 dist/
