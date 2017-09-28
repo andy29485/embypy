@@ -11,11 +11,12 @@ class Emby(objects.EmbyObject):
   def __init__(self, url, **kargs):
     '''create new emby connection object
 
-    `url`:       url to the server (e.g. http://127.0.0.1:8096/)
-
-    `api_key`:   key obtained from server dashboard
-
-    `device_id`: device id to pass to emby
+    :param url: url to the server (e.g. http://127.0.0.1:8096/)
+    :type url:  str
+    :param api_key: key obtained from server dashboard
+    :type api_key: str
+    :param device_id: device id to pass to emby
+    :type decice_id:  str
 
     TODO - other params from connector
     '''
