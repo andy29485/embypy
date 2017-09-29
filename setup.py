@@ -8,6 +8,7 @@ embypy_utils = util.convert_path('embypy/utils')
 
 with open('requirements.txt', 'r') as f:
   requirements = f.readlines()
+requirements.extend(['ssl', 'json'])
 
 setup(name='EmbyPy',
       version='0.1',
