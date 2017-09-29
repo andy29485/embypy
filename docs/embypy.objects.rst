@@ -1,9 +1,8 @@
 EmbyPy Objects module
-=====================
+==============
 
-.. automodule:: embypy.objects
-    :members:
-    :show-inheritance:
+.. toctree::
 
-.. autoclass:: EmbyObject
-    :members:
+  embypy.objects.EmbyObject
+  embypy.objects.Folder
+  embypy.objects.Video

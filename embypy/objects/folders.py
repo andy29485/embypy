@@ -4,19 +4,31 @@ from embypy.objects.object import *
 
 # Generic class
 class Folder(EmbyObject):
+  '''Class representing generic emby folder objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
   @property
   def child_count(self):
+    '''number of items in this folder'''
     return self.object_dict.get('ChildCount', 0)
 
   @property
   def cumulative_run_time(self):
+    '''total run time of items'''
     return self.object_dict.get('CumulativeRunTimeTicks', 0)
 
   @property
   def items(self):
+    '''list of emby objects contained in the folder'''
     return self.extras.get('items', []) or self.items_force
 
   @property
@@ -30,11 +42,21 @@ class Folder(EmbyObject):
 
 # Folders
 class Playlist(Folder):
+  '''Class representing emby playlist objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
   @property
   def songs(self):
+    '''list of songs in the playlist'''
     items = []
     for i in self.items:
       if i.type == 'Audio':
@@ -54,6 +76,17 @@ class Playlist(Folder):
     return items
 
   def add_items(self, *items):
+    '''append items to the playlist
+
+    Parameters
+    ----------
+    items : array_like
+      list of items to add(or their ids)
+
+    See Also
+    --------
+      remove_items :
+    '''
     items = [item.id for item in self.process(items)]
     if not items:
       return
@@ -64,6 +97,17 @@ class Playlist(Folder):
     )
 
   def remove_items(self, *items):
+    '''remove items from the playlist
+
+    Parameters
+    ----------
+    items : array_like
+      list of items to remove(or their ids)
+
+    See Also
+    --------
+      add_items :
+    '''
     items = [item.id for item in self.process(items) if item in self.items]
     if not items:
       return
@@ -74,10 +118,28 @@ class Playlist(Folder):
     )
 
 class BoxSet(Folder):
+  '''Class representing emby boxsets/collection objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
 class MusicAlbum(Folder):
+  '''Class representing emby music album objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
@@ -180,6 +242,15 @@ class MusicArtist(Folder):
     return items
 
 class Season(Folder):
+  '''Class representing emby season objects for TV shows
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
@@ -212,6 +283,15 @@ class Season(Folder):
     return self.object_dict.get('SeriesName', '')
 
 class Series(Folder):
+  '''Class representing emby TV show/series objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
@@ -237,5 +317,14 @@ class Series(Folder):
 
 # Game
 class GameSystem(Folder):
+  '''Class representing emby game systems objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)

@@ -19,7 +19,7 @@ class Emby(objects.EmbyObject):
 
   Attributes
   ----------
-  connector : embypy.utils.Connector
+  connector : embypy.utils.connector.Connector
     Object used to make api requests, do not use
   '''
   def __init__(self, url, **kargs):

@@ -5,10 +5,12 @@ import embypy.utils.connector
 class EmbyObject:
   '''Deafult EMby Object Template
 
-  Attributes
-  -----------
-  id: str
-    string with hexidecimal hash representing the id of this object in emby
+  Parameters
+  ----------
+  object_dict : dict
+    dictionary with json info returned from emby
+  connector: embypy.utils.connector.Connector
+    connector object to make upstream api calls
   '''
   def __init__(self, object_dict, connector):
     self.connector   = connector
@@ -20,10 +22,19 @@ class EmbyObject:
 
   @property
   def id(self):
+    '''string with hexidecimal hash representing the id of this
+    object in emby
+    '''
     return self.object_dict.get('Id') or self.object_dict.get('ItemId')
 
   @property
   def name(self):
+    '''name of the item
+
+    See Also
+    --------
+      post :
+    '''
     return self.object_dict.get('Name', '')
 
   @name.setter
@@ -32,6 +43,12 @@ class EmbyObject:
 
   @property
   def title(self):
+    '''same as name
+
+    See Also
+    --------
+      post :
+    '''
     return self.name
 
   @title.setter
@@ -40,30 +57,42 @@ class EmbyObject:
 
   @property
   def path(self):
-    return self.object_dict.get('Path', '')
+    '''get the filepath of the media file (not url)
 
-  @path.setter
-  def path(self, value):
-    self.object_dict['Path'] = value
+    See Also
+    --------
+      url :
+    '''
+    return self.object_dict.get('Path', '')
 
   @property
   def type(self):
-    return self.object_dict.get('Type', 'Object')
+    '''get the object type (general)
 
-  @type.setter
-  def type(self, value):
-    self.object_dict['Type'] = value
+    See Also
+    --------
+      media_type :
+    '''
+    return self.object_dict.get('Type', 'Object')
 
   @property
   def media_type(self):
-    return self.object_dict.get('MediaType', 'Video')
+    '''get the object type (specific)
 
-  @media_type.setter
-  def media_type(self, value):
-    self.object_dict['MediaType'] = value
+    See Also
+    --------
+      type :
+    '''
+    return self.object_dict.get('MediaType', 'Object')
 
   @property
   def genres(self):
+    '''list of genres
+
+    See Also
+    --------
+      post :
+    '''
     return self.object_dict.get('Genres', [])
 
   @genres.setter
@@ -72,6 +101,12 @@ class EmbyObject:
 
   @property
   def tags(self):
+    '''list of tags
+
+    See Also
+    --------
+      post :
+    '''
     return self.object_dict.get('Tags', [])
 
   @tags.setter
@@ -80,6 +115,12 @@ class EmbyObject:
 
   @property
   def overview(self):
+    '''the description of the item
+
+    See Also
+    --------
+      post :
+    '''
     return self.object_dict.get('Overview', '')
 
   @overview.setter
@@ -88,6 +129,12 @@ class EmbyObject:
 
   @property
   def community_rating(self):
+    '''int [0-10] with the rating of the item
+
+    See Also
+    --------
+      post :
+    '''
     return self.object_dict.get('CommunityRating', 0)
 
   @community_rating.setter
@@ -96,15 +143,28 @@ class EmbyObject:
 
   @property
   def primary_image_url(self):
+    '''url of the main poster image'''
     path = '/Items/{}/Images/Primary'.format(self.id)
     return self.connector.get_url(path, attach_api_key=False)
 
   @property
   def parent_id(self):
+    '''id of the parent object
+
+    See Also
+    --------
+      parent :
+    '''
     return self.object_dict.get('ParentId')
 
   @property
   def parent(self):
+    '''parent object as a subclass of EmbyObject
+
+    See Also
+    --------
+      parent :
+    '''
     if self.parent_id:
       return self.process(self.parent_id)
     else:
@@ -112,10 +172,24 @@ class EmbyObject:
 
   @property
   def url(self):
+    '''url of the item
+
+    Notes
+    -----
+      if remote-adderes was given, then that is used as the base
+    '''
     path = '/web/itemdetails.html?id={}'.format(self.id)
     return self.connector.get_url(path, attach_api_key=False)
 
   def update(self):
+    '''reload object info from emby
+
+    See Also
+    --------
+      refresh : same thing
+      send :
+      post :
+    '''
     path = 'Users/{{UserId}}/Items/{}'.format(self.id)
     info = self.connector.getJson(path, remote=False)
     self.object_dict.update(info)
@@ -123,9 +197,26 @@ class EmbyObject:
     return self
 
   def refresh(self):
+    '''Same as update
+
+    See Also
+    --------
+      update :
+    '''
     return self.update()
 
   def send(self):
+    '''send data that was changed to emby
+
+    This should be used after using any of the setter. Not necessarily
+    immediately, but soon after.
+
+    See Also
+    --------
+      post: same thing
+      update :
+      refresh :
+    '''
     path = 'Items/{}'.format(self.id)
     resp = self.connector.post(path, data=self.object_dict, remote=False)
     if resp.status_code == 400:
@@ -134,9 +225,34 @@ class EmbyObject:
     return resp
 
   def post(self):
+    '''Same as send
+
+    See Also
+    --------
+      send :
+    '''
     return self.send()
 
   def process(self, object_dict):
+    '''[for internal use] convert json into python object
+
+    Parameters
+    ----------
+    object_dict : dict
+      json representation of object from emby
+
+    Notes
+    -----
+    if a string is given, it is assumed to be an id, obj is returned.
+    if a list is given, this method is called for each item in list.
+
+    Returns
+    -------
+    EmbyObject
+      the object that is represented by the json dict
+    list
+      if input is a list, list is returned
+    '''
     try:
       if type(object_dict) == str:
         obj = EmbyObject({"Id":object_dict}, self.connector)

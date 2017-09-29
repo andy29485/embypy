@@ -4,8 +4,8 @@
 Emby API Wrapper
 ~~~~~~~~~~~~~~~~~~~
 A basic wrapper for the Emby Rest API.
-:copyright: (c) 2017 Andriy Zasypkin
-:license: GPLv3, see LICENSE.txt for more details.
+(c) 2017 Andriy Zasypkin
+GPLv3, see LICENSE.txt for more details.
 """
 
 __title__ = 'EmbyPy'

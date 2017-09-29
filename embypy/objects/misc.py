@@ -4,11 +4,21 @@ from embypy.objects.object import *
 
 # Generic class
 class Audio(EmbyObject):
+  '''Class representing generic emby Audio objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
   @property
   def album_id(self):
+    '''the id of the album this song is in'''
     return self.object_dict.get('AlbumId')
 
   @property
@@ -17,6 +27,7 @@ class Audio(EmbyObject):
 
   @property
   def index_number(self):
+    '''track number on disc'''
     return self.object_dict.get('IndexNumber', 1)
 
   @index_number.setter
@@ -33,10 +44,12 @@ class Audio(EmbyObject):
 
   @property
   def album_artist_ids(self):
+    '''list of album artist ids'''
     return [a['Id'] for a in self.object_dict.get('AlbumArtists', [])]
 
   @property
   def album_artist_name(self):
+    '''names of album artists'''
     return self.object_dict.get('AlbumArtist', [])
 
   @property
@@ -45,14 +58,17 @@ class Audio(EmbyObject):
 
   @property
   def artist_ids(self):
+    '''list of song artist ids'''
     return [a['Id'] for a in self.object_dict.get('ArtistItems', [])]
 
   @property
   def artist_names(self):
+    '''names of song artists'''
     return self.object_dict.get('Artists', [])
 
   @property
   def artists(self):
+    '''list of song artist objects'''
     return self.process(self.artist_ids)
 
   @property
@@ -67,19 +83,13 @@ class Audio(EmbyObject):
   def type(self):
     return self.object_dict.get('Type', 'Audio')
 
-  @property
-  def index_number(self):
-    return self.object_dict.get('IndexNumber', 1)
-
-  @index_number.setter
-  def index_number(self, value):
-    self.object_dict['IndexNumber'] = value
-
   def stream(self):
+    '''steam object for this song'''
     return self.connector.get_stream(self.stream_url)
 
   @property
   def stream_url(self):
+    '''stream for this song - not re-encoded'''
     path = '/Audio/{}/universal'.format(self.id)
     return self.connector.get_url(path,
                                   userId=self.connector.userid,
@@ -93,11 +103,21 @@ class Audio(EmbyObject):
 
 
 class Person(EmbyObject):
+  '''Class representing emby people objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
   @property
   def role(self):
+    '''Role the person played as'''
     return self.object_dict.get('Role', '')
 
   @role.setter
@@ -118,16 +138,43 @@ class Person(EmbyObject):
 
 
 class Image(EmbyObject):
+  '''Class representing emby image objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
 
 # Game
 class Game(EmbyObject):
+  '''Class representing emby game objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
 # Book
 class Book(EmbyObject):
+  '''Class representing emby book objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
