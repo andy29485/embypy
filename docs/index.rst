@@ -1,13 +1,20 @@
-.. embypy documentation master file, created by
-   sphinx-quickstart on Thu Sep 28 11:50:18 2017.
+.. EmbyPy documentation master file, created by
+   sphinx-quickstart on Thu Sep 28 17:16:54 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to embypy's documentation!
+Welcome to EmbyPy's documentation!
 ==================================
 
 .. toctree::
-  modules
+    :maxdepth: 4
+    :caption: Contents:
+
+    embypy
+    embypy.objects
+
+    license
+
 
 Indices and tables
 ==================

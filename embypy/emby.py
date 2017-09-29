@@ -1,34 +1,40 @@
 #!/usr/bin/env python3
 
-from embypy import utils
+from embypy.utils import Connector
 from embypy import objects
 from simplejson.scanner import JSONDecodeError
 
 class Emby(objects.EmbyObject):
   '''Emby connection class, an object of this type should be created
   to communicate with emby
+
+  Parameters
+  ----------
+  url : str
+    url to the server (e.g. http://127.0.0.1:8096/)
+  api_key : str, optional
+    key obtained from server dashboard
+  device_id : str, optional
+    device id to pass to emby
+
+  Attributes
+  ----------
+  connector : embypy.utils.Connector
+    Object used to make api requests, do not use
   '''
   def __init__(self, url, **kargs):
-    '''create new emby connection object
-
-    :param url: url to the server (e.g. http://127.0.0.1:8096/)
-    :type url:  str
-    :param api_key: key obtained from server dashboard
-    :type api_key: str
-    :param device_id: device id to pass to emby
-    :type decice_id:  str
-
-    TODO - other params from connector
-    '''
-    connector = utils.Connector(url, **kargs)
+    connector = Connector(url, **kargs)
     super().__init__({'ItemId':'', 'Name':''}, connector)
 
   def info(self, obj_id=None):
     '''Get info about object id
 
-    `obj_id` if not provided, server info is retured(as a dict).
-    Otherwise, an object with that id is returned
-    (or objects if `obj_id` is a list).
+    Parameters
+    ----------
+    obj_id : str, list
+      if not provided, server info is retured(as a dict).
+      Otherwise, an object with that id is returned
+      (or objects if `obj_id` is a list).
     '''
     if obj_id:
       try:
@@ -43,28 +49,31 @@ class Emby(objects.EmbyObject):
              strict_sort = False):
     '''Sends a search request to emby, returns results
 
-    `query` is the search string to send to emby
+    Parameters
+    ----------
+    query : str
+      the search string to send to emby
+    sort_map : dict
+      is a dict of strings to ints. Strings should be item types, and
+      the ints are the priority of those types(for sorting).
+      lower valued(0) will appear first.
+    strict_sort : bool
+      if True, then only item types in the keys of sortmap will be
+      included in the results
 
-    `sort_map` is a dict of strings to ints. Strings should be item types, and
-    the ints are the priority of those types(for sorting).
-    lower valued(0) will appear first.
-
-    `strict_sort` if True, then only item types in the keys of sortmap will be
-    included in the results
-
-    `returns` a list of emby objects
+    Returns
+    -------
+    list
+      list of emby objects
     '''
+    search_params = {
+      'remote'     : False,
+      'searchTerm' : query
+    }
     if strict_sort:
-      json = self.connector.getJson('/Search/Hints/',
-                                    remote=False,
-                                    searchTerm=query,
-                                    IncludeItemTypes=','.join(sort_map.keys())
-      )
-    else:
-      json = self.connector.getJson('/Search/Hints/',
-                                    remote=False,
-                                    searchTerm=query
-      )
+      search_params['IncludeItemTypes'] = ','.join(sort_map.keys())
+
+    json = self.connector.getJson('/Search/Hints/', **search_params)
     items  = []
     for item in json["SearchHints"]:
       item = self.process(item)
@@ -78,8 +87,16 @@ class Emby(objects.EmbyObject):
   def latest(self, userId=None):
     '''returns list of latest items
 
-    if `userId` is provided, then the list returned is
-    the one that that use will see.
+    Parameters
+    ----------
+    userId : str
+      if provided, then the list returned is
+      the one that that use will see.
+
+    Returns
+    -------
+    list
+      the itmes that will appear as latest (for user if id was given)
     '''
     json = self.connector.getJson('/Users/{UserId}/Items/Latest',
                                    remote=False, userId=userId
@@ -89,8 +106,16 @@ class Emby(objects.EmbyObject):
   def nextUp(self, userId=None):
     '''returns list of items marked as `next up`
 
-    if `userId` is provided, then the list returned is
-    the one that that use will see.
+    Parameters
+    ----------
+    userId : str
+      if provided, then the list returned is
+      the one that that use will see.
+
+    Returns
+    -------
+    list
+      the itmes that will appear as next up (for user if id was given)
     '''
     json = self.connector.getJson('/Shows/NextUp', pass_uid=True,
                                    remote=False,   userId=userId
@@ -101,6 +126,8 @@ class Emby(objects.EmbyObject):
     '''
     reload all cached information
 
+    Notes
+    -----
     This is a slow process, and will remove the cache before updating.
     Thus it is recomended to use the `*_force` properties, which will
     only update the cache after data is retrived.
@@ -117,8 +144,13 @@ class Emby(objects.EmbyObject):
 
   def create_playlist(self, name, *song_ids):
     '''create a new playlist
-    `name`     - name of new playlist
-    `song_ids` - [optional] list of song ids to add to playlist
+
+    Parameters
+    ----------
+    name : str
+      name of new playlist
+    song_ids : array_like
+      list of song ids to add to playlist
     '''
     data = {'Name': name}
     ids = ','.join([item.id for item in self.process(song_ids)])
@@ -138,7 +170,9 @@ class Emby(objects.EmbyObject):
 
     If a cached list is avalible, that is returned
 
-    see: albums_force
+    See Also
+    --------
+      albums_force :
     '''
     return self.extras.get('albums', []) or self.albums_force
 
@@ -147,6 +181,7 @@ class Emby(objects.EmbyObject):
     '''returns list of albums, focing a refresh
 
     Upon completion of a retrival, the cache is updated.
+
     '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
@@ -166,7 +201,9 @@ class Emby(objects.EmbyObject):
 
     If a cached list is avalible, that is returned
 
-    see: songs_force
+    See Also
+    --------
+      songs_force :
     '''
     return self.extras.get('songs', []) or self.songs_force
 
@@ -175,6 +212,10 @@ class Emby(objects.EmbyObject):
     '''returns list of songs, focing a refresh
 
     Upon completion of a retrival, the cache is updated.
+
+    See Also
+    --------
+      songs :
     '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
@@ -194,7 +235,9 @@ class Emby(objects.EmbyObject):
 
     If a cached list is avalible, that is returned
 
-    see: playlists_force
+    See Also
+    --------
+      playlists_force :
     '''
     return self.extras.get('playlists', []) or self.playlists_force
 
@@ -203,6 +246,10 @@ class Emby(objects.EmbyObject):
     '''returns list of playlists, focing a refresh
 
     Upon completion of a retrival, the cache is updated.
+
+    See Also
+    --------
+      playlists :
     '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
@@ -222,7 +269,9 @@ class Emby(objects.EmbyObject):
 
     If a cached list is avalible, that is returned
 
-    see: artists_force
+    See Also
+    --------
+      artists_force :
     '''
     return self.extras.get('artists', []) or self.artists_force
 
@@ -231,6 +280,8 @@ class Emby(objects.EmbyObject):
     '''returns list of song artists, focing a refresh
 
     Upon completion of a retrival, the cache is updated.
+
+    artists :
     '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
@@ -250,7 +301,9 @@ class Emby(objects.EmbyObject):
 
     If a cached list is avalible, that is returned
 
-    see: movies_force
+    See Also
+    --------
+      movies_force :
     '''
     return self.extras.get('movies', []) or self.movies_force
 
@@ -259,6 +312,10 @@ class Emby(objects.EmbyObject):
     '''returns list of movies, focing a refresh
 
     Upon completion of a retrival, the cache is updated.
+
+    See Also
+    --------
+      movies :
     '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
@@ -278,7 +335,9 @@ class Emby(objects.EmbyObject):
 
     If a cached list is avalible, that is returned
 
-    see: episodes_force
+    See Also
+    --------
+      episodes_force :
     '''
     return self.extras.get('episodes', []) or self.episodes_force
 
@@ -287,6 +346,10 @@ class Emby(objects.EmbyObject):
     '''returns list of episodes, focing a refresh
 
     Upon completion of a retrival, the cache is updated.
+
+    See Also
+    --------
+      episodes :
     '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,

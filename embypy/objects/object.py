@@ -3,6 +3,13 @@
 import embypy.utils.connector
 
 class EmbyObject:
+  '''Deafult EMby Object Template
+
+  Attributes
+  -----------
+  id: str
+    string with hexidecimal hash representing the id of this object in emby
+  '''
   def __init__(self, object_dict, connector):
     self.connector   = connector
     self.object_dict = object_dict
