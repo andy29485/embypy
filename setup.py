@@ -5,7 +5,10 @@ from distutils import util
 
 embypy_objs = util.convert_path('embypy/objects')
 embypy_utils = util.convert_path('embypy/utils')
-print(embypy_utils)
+
+with open('requirements.txt', 'r') as f:
+  requirements = f.readlines()
+
 setup(name='EmbyPy',
       version='0.1',
       description='Python API wrapper for emby media browser',
@@ -17,14 +20,6 @@ setup(name='EmbyPy',
         'embypy.utils': embypy_utils,
         'embypy.objects': embypy_objs
       },
-      install_requires=[
-        'aiohttp',
-        'asyncio'
-        'json',
-        'requests',
-        'simplejson',
-        'ssl',
-        'websockets',
-      ],
+      install_requires=requirements,
       packages=['embypy', 'embypy.objects', 'embypy.utils'],
 )

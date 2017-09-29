@@ -1,0 +1,7 @@
+aiohttp
+asyncio
+json
+requests
+simplejson
+ssl
+websockets
