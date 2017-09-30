@@ -145,56 +145,66 @@ class MusicAlbum(Folder):
 
   @property
   def album_artist_id(self):
+    '''emby id of album artist'''
     return self.object_dict.get('AlbumArtist')
 
   @property
   def album_artist(self):
+    '''album artist object'''
     return self.process(self.album_artist_id)
 
   @property
   def artist_ids(self):
+    '''list of emby artist ids for the song'''
     return self.object_dict.get('Artists', [])
 
   @property
   def artists(self):
+    '''list of song artist objects'''
     return self.process(self.artist_ids)
 
   @property
   def album_id(self):
+    '''emby id for the song's album'''
     return self.object_dict.get('AlbumId')
 
   @property
-  def album(self):
+  def album_name(self):
+    '''(str) album name'''
     return self.object_dict.get('Album', '')
 
-  @album.setter
-  def album(self, value):
+  @album_name.setter
+  def album_name(self, value):
     self.object_dict['Album'] = value
 
   @property
   def songs(self):
-    items = self.extras.get('songs', [])
-    if not items:
-      items = self.connector.getJson('/Users/{UserId}/Items',
-                                     remote            = False,
-                                     format            = 'json',
-                                     SortOrder         = 'Ascending',
-                                     SortBy            = 'SortName',
-                                     AlbumIds          = self.id,
-                                     Recursive         = 'true',
-                                     IncludeItemTypes  = 'Audio',
-                                     Fields            = 'Path,ParentId'
-      )
-      items = self.process(items)
-      self.extras['songs'] = items
+    return self.extras.get('songs') or self.songs_force
+
+  @property
+  def songs_force(self):
+    items = self.connector.getJson('/Users/{UserId}/Items',
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   SortBy            = 'SortName',
+                                   AlbumIds          = self.id,
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'Audio',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['songs'] = items
     return items
 
   @property
   def album_primary_image_tag(self):
+    '''url for the song's cover image'''
     return self.object_dict.get('AlbumPrimaryImageTag')
 
   @property
   def premiere_date(self):
+    '''date song was released'''
     return self.object_dict.get('PremiereDate')
 
 class MusicArtist(Folder):
@@ -207,38 +217,44 @@ class MusicArtist(Folder):
 
   @property
   def albums(self):
-    items = self.extras.get('albums', [])
-    if not items:
-      items = self.connector.getJson('/Users/{UserId}/Items',
-                                     remote            = False,
-                                     format            = 'json',
-                                     SortOrder         = 'Ascending',
-                                     SortBy            = 'SortName',
-                                     ArtistIds         = self.id,
-                                     Recursive         = 'true',
-                                     IncludeItemTypes  = 'MusicAlbum',
-                                     Fields            = 'Path,ParentId'
-      )
-      items = self.process(items)
-      self.extras['albums'] = items
+    '''list of album objects that include the artist'''
+    return self.extras.get('albums') or self.albums_force
+
+  @property
+  def albums_force(self):
+    items = self.connector.getJson('/Users/{UserId}/Items',
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   SortBy            = 'SortName',
+                                   ArtistIds         = self.id,
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'MusicAlbum',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['albums'] = items
     return items
 
   @property
   def songs(self):
-    items = self.extras.get('songs', [])
-    if not items:
-      item = self.connector.getJson('/Users/{UserId}/Items',
-                                     remote            = False,
-                                     format            = 'json',
-                                     SortOrder         = 'Ascending',
-                                     SortBy            = 'SortName',
-                                     ArtistIds         = self.id,
-                                     Recursive         = 'true',
-                                     IncludeItemTypes  = 'Audio',
-                                     Fields            = 'Path,ParentId'
-      )
-      items = self.process(items)
-      self.extras['songs'] = items
+    '''list of song objects that include the artist'''
+    return self.extras.get('songs') or self.songs_force
+
+  @property
+  def songs_force(self):
+    items = self.connector.getJson('/Users/{UserId}/Items',
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   SortBy            = 'SortName',
+                                   AlbumIds          = self.id,
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'Audio',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['songs'] = items
     return items
 
 class Season(Folder):
