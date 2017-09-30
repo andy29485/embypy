@@ -1,11 +1,7 @@
 # embypy
 python wrapper for the emby rest api
-[![Latest Version]
-  (https://pypip.in/version/EmbyPy/badge.svg)]
-  (https://pypi.python.org/pypi/EmbyPy)
-[![Documentation]
-  (https://media.readthedocs.org/static/projects/badges/passing.svg)]
-  (http://embypy.readthedocs.io/en/latest/)
+[![Latest Version](https://pypip.in/version/EmbyPy/badge.svg)](https://pypi.python.org/pypi/EmbyPy)
+[![Documentation](https://media.readthedocs.org/static/projects/badges/passing.svg)](http://embypy.readthedocs.io/en/latest/)
 
 ## Installing
 Installation should be done through the `pip` command:
@@ -19,8 +15,7 @@ python setup.py install
 ```
 
 ## Documentation
-Documentation is availble at [Read the Docs]
-(http://embypy.readthedocs.io/en/latest/).
+Documentation is availble at [Read the Docs](http://embypy.readthedocs.io/en/latest/).
 
 ## Usage
 To use you will need an [Emby](https://emby.media/) server and
