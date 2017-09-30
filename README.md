@@ -1,6 +1,6 @@
 # embypy
 python wrapper for the emby rest api
-[![Latest Version](https://pypip.in/version/EmbyPy/badge.svg)](https://pypi.python.org/pypi/EmbyPy)
+[![Latest Version](https://img.shields.io/pypi/v/EmbyPy.svg)](https://pypi.python.org/pypi/EmbyPy)
 [![Documentation](https://media.readthedocs.org/static/projects/badges/passing.svg)](http://embypy.readthedocs.io/en/latest/)
 
 ## Installing
