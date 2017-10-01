@@ -272,6 +272,7 @@ class Season(Folder):
 
   @property
   def index_number(self):
+    '''season number'''
     return self.object_dict.get('IndexNumber', 1)
 
   @index_number.setter
@@ -280,22 +281,27 @@ class Season(Folder):
 
   @property
   def played_percentage(self):
+    '''percentage of episodes watched'''
     return self.object_dict.get('PlayedPercentage', 0)
 
   @property
   def series_id(self):
+    '''emby id of the show'''
     return self.object_dict.get('SeriesId')
 
   @property
   def series(self):
+    '''emby object representing the show'''
     return self.process(self.series_id)
 
   @property
   def show(self):
+    '''same as `series`'''
     return self.series
 
   @property
   def series_name(self):
+    '''Name of the show'''
     return self.object_dict.get('SeriesName', '')
 
 class Series(Folder):
@@ -313,22 +319,27 @@ class Series(Folder):
 
   @property
   def air_days(self):
+    '''Days of the week the show airs'''
     return self.object_dict.get('AirDays')
 
   @property
   def air_time(self):
+    '''Time of day at which show airs'''
     return self.object_dict.get('AirTime')
 
   @property
   def status(self):
+    '''whether show is Airing or Complete'''
     return self.object_dict.get('Status')
 
   @property
   def premiere_date(self):
+    '''date the show started airing'''
     return self.object_dict.get('PremiereDate')
 
   @property
   def season_count(self):
+    '''number of seasons in the show'''
     return self.object_dict.get('SeasonCount', 0)
 
 # Game
