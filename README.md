@@ -2,6 +2,7 @@
 python wrapper for the emby rest api
 [![Latest Version](https://img.shields.io/pypi/v/EmbyPy.svg)](https://pypi.python.org/pypi/EmbyPy)
 [![Documentation](https://media.readthedocs.org/static/projects/badges/passing.svg)](http://embypy.readthedocs.io/en/latest/)
+[![Build Status](https://travis-ci.org/andy29485/embypy.svg?branch=master)](https://travis-ci.org/andy29485/embypy)
 
 ## Installing
 Installation should be done through the `pip` command:
