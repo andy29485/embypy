@@ -3,8 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to EmbyPy's documentation!
+EmbyPy's documentation!
 ==================================
+Start with the :class:`embypy.Emby` class, it should be the main thing that your
+make requests to.
 
 .. toctree::
     :maxdepth: 4
@@ -12,6 +14,7 @@ Welcome to EmbyPy's documentation!
 
     embypy
     embypy.objects
+    embypy.utils
 
     license
 

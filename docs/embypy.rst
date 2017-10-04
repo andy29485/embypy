@@ -1,5 +1,5 @@
 EmbyPy module
-==============
+=============
 
 .. automodule:: embypy
 

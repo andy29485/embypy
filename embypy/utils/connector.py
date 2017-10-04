@@ -82,6 +82,7 @@ class Connector:
 
   Notes
   -----
+  This class/object should NOT be used except internally
   if a address-remote url is given, then that will be used for output,
     such as the `embypy.objects.EmbyObject.url` atribute.
   `url` will always be used when making requests - thus I recomend using

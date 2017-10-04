@@ -338,9 +338,44 @@ class Series(Folder):
     return self.object_dict.get('PremiereDate')
 
   @property
-  def season_count(self):
-    '''number of seasons in the show'''
-    return self.object_dict.get('SeasonCount', 0)
+  def seasons(self):
+    '''list of seasons that are part of the show'''
+    return self.extras.get('seasons') or self.seasons_force
+
+  @property
+  def seasons_force(self):
+    items = self.connector.getJson('/Shows/{}/Seasons'.format(self.id),
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   SortBy            = 'SortName',
+                                   Recursive         = 'true',
+                                   pass_uid          = True,
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['seasons'] = items
+    return items
+
+  @property
+  def episodes(self):
+    '''list of episodes that are part of the show'''
+    return self.extras.get('episodes') or self.seasons_force
+
+  @property
+  def episodes_force(self):
+    items = self.connector.getJson('/Shows/{}/Episodes'.format(self.id),
+                                   remote            = False,
+                                   format            = 'json',
+                                   SortOrder         = 'Ascending',
+                                   SortBy            = 'SortName',
+                                   Recursive         = 'true',
+                                   pass_uid          = True,
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['episodes'] = items
+    return items
 
 # Game
 class GameSystem(Folder):

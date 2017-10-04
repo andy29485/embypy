@@ -88,20 +88,6 @@ class Episode(Video):
     self.index_number = value
 
   @property
-  def series_id(self):
-    '''The emby id of the series this episode belongs to'''
-    return self.object_dict.get('SeriesId')
-
-  @property
-  def series(self):
-    '''Series object for this episode'''
-    return self.process(self.series_id)
-
-  @property
-  def show(self):
-    return self.series
-
-  @property
   def season_id(self):
     '''season number'''
     return self.object_dict.get('SeasonId', 1)
@@ -114,6 +100,20 @@ class Episode(Video):
   def season(self):
     '''season object'''
     return self.process(self.season_id)
+
+  @property
+  def series_id(self):
+    '''The emby id of the series this episode belongs to'''
+    return self.object_dict.get('SeriesId')
+
+  @property
+  def series(self):
+    '''Series object for this episode'''
+    return self.process(self.series_id)
+
+  @property
+  def show(self):
+    return self.series
 
   @property
   def series_name(self):
