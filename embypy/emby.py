@@ -168,21 +168,17 @@ class Emby(objects.EmbyObject):
   def albums(self):
     '''returns list of all albums.
 
-    If a cached list is avalible, that is returned
+    |force|
 
-    See Also
-    --------
-      albums_force :
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Album`
     '''
     return self.extras.get('albums', []) or self.albums_force
 
   @property
   def albums_force(self):
-    '''returns list of albums, focing a refresh
-
-    Upon completion of a retrival, the cache is updated.
-
-    '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',
@@ -199,24 +195,17 @@ class Emby(objects.EmbyObject):
   def songs(self):
     '''returns list of all songs.
 
-    If a cached list is avalible, that is returned
+    |force|
 
-    See Also
-    --------
-      songs_force :
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Audio`
     '''
     return self.extras.get('songs', []) or self.songs_force
 
   @property
   def songs_force(self):
-    '''returns list of songs, focing a refresh
-
-    Upon completion of a retrival, the cache is updated.
-
-    See Also
-    --------
-      songs :
-    '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',
@@ -233,24 +222,17 @@ class Emby(objects.EmbyObject):
   def playlists(self):
     '''returns list of all playlists.
 
-    If a cached list is avalible, that is returned
+    |force|
 
-    See Also
-    --------
-      playlists_force :
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Playlist`
     '''
     return self.extras.get('playlists', []) or self.playlists_force
 
   @property
   def playlists_force(self):
-    '''returns list of playlists, focing a refresh
-
-    Upon completion of a retrival, the cache is updated.
-
-    See Also
-    --------
-      playlists :
-    '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',
@@ -267,22 +249,17 @@ class Emby(objects.EmbyObject):
   def artists(self):
     '''returns list of all song artists.
 
-    If a cached list is avalible, that is returned
+    |force|
 
-    See Also
-    --------
-      artists_force :
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Artist`
     '''
     return self.extras.get('artists', []) or self.artists_force
 
   @property
   def artists_force(self):
-    '''returns list of song artists, focing a refresh
-
-    Upon completion of a retrival, the cache is updated.
-
-    artists :
-    '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',
@@ -299,24 +276,17 @@ class Emby(objects.EmbyObject):
   def movies(self):
     '''returns list of all movies.
 
-    If a cached list is avalible, that is returned
+    |force|
 
-    See Also
-    --------
-      movies_force :
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Movie`
     '''
     return self.extras.get('movies', []) or self.movies_force
 
   @property
   def movies_force(self):
-    '''returns list of movies, focing a refresh
-
-    Upon completion of a retrival, the cache is updated.
-
-    See Also
-    --------
-      movies :
-    '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',
@@ -331,26 +301,19 @@ class Emby(objects.EmbyObject):
 
   @property
   def episodes(self):
-    '''returns list of all episodes.
+    '''returns a list of all episodes in emby.
 
-    If a cached list is avalible, that is returned
+    |force|
 
-    See Also
-    --------
-      episodes_force :
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Episode`
     '''
     return self.extras.get('episodes', []) or self.episodes_force
 
   @property
   def episodes_force(self):
-    '''returns list of episodes, focing a refresh
-
-    Upon completion of a retrival, the cache is updated.
-
-    See Also
-    --------
-      episodes :
-    '''
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',

@@ -28,7 +28,15 @@ class Folder(EmbyObject):
 
   @property
   def items(self):
-    '''list of emby objects contained in the folder'''
+    '''list of emby objects contained in the folder
+
+    |force|
+
+    Returns
+    -------
+    list
+      with subclass of type :class:`embypy.objects.EmbyObject`
+    '''
     return self.extras.get('items', []) or self.items_force
 
   @property
@@ -56,7 +64,15 @@ class Playlist(Folder):
 
   @property
   def songs(self):
-    '''list of songs in the playlist'''
+    '''list of songs in the playlist
+
+    |force|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Audio`
+    '''
     items = []
     for i in self.items:
       if i.type == 'Audio':
@@ -179,6 +195,15 @@ class MusicAlbum(Folder):
 
   @property
   def songs(self):
+    '''returns a list of songs in the album
+
+    |force|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Audio`
+    '''
     return self.extras.get('songs') or self.songs_force
 
   @property
@@ -217,7 +242,15 @@ class MusicArtist(Folder):
 
   @property
   def albums(self):
-    '''list of album objects that include the artist'''
+    '''list of album objects that include the artist
+
+    |force|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Album`
+    '''
     return self.extras.get('albums') or self.albums_force
 
   @property
@@ -238,7 +271,15 @@ class MusicArtist(Folder):
 
   @property
   def songs(self):
-    '''list of song objects that include the artist'''
+    '''list of song objects that include the artist
+
+    |force|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Audio`
+    '''
     return self.extras.get('songs') or self.songs_force
 
   @property
@@ -304,6 +345,35 @@ class Season(Folder):
     '''Name of the show'''
     return self.object_dict.get('SeriesName', '')
 
+  @property
+  def episodes(self):
+    '''returns a list of all episodes in this season.
+
+    |force|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Episode`
+    '''
+    return self.extras.get('episodes', []) or self.episodes_force
+
+  @property
+  def episodes_force(self):
+    items = self.connector.getJson('/Shows/{}/Episodes'.format(self.series_id),
+                                   remote            = False,
+                                   format            = 'json',
+                                   Season            = self.id,
+                                   pass_uid          = True,
+                                   SortOrder         = 'Ascending',
+                                   Recursive         = 'true',
+                                   IncludeItemTypes  = 'Episode',
+                                   Fields            = 'Path,ParentId'
+    )
+    items = self.process(items)
+    self.extras['episodes'] = items
+    return items
+
 class Series(Folder):
   '''Class representing emby TV show/series objects
 
@@ -339,7 +409,15 @@ class Series(Folder):
 
   @property
   def seasons(self):
-    '''list of seasons that are part of the show'''
+    '''list of seasons that are part of the show
+
+    |force|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Season`
+    '''
     return self.extras.get('seasons') or self.seasons_force
 
   @property
@@ -359,7 +437,15 @@ class Series(Folder):
 
   @property
   def episodes(self):
-    '''list of episodes that are part of the show'''
+    '''list of episodes that are part of the show
+
+    |force|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Episode`
+    '''
     return self.extras.get('episodes') or self.seasons_force
 
   @property

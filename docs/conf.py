@@ -51,6 +51,11 @@ extlinks = {
     'issue': ('https://github.com/Andy29485/embypy/issues/%s', 'issue '),
 }
 
+rst_prolog = '''
+.. |force| replace:: This property will return a chached version,
+                     append ``_force`` to the param name to force a refresh.
+'''
+
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #

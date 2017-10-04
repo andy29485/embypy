@@ -5,6 +5,5 @@ EmbyPy Videos
   :show-inheritance:
 
 .. autoclass:: Connector
-
   :members:
 
