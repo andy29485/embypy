@@ -10,6 +10,8 @@ from requests.compat import urlparse, urlunparse, urlencode
 import websockets
 import ssl
 
+from embypy import __version__
+
 adapters.DEFAULT_RETRIES = 5
 
 class WebSocket:
@@ -110,6 +112,7 @@ class Connector:
     self.loop      = kargs.get('loop', asyncio.get_event_loop())
     self.url       = urlparse(url)
     self.urlremote = urlparse(urlremote) if urlremote else urlremote
+    self.token     = ''
     conn           = aiohttp.TCPConnector(verify_ssl=self.ssl)
     self.session   = Session()
 
@@ -118,6 +121,25 @@ class Connector:
       self.ws = WebSocket(self, self.get_url(websocket=True), self.ssl)
     else:
       self.ws = None
+
+    conn.connector.session.headers.update(
+      {'Authorization':
+       'MediaBrowser Client="{0}", Device="{0}", DeviceId="{1}", Version="{2}"'
+        .format('Navi', conn.connector.device_id, __version__)
+      }
+    )
+
+    # authenticate to emby if password was given
+    if self.password and self.username:
+      data = conn.connector.post('/Users/AuthenticateByName',
+                                 data=pw(self.password),
+                                 format='json',
+                                 username=self.username
+      ).json()
+      self.token = data['AccessToken']
+      conn.connector.session.headers.update(
+             {'X-MediaBrowser-Token', self.token}
+      )
 
   def get_url(self, path='/', websocket=False, remote=True,
               attach_api_key=True, userId=None, pass_uid=False, **query):
