@@ -122,22 +122,22 @@ class Connector:
     else:
       self.ws = None
 
-    conn.connector.session.headers.update(
+    self.session.headers.update(
       {'Authorization':
        'MediaBrowser Client="{0}", Device="{0}", DeviceId="{1}", Version="{2}"'
-        .format('Navi', conn.connector.device_id, __version__)
+        .format('Navi', self.device_id, __version__)
       }
     )
 
     # authenticate to emby if password was given
     if self.password and self.username:
-      data = conn.connector.post('/Users/AuthenticateByName',
+      data = self.post('/Users/AuthenticateByName',
                                  data=pw(self.password),
                                  format='json',
                                  username=self.username
       ).json()
       self.token = data['AccessToken']
-      conn.connector.session.headers.update(
+      self.session.headers.update(
              {'X-MediaBrowser-Token', self.token}
       )
 
