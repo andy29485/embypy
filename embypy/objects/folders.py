@@ -45,7 +45,7 @@ class Folder(EmbyObject):
           'Playlists/{Id}/Items'.format(Id=self.id), remote=False
     )
     items = self.process(items)
-    self.extras['items'] = items
+    self.extras['items'] = sorted(items, key=lambda x: x.index_number)
     return items
 
 # Folders
@@ -219,7 +219,7 @@ class MusicAlbum(Folder):
                                    Fields            = 'Path,ParentId'
     )
     items = self.process(items)
-    self.extras['songs'] = items
+    self.extras['songs'] = sorted(items, key=lambda x: x.index_number)
     return items
 
   @property
@@ -266,7 +266,7 @@ class MusicArtist(Folder):
                                    Fields            = 'Path,ParentId'
     )
     items = self.process(items)
-    self.extras['albums'] = items
+    self.extras['albums'] = sorted(items, key=lambda x: x.index_number)
     return items
 
   @property
@@ -295,7 +295,7 @@ class MusicArtist(Folder):
                                    Fields            = 'Path,ParentId'
     )
     items = self.process(items)
-    self.extras['songs'] = items
+    self.extras['songs'] = sorted(items, key=lambda x: x.index_number)
     return items
 
 class Season(Folder):
@@ -371,7 +371,7 @@ class Season(Folder):
                                    Fields            = 'Path,ParentId'
     )
     items = self.process(items)
-    self.extras['episodes'] = items
+    self.extras['episodes'] = sorted(items, key=lambda x: x.index_number)
     return items
 
 class Series(Folder):
@@ -432,7 +432,7 @@ class Series(Folder):
                                    Fields            = 'Path,ParentId'
     )
     items = self.process(items)
-    self.extras['seasons'] = items
+    self.extras['seasons'] = sorted(items, key=lambda x: x.index_number)
     return items
 
   @property
@@ -460,7 +460,7 @@ class Series(Folder):
                                    Fields            = 'Path,ParentId'
     )
     items = self.process(items)
-    self.extras['episodes'] = items
+    self.extras['episodes'] = sorted(items, key=lambda x: x.index_number)
     return items
 
 # Game
