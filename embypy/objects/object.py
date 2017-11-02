@@ -191,7 +191,7 @@ class EmbyObject:
       post :
     '''
     path = 'Users/{{UserId}}/Items/{}'.format(self.id)
-    info = self.connector.getJson(path, remote=False)
+    info = self.connector.getJson(path, remote=False, Fields='Path,Overview')
     self.object_dict.update(info)
     self.extras = {}
     return self

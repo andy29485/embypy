@@ -216,7 +216,7 @@ class MusicAlbum(Folder):
                                    AlbumIds          = self.id,
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'Audio',
-                                   Fields            = 'Path,ParentId'
+                                   Fields            = 'Path,ParentId,Overview'
     )
     items = self.process(items)
     self.extras['songs'] = sorted(items, key=lambda x: x.index_number)
@@ -263,7 +263,7 @@ class MusicArtist(Folder):
                                    ArtistIds         = self.id,
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'MusicAlbum',
-                                   Fields            = 'Path,ParentId'
+                                   Fields            = 'Path,ParentId,Overview'
     )
     items = self.process(items)
     self.extras['albums'] = sorted(items, key=lambda x: x.index_number)
@@ -292,7 +292,7 @@ class MusicArtist(Folder):
                                    AlbumIds          = self.id,
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'Audio',
-                                   Fields            = 'Path,ParentId'
+                                   Fields            = 'Path,ParentId,Overview'
     )
     items = self.process(items)
     self.extras['songs'] = sorted(items, key=lambda x: x.index_number)
@@ -368,7 +368,7 @@ class Season(Folder):
                                    SortOrder         = 'Ascending',
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'Episode',
-                                   Fields            = 'Path,ParentId'
+                                   Fields            = 'Path,ParentId,Overview'
     )
     items = self.process(items)
     self.extras['episodes'] = sorted(items, key=lambda x: x.index_number)
@@ -429,7 +429,7 @@ class Series(Folder):
                                    SortBy            = 'SortName',
                                    Recursive         = 'true',
                                    pass_uid          = True,
-                                   Fields            = 'Path,ParentId'
+                                   Fields            = 'Path,ParentId,Overview'
     )
     items = self.process(items)
     self.extras['seasons'] = sorted(items, key=lambda x: x.index_number)
@@ -457,7 +457,7 @@ class Series(Folder):
                                    SortBy            = 'SortName',
                                    Recursive         = 'true',
                                    pass_uid          = True,
-                                   Fields            = 'Path,ParentId'
+                                   Fields            = 'Path,ParentId,Overview'
     )
     items = self.process(items)
     self.extras['episodes'] = sorted(items, key=lambda x: x.index_number)
