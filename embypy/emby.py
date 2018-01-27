@@ -84,7 +84,7 @@ class Emby(objects.EmbyObject):
 
     return items
 
-  def latest(self, userId=None):
+  def latest(self, userId=None, itemTypes=''):
     '''returns list of latest items
 
     Parameters
@@ -92,6 +92,10 @@ class Emby(objects.EmbyObject):
     userId : str
       if provided, then the list returned is
       the one that that use will see.
+    itemTypes: str
+      if provided, then the list will only include items
+      if that type - gets passed to the emby api
+      see https://github.com/MediaBrowser/Emby/wiki/Item-Types
 
     Returns
     -------
@@ -99,7 +103,9 @@ class Emby(objects.EmbyObject):
       the itmes that will appear as latest (for user if id was given)
     '''
     json = self.connector.getJson('/Users/{UserId}/Items/Latest',
-                                   remote=False, userId=userId
+                                  remote=False,
+                                  userId=userId,
+                                  IncludeItemTypes=itemTypes
     )
     return self.process(json)
 

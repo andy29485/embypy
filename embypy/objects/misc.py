@@ -48,9 +48,9 @@ class Audio(EmbyObject):
     return [a['Id'] for a in self.object_dict.get('AlbumArtists', [])]
 
   @property
-  def album_artist_name(self):
+  def album_artist_names(self):
     '''names of album artists'''
-    return self.object_dict.get('AlbumArtist', [])
+    return self.object_dict.get('AlbumArtist', '').split(';')
 
   @property
   def album_artists(self):
