@@ -2,16 +2,18 @@
 
 from distutils.core import setup
 from distutils import util
+import os.path
 
 embypy_objs = util.convert_path('embypy/objects')
 embypy_utils = util.convert_path('embypy/utils')
 
-with open('requirements.txt', 'r') as f:
+
+with open(os.path.join(os.path.dirname(__file__),'requirements.txt'), 'r') as f:
   requirements = f.readlines()
 requirements.extend(['ssl', 'json'])
 
 setup(name='EmbyPy',
-      version='0.2.4',
+      version='0.2.4.1',
       setup_requires=['setuptools-markdown'],
       long_description_markdown_filename='README.md',
       description='Python API wrapper for emby media browser',
