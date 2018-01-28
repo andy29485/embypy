@@ -1,4 +1,4 @@
-EmbyPy Videos
+EmbyPy MISC
 =====================
 
 .. automodule:: embypy.objects

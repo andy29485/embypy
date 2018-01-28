@@ -93,6 +93,8 @@ class EmbyObject:
     --------
       post :
     '''
+    if self.parent:
+      return self.object_dict.get('Genres', self.parent.genres)
     return self.object_dict.get('Genres', [])
 
   @genres.setter
@@ -107,6 +109,8 @@ class EmbyObject:
     --------
       post :
     '''
+    if self.parent:
+      return self.object_dict.get('Tags', self.parent.genres)
     return self.object_dict.get('Tags', [])
 
   @tags.setter

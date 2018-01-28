@@ -67,7 +67,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'EmbyPy'
-copyright = '2017, Andriy Zasypkin'
+copyright = '2018, Andriy Zasypkin'
 author = 'Andriy Zasypkin'
 
 # The version info for the project you're documenting, acts as replacement for
