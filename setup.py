@@ -5,14 +5,13 @@ from distutils import util
 
 embypy_objs = util.convert_path('embypy/objects')
 embypy_utils = util.convert_path('embypy/utils')
-from embypy import __version__
 
 with open('requirements.txt', 'r') as f:
   requirements = f.readlines()
 requirements.extend(['ssl', 'json'])
 
 setup(name='EmbyPy',
-      version=__version__,
+      version='0.2.4',
       description='Python API wrapper for emby media browser',
       author='Andriy Zasypkin',
       author_email='AndriyZasypkin@gmail.com',
