@@ -12,6 +12,8 @@ requirements.extend(['ssl', 'json'])
 
 setup(name='EmbyPy',
       version='0.2.4',
+      setup_requires=['setuptools-markdown'],
+      long_description_markdown_filename='README.md',
       description='Python API wrapper for emby media browser',
       author='Andriy Zasypkin',
       author_email='AndriyZasypkin@gmail.com',
