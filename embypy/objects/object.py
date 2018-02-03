@@ -93,8 +93,6 @@ class EmbyObject:
     --------
       post :
     '''
-    if self.parent:
-      return self.object_dict.get('Genres', self.parent.genres)
     return self.object_dict.get('Genres', [])
 
   @genres.setter
