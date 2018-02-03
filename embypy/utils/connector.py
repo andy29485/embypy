@@ -107,8 +107,8 @@ class Connector:
     self.username  = kargs.get('username')
     self.password  = kargs.get('password')
     self.device_id = kargs.get('device_id')
-    self.timeout   = kargs.get('timeout', 22)
-    self.tries     = kargs.get('tries', 4)
+    self.timeout   = kargs.get('timeout', (6.1, 27))
+    self.tries     = kargs.get('tries', 3)
     self.loop      = kargs.get('loop', asyncio.get_event_loop())
     self.url       = urlparse(url)
     self.urlremote = urlparse(urlremote) if urlremote else urlremote
