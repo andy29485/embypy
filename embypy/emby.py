@@ -84,7 +84,7 @@ class Emby(objects.EmbyObject):
 
     return items
 
-  def latest(self, userId=None, itemTypes=''):
+  def latest(self, userId=None, itemTypes='', groupItems=False):
     '''returns list of latest items
 
     Parameters
@@ -105,7 +105,8 @@ class Emby(objects.EmbyObject):
     json = self.connector.getJson('/Users/{UserId}/Items/Latest',
                                   remote=False,
                                   userId=userId,
-                                  IncludeItemTypes=itemTypes
+                                  IncludeItemTypes=itemTypes,
+                                  GroupItems=groupItems
     )
     return self.process(json)
 
