@@ -192,7 +192,9 @@ class Emby(objects.EmbyObject):
                                    SortOrder         = 'Ascending',
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'MusicAlbum',
-                                   Fields            = 'Path,ParentId,Overview'
+                                   Fields            = 'Path,ParentId,Overview',
+                                   SortBy            = 'SortName',
+                                   SortOrder         = 'Ascending'
     )
     items = self.process(items)
     self.extras['albums'] = items
@@ -219,7 +221,9 @@ class Emby(objects.EmbyObject):
                                    SortOrder         = 'Ascending',
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'Audio',
-                                   Fields            = 'Path,ParentId,Overview'
+                                   Fields            = 'Path,ParentId,Overview',
+                                   SortBy            = 'SortName',
+                                   SortOrder         = 'Ascending'
     )
     items = self.process(items)
     self.extras['songs'] = items
@@ -246,7 +250,9 @@ class Emby(objects.EmbyObject):
                                    SortOrder         = 'Ascending',
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'Playlist',
-                                   Fields            = 'Path,ParentId,Overview'
+                                   Fields            = 'Path,ParentId,Overview',
+                                   SortBy            = 'SortName',
+                                   SortOrder         = 'Ascending'
     )
     items = self.process(items)
     self.extras['playlists'] = items
@@ -273,7 +279,9 @@ class Emby(objects.EmbyObject):
                                    SortOrder         = 'Ascending',
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'MusicArtist',
-                                   Fields            = 'Path,ParentId,Overview'
+                                   Fields            = 'Path,ParentId,Overview',
+                                   SortBy            = 'SortName',
+                                   SortOrder         = 'Ascending'
     )
     items = self.process(items)
     self.extras['artists'] = items
@@ -300,7 +308,9 @@ class Emby(objects.EmbyObject):
                                    SortOrder         = 'Ascending',
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'Movie',
-                                   Fields            = 'Path,ParentId,Overview'
+                                   Fields            = 'Path,ParentId,Overview',
+                                   SortBy            = 'SortName',
+                                   SortOrder         = 'Ascending'
     )
     items = self.process(items)
     self.extras['movies'] = items
@@ -327,7 +337,9 @@ class Emby(objects.EmbyObject):
                                    SortOrder         = 'Ascending',
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'Episode',
-                                   Fields            = 'Path,ParentId,Overview'
+                                   Fields            = 'Path,ParentId,Overview',
+                                   SortBy            = 'SortName',
+                                   SortOrder         = 'Ascending'
     )
     items = self.process(items)
     self.extras['episodes'] = items
