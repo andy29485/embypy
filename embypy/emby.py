@@ -189,7 +189,6 @@ class Emby(objects.EmbyObject):
     items = self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',
-                                   SortOrder         = 'Ascending',
                                    Recursive         = 'true',
                                    IncludeItemTypes  = 'MusicAlbum',
                                    Fields            = 'Path,ParentId,Overview',
