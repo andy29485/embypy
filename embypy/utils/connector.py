@@ -29,7 +29,7 @@ class WebSocket:
       self.ssl = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
       self.ssl.load_verify_locations(cafile=ssl_str)
     else:
-      self.ssl = None
+      self.ssl = ssl_str
 
   def connect(self):
     '''Establish a connection'''
@@ -126,6 +126,10 @@ class Connector:
         .format('EmbyPy', self.device_id, __version__)
       }
     )
+
+    if self.ssl and type(self.ssl) == str:
+      self.ssl = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+      self.ssl.load_verify_locations(cafile=self.ssl)
 
     #connect to websocket is user wants to
     if 'ws' in kargs:
@@ -263,7 +267,7 @@ class Connector:
       try:
         return await self.session.get(url,
                                       timeout=self.timeout,
-                                      verify=self.ssl
+                                      ssl=self.ssl
         )
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
@@ -296,7 +300,7 @@ class Connector:
       try:
         return await self.session.delete(url,
                                          timeout=self.timeout,
-                                         verify=self.ssl
+                                         ssl=self.ssl
         )
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
@@ -329,7 +333,7 @@ class Connector:
         return await self.session.post(url,
                                        json=data,
                                        timeout=self.timeout,
-                                       verify=self.ssl
+                                       ssl=self.ssl
         )
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
