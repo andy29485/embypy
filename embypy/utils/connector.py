@@ -119,18 +119,21 @@ class Connector:
     self.url       = urlparse(url)
     self.urlremote = urlparse(urlremote) if urlremote else urlremote
     self.token     = ''
-    self.session   = aiohttp.ClientSession(
-      headers={
-       'Authorization':
-       'MediaBrowser Client="{0}", Device="{0}", DeviceId="{1}", Version="{2}"'
-        .format('EmbyPy', self.device_id, __version__)
-      }
-    )
 
     if self.ssl and type(self.ssl) == str:
       self.ssl = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
       self.ssl.load_verify_locations(cafile=self.ssl)
 
+    conn = aiohttp.TCPConnector(ssl_context=self.ssl)
+
+    self.session   = aiohttp.ClientSession(
+      headers={
+        'Authorization':
+        'MediaBrowser Client="{0}", Device="{0}", DeviceId="{1}", Version="{2}"'
+        .format('EmbyPy', self.device_id, __version__)
+      },
+      connector=conn
+    )
     #connect to websocket is user wants to
     if 'ws' in kargs:
       self.ws = WebSocket(self, self.get_url(websocket=True), self.ssl)
@@ -265,10 +268,7 @@ class Connector:
 
     for i in range(self.tries):
       try:
-        return await self.session.get(url,
-                                      timeout=self.timeout,
-                                      ssl=self.ssl
-        )
+        return await self.session.get(url, timeout=self.timeout)
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
           raise aiohttp.ClientConnectionError(
@@ -298,10 +298,7 @@ class Connector:
 
     for i in range(self.tries):
       try:
-        return await self.session.delete(url,
-                                         timeout=self.timeout,
-                                         ssl=self.ssl
-        )
+        return await self.session.delete(url, timeout=self.timeout)
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
           raise aiohttp.ClientConnectionError(
@@ -330,11 +327,7 @@ class Connector:
     url = self.get_url(path, **params)
     for i in range(self.tries):
       try:
-        return await self.session.post(url,
-                                       json=data,
-                                       timeout=self.timeout,
-                                       ssl=self.ssl
-        )
+        return await self.session.post(url, json=data, timeout=self.timeout)
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
           raise aiohttp.ClientConnectionError(
