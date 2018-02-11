@@ -281,7 +281,6 @@ class EmbyObject:
       if type(object_dict) == str:
         existing = EmbyObject.known_objects.get(object_dict)
         if existing:
-          existing.object_dict.update(object_dict)
           return existing
 
         obj = EmbyObject({"Id":object_dict}, self.connector)

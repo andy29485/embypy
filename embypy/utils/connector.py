@@ -113,7 +113,7 @@ class Connector:
     self.username  = kargs.get('username')
     self.password  = kargs.get('password')
     self.device_id = kargs.get('device_id')
-    self.timeout   = kargs.get('timeout', (6.1, 27))
+    self.timeout   = kargs.get('timeout', 30)
     self.tries     = kargs.get('tries', 3)
     self.loop      = kargs.get('loop', asyncio.get_event_loop())
     self.url       = urlparse(url)
@@ -159,7 +159,7 @@ class Connector:
       pass
 
   @staticmethod
-  def sync_run(self, f):
+  def sync_run(f):
     if asyncio.iscoroutinefunction(f):
       f = f()
 
