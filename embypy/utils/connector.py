@@ -119,20 +119,19 @@ class Connector:
     self.url       = urlparse(url)
     self.urlremote = urlparse(urlremote) if urlremote else urlremote
     self.token     = ''
-    self.session   = aiohttp.ClientSession()
+    self.session   = aiohttp.ClientSession(
+      headers={
+       'Authorization':
+       'MediaBrowser Client="{0}", Device="{0}", DeviceId="{1}", Version="{2}"'
+        .format('EmbyPy', self.device_id, __version__)
+      }
+    )
 
     #connect to websocket is user wants to
     if 'ws' in kargs:
       self.ws = WebSocket(self, self.get_url(websocket=True), self.ssl)
     else:
       self.ws = None
-
-    self.session.headers.update(
-      {'Authorization':
-       'MediaBrowser Client="{0}", Device="{0}", DeviceId="{1}", Version="{2}"'
-        .format('Navi', self.device_id, __version__)
-      }
-    )
 
     # authenticate to emby if password was given
     if self.password and self.username:
@@ -142,7 +141,7 @@ class Connector:
                                  username=self.username
       ).json()
       self.token = data['AccessToken']
-      self.session.headers.update(
+      self.session._default_headers.update(
              {'X-MediaBrowser-Token', self.token}
       )
 
