@@ -220,7 +220,7 @@ class EmbyObject:
     --------
       update :
     '''
-    return self.update()
+    return await self.update()
 
   def send_sync(self):
     return self.connector.sync_run(self.send())

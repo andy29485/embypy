@@ -383,14 +383,22 @@ class Season(Folder):
     return self.object_dict.get('SeriesId')
 
   @property
-  def series(self):
+  def series_sync(self):
+    return self.connector.sync_run(self.series)
+
+  @property
+  async def series(self):
     '''emby object representing the show'''
     return await self.process(self.series_id)
 
   @property
-  def show(self):
+  def show_sync(self):
+    return self.connector.sync_run(self.series)
+
+  @property
+  async def show(self):
     '''same as `series`'''
-    return self.series
+    return await self.series
 
   @property
   def series_name(self):
@@ -398,7 +406,11 @@ class Season(Folder):
     return self.object_dict.get('SeriesName', '')
 
   @property
-  def episodes(self):
+  def episodes_sync(self):
+    return self.connector.sync_run(self.episodes)
+
+  @property
+  async def episodes(self):
     '''returns a list of all episodes in this season.
 
     |force|
@@ -408,21 +420,26 @@ class Season(Folder):
     list
       of type :class:`embypy.objects.Episode`
     '''
-    return self.extras.get('episodes', []) or self.episodes_force
+    return self.extras.get('episodes', []) or await self.episodes_force
 
   @property
-  def episodes_force(self):
-    items = self.connector.getJson('/Shows/{}/Episodes'.format(self.series_id),
-                                   remote            = False,
-                                   format            = 'json',
-                                   Season            = self.id,
-                                   pass_uid          = True,
-                                   SortOrder         = 'Ascending',
-                                   Recursive         = 'true',
-                                   IncludeItemTypes  = 'Episode',
-                                   Fields            = 'Path,ParentId,Overview'
+  def episodes_force_sync(self):
+    return self.connector.sync_run(self.episodes_force)
+
+  @property
+  async def episodes_force(self):
+    items = await self.connector.getJson(
+                            '/Shows/{}/Episodes'.format(self.series_id),
+                            remote            = False,
+                            format            = 'json',
+                            Season            = self.id,
+                            pass_uid          = True,
+                            SortOrder         = 'Ascending',
+                            Recursive         = 'true',
+                            IncludeItemTypes  = 'Episode',
+                            Fields            = 'Path,ParentId,Overview'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['episodes'] = sorted(items, key=lambda x: x.index_number)
     return items
 
@@ -460,7 +477,11 @@ class Series(Folder):
     return self.object_dict.get('PremiereDate')
 
   @property
-  def seasons(self):
+  def seasons_sync(self):
+    return self.connector.sync_run(self.seasons)
+  
+  @property
+  async def seasons(self):
     '''list of seasons that are part of the show
 
     |force|
@@ -470,25 +491,34 @@ class Series(Folder):
     list
       of type :class:`embypy.objects.Season`
     '''
-    return self.extras.get('seasons') or self.seasons_force
+    return self.extras.get('seasons') or await self.seasons_force
 
   @property
-  def seasons_force(self):
-    items = self.connector.getJson('/Shows/{}/Seasons'.format(self.id),
-                                   remote            = False,
-                                   format            = 'json',
-                                   SortOrder         = 'Ascending',
-                                   SortBy            = 'SortName',
-                                   Recursive         = 'true',
-                                   pass_uid          = True,
-                                   Fields            = 'Path,ParentId,Overview'
+  def seasons_force_sync(self):
+    return self.connector.sync_run(self.seasons_force)
+  
+  @property
+  async def seasons_force(self):
+    items = await self.connector.getJson(
+                                  '/Shows/{}/Seasons'.format(self.id),
+                                  remote            = False,
+                                  format            = 'json',
+                                  SortOrder         = 'Ascending',
+                                  SortBy            = 'SortName',
+                                  Recursive         = 'true',
+                                  pass_uid          = True,
+                                  Fields            = 'Path,ParentId,Overview'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['seasons'] = sorted(items, key=lambda x: x.index_number)
     return items
 
   @property
-  def episodes(self):
+  def episodes_sync(self):
+    return self.connector.sync_run(self.episodes)
+
+  @property
+  async def episodes(self):
     '''list of episodes that are part of the show
 
     |force|
@@ -498,20 +528,25 @@ class Series(Folder):
     list
       of type :class:`embypy.objects.Episode`
     '''
-    return self.extras.get('episodes') or self.seasons_force
+    return self.extras.get('episodes') or await self.episodes_force
 
   @property
-  def episodes_force(self):
-    items = self.connector.getJson('/Shows/{}/Episodes'.format(self.id),
-                                   remote            = False,
-                                   format            = 'json',
-                                   SortOrder         = 'Ascending',
-                                   SortBy            = 'SortName',
-                                   Recursive         = 'true',
-                                   pass_uid          = True,
-                                   Fields            = 'Path,ParentId,Overview'
+  def episodes_force_sync(self):
+    return self.connector.sync_run(self.episodes_force)
+
+  @property
+  async def episodes_force(self):
+    items = await self.connector.getJson(
+                            '/Shows/{}/Episodes'.format(self.id),
+                            remote            = False,
+                            format            = 'json',
+                            SortOrder         = 'Ascending',
+                            SortBy            = 'SortName',
+                            Recursive         = 'true',
+                            pass_uid          = True,
+                            Fields            = 'Path,ParentId,Overview'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['episodes'] = sorted(items, key=lambda x: x.index_number)
     return items
 
