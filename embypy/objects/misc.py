@@ -28,7 +28,7 @@ class Audio(EmbyObject):
 
   @property
   async def album(self):
-    return self.process(self.album_id)
+    return await self.process(self.album_id)
 
   @property
   def index_number(self):
@@ -64,7 +64,7 @@ class Audio(EmbyObject):
 
   @property
   async def album_artists(self):
-    return self.process(self.album_artist_ids)
+    return await self.process(self.album_artist_ids)
 
   @property
   def artist_ids(self):
@@ -84,7 +84,7 @@ class Audio(EmbyObject):
   @property
   async def artists(self):
     '''list of song artist objects'''
-    return self.process(self.artist_ids)
+    return await self.process(self.artist_ids)
 
   @property
   def album_primary_image_tag(self):

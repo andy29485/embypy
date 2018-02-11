@@ -385,7 +385,7 @@ class Season(Folder):
   @property
   def series(self):
     '''emby object representing the show'''
-    return self.process(self.series_id)
+    return await self.process(self.series_id)
 
   @property
   def show(self):
