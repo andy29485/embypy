@@ -27,7 +27,10 @@ class Emby(objects.EmbyObject):
     connector = Connector(url, **kargs)
     super().__init__({'ItemId':'', 'Name':''}, connector)
 
-  def info(self, obj_id=None):
+  def info_sync(self, obj_id=None):
+    return self.connector.sync_run(self.info(obj_id))
+
+  async def info(self, obj_id=None):
     '''Get info about object id
 
     Parameters
@@ -39,15 +42,20 @@ class Emby(objects.EmbyObject):
     '''
     if obj_id:
       try:
-        return self.process(obj_id)
+        return await self.process(obj_id)
       except JSONDecodeError:
         raise LookupError('Error object with that id does not exist', obj_id)
     else:
-      return self.connector.getJson('/system/info/public', remote=False)
+      return await self.connector.getJson('/system/info/public', remote=False)
 
-  def search(self, query,
+  def search_sync(self, query,
              sort_map = {'BoxSet':0,'Series':1,'Movie':2,'Audio':3,'Person':4},
              strict_sort = False):
+    return self.connector.sync_run(self.search(query, sort_map, strict_sort))
+
+  async def search(self, query,
+            sort_map = {'BoxSet':0,'Series':1,'Movie':2,'Audio':3,'Person':4},
+            strict_sort = False):
     '''Sends a search request to emby, returns results
 
     Parameters
@@ -74,18 +82,18 @@ class Emby(objects.EmbyObject):
     if strict_sort:
       search_params['IncludeItemTypes'] = ','.join(sort_map.keys())
 
-    json = self.connector.getJson('/Search/Hints/', **search_params)
-    items  = []
-    for item in json["SearchHints"]:
-      item = self.process(item)
-      items.append(item)
+    json  = await self.connector.getJson('/Search/Hints/', **search_params)
+    items = await self.process(json["SearchHints"])
 
     m_size = len(sort_map)
     items  = sorted(items, key = lambda x : sort_map.get(x.type, m_size))
 
     return items
 
-  def latest(self, userId=None, itemTypes='', groupItems=False):
+  def latest_sync(self, userId=None, itemTypes='', groupItems=False):
+    return self.connector.sync_run(self.latest(userId, itemTypes, groupItems))
+
+  async def latest(self, userId=None, itemTypes='', groupItems=False):
     '''returns list of latest items
 
     Parameters
@@ -103,15 +111,15 @@ class Emby(objects.EmbyObject):
     list
       the itmes that will appear as latest (for user if id was given)
     '''
-    json = self.connector.getJson('/Users/{UserId}/Items/Latest',
+    json = await self.connector.getJson('/Users/{UserId}/Items/Latest',
                                   remote=False,
                                   userId=userId,
                                   IncludeItemTypes=itemTypes,
                                   GroupItems=groupItems
     )
-    return self.process(json)
+    return await self.process(json)
 
-  def nextUp(self, userId=None):
+  def nextUp_sync(self, userId=None):
     return self.connector.sync_run(self.nextUp(userId))
 
   async def nextUp(self, userId=None):
