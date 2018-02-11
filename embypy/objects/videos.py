@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from embypy.objects.object import *
+import asyncio
 
 # Generic class
 class Video(EmbyObject):
@@ -97,9 +98,13 @@ class Episode(Video):
     self.object_dict['SeasonId'] = value
 
   @property
-  def season(self):
+  def season_sync(self):
+    return self.connector.sync_run(self.season)
+
+  @property
+  async def season(self):
     '''season object'''
-    return self.process(self.season_id)
+    return await self.process(self.season_id)
 
   @property
   def series_id(self):
@@ -107,13 +112,21 @@ class Episode(Video):
     return self.object_dict.get('SeriesId')
 
   @property
-  def series(self):
-    '''Series object for this episode'''
-    return self.process(self.series_id)
+  def series_sync(self):
+    return self.connector.sync_run(self.series)
 
   @property
-  def show(self):
-    return self.series
+  async def series(self):
+    '''Series object for this episode'''
+    return await self.process(self.series_id)
+
+  @property
+  def show_sync(self):
+    return self.connector.sync_run(self.series)
+
+  @property
+  async def show(self):
+    return await self.series
 
   @property
   def series_name(self):

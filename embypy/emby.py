@@ -3,6 +3,7 @@
 from embypy.utils import Connector
 from embypy import objects
 from simplejson.scanner import JSONDecodeError
+import asyncio
 
 class Emby(objects.EmbyObject):
   '''Emby connection class, an object of this type should be created
@@ -111,6 +112,9 @@ class Emby(objects.EmbyObject):
     return self.process(json)
 
   def nextUp(self, userId=None):
+    return self.connector.sync_run(self.nextUp(userId))
+
+  async def nextUp(self, userId=None):
     '''returns list of items marked as `next up`
 
     Parameters
@@ -122,14 +126,21 @@ class Emby(objects.EmbyObject):
     Returns
     -------
     list
-      the itmes that will appear as next up (for user if id was given)
+      the itmes that will appear as next up
+      (for user if id was given)
     '''
-    json = self.connector.getJson('/Shows/NextUp', pass_uid=True,
-                                   remote=False,   userId=userId
+    json = await self.connector.getJson('/Shows/NextUp',
+                                        pass_uid=True,
+                                        remote=False,
+                                        userId=userId
     )
-    return self.process(json)
+    return await self.process(json)
 
-  def update(self):
+
+  def update_sync(self):
+    self.connector.sync_run(self.update())
+
+  async def update(self):
     '''
     reload all cached information
 
@@ -149,30 +160,38 @@ class Emby(objects.EmbyObject):
       except:
         pass
 
-  def create_playlist(self, name, *song_ids):
+  def create_playlist_sync(self, name, *songs):
+    return self.connector.sync_run(self.create_playlist(name, *songs))
+
+  async def create_playlist(self, name, *songs):
     '''create a new playlist
 
     Parameters
     ----------
     name : str
       name of new playlist
-    song_ids : array_like
+    songs : array_like
       list of song ids to add to playlist
     '''
     data = {'Name': name}
-    ids = ','.join([item.id for item in self.process(song_ids)])
+    ids = [i.id for i in (await self.process(songs))]
+
     if ids:
-      data['Ids'] = ids
+      data['Ids'] = ','.join(ids)
 
     # TODO - return playlist not status
-    return self.connector.post('/Playlists',
+    return await self.connector.post('/Playlists',
       data=data,
       pass_uid=True,
       remote=False
     )
 
   @property
-  def albums(self):
+  def albums_sync(self):
+    return self.connector.sync_run(self.albums)
+
+  @property
+  async def albums(self):
     '''returns list of all albums.
 
     |force|
@@ -182,25 +201,35 @@ class Emby(objects.EmbyObject):
     list
       of type :class:`embypy.objects.Album`
     '''
-    return self.extras.get('albums', []) or self.albums_force
+    return self.extras.get('albums') or \
+                                     await self.albums_force
 
   @property
-  def albums_force(self):
-    items = self.connector.getJson('/Users/{UserId}/Items',
-                                   remote            = False,
-                                   format            = 'json',
-                                   Recursive         = 'true',
-                                   IncludeItemTypes  = 'MusicAlbum',
-                                   Fields            = 'Path,ParentId,Overview',
-                                   SortBy            = 'SortName',
-                                   SortOrder         = 'Ascending'
+  def albums_force_sync(self):
+    return self.connector.sync_run(self.albums_force)
+
+  @property
+  async def albums_force(self):
+    items = await self.connector.getJson(
+              '/Users/{UserId}/Items',
+              remote            = False,
+              format            = 'json',
+              Recursive         = 'true',
+              IncludeItemTypes  = 'MusicAlbum',
+              Fields            = 'Path,ParentId,Overview',
+              SortBy            = 'SortName',
+              SortOrder         = 'Ascending'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['albums'] = items
     return items
 
   @property
-  def songs(self):
+  def songs_sync(self):
+    return self.connector.sync_run(self.songs)
+
+  @property
+  async def songs(self):
     '''returns list of all songs.
 
     |force|
@@ -210,25 +239,34 @@ class Emby(objects.EmbyObject):
     list
       of type :class:`embypy.objects.Audio`
     '''
-    return self.extras.get('songs', []) or self.songs_force
+    return self.extras.get('songs') or await self.songs_force
 
   @property
-  def songs_force(self):
-    items = self.connector.getJson('/Users/{UserId}/Items',
-                                   remote            = False,
-                                   format            = 'json',
-                                   Recursive         = 'true',
-                                   IncludeItemTypes  = 'Audio',
-                                   Fields            = 'Path,ParentId,Overview',
-                                   SortBy            = 'SortName',
-                                   SortOrder         = 'Ascending'
+  def songs_force_sync(self):
+    return self.connector.sync_run(self.songs_force)
+
+  @property
+  async def songs_force(self):
+    items = await self.connector.getJson(
+                '/Users/{UserId}/Items',
+                remote            = False,
+                format            = 'json',
+                Recursive         = 'true',
+                IncludeItemTypes  = 'Audio',
+                Fields            = 'Path,ParentId,Overview',
+                SortBy            = 'SortName',
+                SortOrder         = 'Ascending'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['songs'] = items
     return items
 
   @property
-  def playlists(self):
+  def playlists_sync(self):
+    return self.connector.sync_run(self.playlists)
+
+  @property
+  async def playlists(self):
     '''returns list of all playlists.
 
     |force|
@@ -238,25 +276,35 @@ class Emby(objects.EmbyObject):
     list
       of type :class:`embypy.objects.Playlist`
     '''
-    return self.extras.get('playlists', []) or self.playlists_force
+    return self.extras.get('playlists') or \
+                                  await self.playlists_force
 
   @property
-  def playlists_force(self):
-    items = self.connector.getJson('/Users/{UserId}/Items',
-                                   remote            = False,
-                                   format            = 'json',
-                                   Recursive         = 'true',
-                                   IncludeItemTypes  = 'Playlist',
-                                   Fields            = 'Path,ParentId,Overview',
-                                   SortBy            = 'SortName',
-                                   SortOrder         = 'Ascending'
+  def playlists_force_sync(self):
+    return self.connector.sync_run(self.playlists_force)
+
+  @property
+  async def playlists_force(self):
+    items = await self.connector.getJson(
+                '/Users/{UserId}/Items',
+                remote            = False,
+                format            = 'json',
+                Recursive         = 'true',
+                IncludeItemTypes  = 'Playlist',
+                Fields            = 'Path,ParentId,Overview',
+                SortBy            = 'SortName',
+                SortOrder         = 'Ascending'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['playlists'] = items
     return items
 
   @property
-  def artists(self):
+  def artists_sync(self):
+    return self.connector.sync_run(self.artists)
+
+  @property
+  async def artists(self):
     '''returns list of all song artists.
 
     |force|
@@ -266,25 +314,35 @@ class Emby(objects.EmbyObject):
     list
       of type :class:`embypy.objects.Artist`
     '''
-    return self.extras.get('artists', []) or self.artists_force
+    return self.extras.get('artists', []) or \
+                                     await self.artists_force
 
   @property
-  def artists_force(self):
-    items = self.connector.getJson('/Users/{UserId}/Items',
-                                   remote            = False,
-                                   format            = 'json',
-                                   Recursive         = 'true',
-                                   IncludeItemTypes  = 'MusicArtist',
-                                   Fields            = 'Path,ParentId,Overview',
-                                   SortBy            = 'SortName',
-                                   SortOrder         = 'Ascending'
+  def artists_force_sync(self):
+    return self.connector.sync_run(self.artists_force)
+
+  @property
+  async def artists_force(self):
+    items = await self.connector.getJson(
+                '/Users/{UserId}/Items',
+                remote            = False,
+                format            = 'json',
+                Recursive         = 'true',
+                IncludeItemTypes  = 'MusicArtist',
+                Fields            = 'Path,ParentId,Overview',
+                SortBy            = 'SortName',
+                SortOrder         = 'Ascending'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['artists'] = items
     return items
 
   @property
-  def movies(self):
+  def movies_sync(self):
+    return self.connector.sync_run(self.movies)
+
+  @property
+  async def movies(self):
     '''returns list of all movies.
 
     |force|
@@ -294,25 +352,35 @@ class Emby(objects.EmbyObject):
     list
       of type :class:`embypy.objects.Movie`
     '''
-    return self.extras.get('movies', []) or self.movies_force
+    return self.extras.get('movies', []) or \
+                                      await self.movies_force
 
   @property
-  def movies_force(self):
-    items = self.connector.getJson('/Users/{UserId}/Items',
-                                   remote            = False,
-                                   format            = 'json',
-                                   Recursive         = 'true',
-                                   IncludeItemTypes  = 'Movie',
-                                   Fields            = 'Path,ParentId,Overview',
-                                   SortBy            = 'SortName',
-                                   SortOrder         = 'Ascending'
+  def movies_force_sync(self):
+    return self.connector.sync_run(self.movies_force)
+
+  @property
+  async def movies_force(self):
+    items = await self.connector.getJson(
+                '/Users/{UserId}/Items',
+                remote            = False,
+                format            = 'json',
+                Recursive         = 'true',
+                IncludeItemTypes  = 'Movie',
+                Fields            = 'Path,ParentId,Overview',
+                SortBy            = 'SortName',
+                SortOrder         = 'Ascending'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['movies'] = items
     return items
 
   @property
-  def episodes(self):
+  def episodes_sync(self):
+    return self.connector.sync_run(self.episodes)
+
+  @property
+  async def episodes(self):
     '''returns a list of all episodes in emby.
 
     |force|
@@ -322,19 +390,25 @@ class Emby(objects.EmbyObject):
     list
       of type :class:`embypy.objects.Episode`
     '''
-    return self.extras.get('episodes', []) or self.episodes_force
+    return self.extras.get('episodes', []) or \
+                                    await self.episodes_force
 
   @property
-  def episodes_force(self):
-    items = self.connector.getJson('/Users/{UserId}/Items',
-                                   remote            = False,
-                                   format            = 'json',
-                                   Recursive         = 'true',
-                                   IncludeItemTypes  = 'Episode',
-                                   Fields            = 'Path,ParentId,Overview',
-                                   SortBy            = 'SortName',
-                                   SortOrder         = 'Ascending'
+  def episodes_force_sync(self):
+    return self.connector.sync_run(self.episodes_force)
+
+  @property
+  async def episodes_force(self):
+    items = await self.connector.getJson(
+                '/Users/{UserId}/Items',
+                remote            = False,
+                format            = 'json',
+                Recursive         = 'true',
+                IncludeItemTypes  = 'Episode',
+                Fields            = 'Path,ParentId,Overview',
+                SortBy            = 'SortName',
+                SortOrder         = 'Ascending'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['episodes'] = items
     return items

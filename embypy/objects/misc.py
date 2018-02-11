@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from embypy.objects.object import *
+import asyncio
 
 # Generic class
 class Audio(EmbyObject):
@@ -22,7 +23,11 @@ class Audio(EmbyObject):
     return self.object_dict.get('AlbumId')
 
   @property
-  def album(self):
+  def album_sync(self):
+    return self.connector.sync_run(self.album)
+
+  @property
+  async def album(self):
     return self.process(self.album_id)
 
   @property
@@ -45,7 +50,8 @@ class Audio(EmbyObject):
   @property
   def album_artist_ids(self):
     '''list of album artist ids'''
-    return [a['Id'] for a in self.object_dict.get('AlbumArtists', [])]
+    return [a['Id'] for a in
+                  self.object_dict.get('AlbumArtists', [])]
 
   @property
   def album_artist_names(self):
@@ -53,13 +59,18 @@ class Audio(EmbyObject):
     return self.object_dict.get('AlbumArtist', '').split(';')
 
   @property
-  def album_artists(self):
+  def album_artists_sync(self):
+    return self.connector.sync_run(self.album_artists)
+
+  @property
+  async def album_artists(self):
     return self.process(self.album_artist_ids)
 
   @property
   def artist_ids(self):
     '''list of song artist ids'''
-    return [a['Id'] for a in self.object_dict.get('ArtistItems', [])]
+    return [a['Id'] for a in
+                  self.object_dict.get('ArtistItems', [])]
 
   @property
   def artist_names(self):
@@ -67,7 +78,11 @@ class Audio(EmbyObject):
     return self.object_dict.get('Artists', [])
 
   @property
-  def artists(self):
+  def artists_sync(self):
+    return self.connector.sync_run(self.artists)
+
+  @property
+  async def artists(self):
     '''list of song artist objects'''
     return self.process(self.artist_ids)
 
@@ -83,22 +98,18 @@ class Audio(EmbyObject):
   def type(self):
     return self.object_dict.get('Type', 'Audio')
 
-  def stream(self):
-    '''steam object for this song'''
-    return self.connector.get_stream(self.stream_url)
-
   @property
   def stream_url(self):
     '''stream for this song - not re-encoded'''
     path = '/Audio/{}/universal'.format(self.id)
     return self.connector.get_url(path,
-                                  userId=self.connector.userid,
-                                  MaxStreamingBitrate=140000000,
-                                  Container='opus',
-                                  TranscodingContainer='opus',
-                                  AudioCodec='opus',
-                                  MaxSampleRate=48000,
-                                  PlaySessionId=1496213367201 #TODO no hard code
+              userId=self.connector.userid,
+              MaxStreamingBitrate=140000000,
+              Container='opus',
+              TranscodingContainer='opus',
+              AudioCodec='opus',
+              MaxSampleRate=48000,
+              PlaySessionId=1496213367201 #TODO no hard code
     )
 
 

@@ -1,5 +1,4 @@
 aiohttp
 asyncio
-requests
 simplejson
 websockets

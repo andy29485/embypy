@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from embypy.objects.object import *
+import asyncio
 
 # Generic class
 class Folder(EmbyObject):
@@ -27,7 +28,11 @@ class Folder(EmbyObject):
     return self.object_dict.get('CumulativeRunTimeTicks', 0)
 
   @property
-  def items(self):
+  def items_sync(self):
+    return self.connector.sync_run(self.items)
+
+  @property
+  async def items(self):
     '''list of emby objects contained in the folder
 
     |force|
@@ -37,14 +42,18 @@ class Folder(EmbyObject):
     list
       with subclass of type :class:`embypy.objects.EmbyObject`
     '''
-    return self.extras.get('items', []) or self.items_force
+    return self.extras.get('items', []) or await self.items_force
 
   @property
-  def items_force(self):
-    items = self.connector.getJson(
+  def items_force_sync(self):
+    return self.connector.sync_run(self.items_force)
+
+  @property
+  async def items_force(self):
+    items = await self.connector.getJson(
           'Playlists/{Id}/Items'.format(Id=self.id), remote=False
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['items'] = sorted(items, key=lambda x: x.index_number)
     return items
 
@@ -82,7 +91,11 @@ class Playlist(Folder):
     return items
 
   @property
-  def songs_force(self):
+  def songs_force_sync(self):
+    return self.connector.sync_run(self.songs_force)
+
+  @property
+  async def songs_force(self):
     items = []
     for i in self.items_force:
       if i.type == 'Audio':
@@ -91,7 +104,10 @@ class Playlist(Folder):
         items.extend(i.songs)
     return items
 
-  def add_items(self, *items):
+  def add_items_sync(self, *items):
+    return self.connector.sync_run(self.add_items_sync(*items))
+
+  async def add_items(self, *items):
     '''append items to the playlist
 
     Parameters
@@ -103,7 +119,7 @@ class Playlist(Folder):
     --------
       remove_items :
     '''
-    items = [item.id for item in self.process(items)]
+    items = [item.id for item in await self.process(items)]
     if not items:
       return
 
@@ -112,7 +128,10 @@ class Playlist(Folder):
       remote=False
     )
 
-  def remove_items(self, *items):
+  def remove_items_sync(self, *items):
+    return self.connector.sync_run(self.remove_items_sync(*items))
+
+  async def remove_items(self, *items):
     '''remove items from the playlist
 
     Parameters
@@ -124,11 +143,12 @@ class Playlist(Folder):
     --------
       add_items :
     '''
-    items = [item.id for item in self.process(items) if item in self.items]
+    items = [i.id for i in (await self.process(items)) if i in self.items]
     if not items:
       return
 
-    self.connector.delete('Playlists/{Id}/Items'.format(Id=self.id),
+    await self.connector.delete(
+      'Playlists/{Id}/Items'.format(Id=self.id),
       EntryIds=','.join(items),
       remote=False
     )
@@ -165,9 +185,13 @@ class MusicAlbum(Folder):
     return self.object_dict.get('AlbumArtist')
 
   @property
-  def album_artist(self):
+  def album_artist_sync(self):
+    return self.connector.sync_run(self.album_artist)
+
+  @property
+  async def album_artist(self):
     '''album artist object'''
-    return self.process(self.album_artist_id)
+    return await self.process(self.album_artist_id)
 
   @property
   def artist_ids(self):
@@ -175,9 +199,13 @@ class MusicAlbum(Folder):
     return self.object_dict.get('Artists', [])
 
   @property
-  def artists(self):
+  def artists_sync(self):
+    return self.connector.sync_run(self.artists)
+
+  @property
+  async def artists(self):
     '''list of song artist objects'''
-    return self.process(self.artist_ids)
+    return await self.process(self.artist_ids)
 
   @property
   def album_id(self):
@@ -194,7 +222,11 @@ class MusicAlbum(Folder):
     self.object_dict['Album'] = value
 
   @property
-  def songs(self):
+  def songs_sync(self):
+    return self.connector.sync_run(self.songs)
+
+  @property
+  async def songs(self):
     '''returns a list of songs in the album
 
     |force|
@@ -204,11 +236,15 @@ class MusicAlbum(Folder):
     list
       of type :class:`embypy.objects.Audio`
     '''
-    return self.extras.get('songs') or self.songs_force
+    return self.extras.get('songs') or await self.songs_force
 
   @property
-  def songs_force(self):
-    items = self.connector.getJson('/Users/{UserId}/Items',
+  def songs_force_sync(self):
+    return self.connector.sync_run(self.songs_force)
+
+  @property
+  async def songs_force(self):
+    items = await self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',
                                    SortOrder         = 'Ascending',
@@ -241,7 +277,11 @@ class MusicArtist(Folder):
     return self.object_dict.get('PremiereDate')
 
   @property
-  def albums(self):
+  def albums_sync(self):
+    return self.connector.sync_run(self.albums)
+
+  @property
+  async def albums(self):
     '''list of album objects that include the artist
 
     |force|
@@ -251,11 +291,15 @@ class MusicArtist(Folder):
     list
       of type :class:`embypy.objects.Album`
     '''
-    return self.extras.get('albums') or self.albums_force
+    return self.extras.get('albums') or await self.albums_force
 
   @property
-  def albums_force(self):
-    items = self.connector.getJson('/Users/{UserId}/Items',
+  def albums_force_sync(self):
+    return self.connector.sync_run(self.albums_force)
+
+  @property
+  async def albums_force(self):
+    items = await self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',
                                    SortOrder         = 'Ascending',
@@ -265,12 +309,16 @@ class MusicArtist(Folder):
                                    IncludeItemTypes  = 'MusicAlbum',
                                    Fields            = 'Path,ParentId,Overview'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['albums'] = sorted(items, key=lambda x: x.index_number)
     return items
 
   @property
-  def songs(self):
+  def songs_sync(self):
+    return self.connector.sync_run(self.songs)
+
+  @property
+  async def songs(self):
     '''list of song objects that include the artist
 
     |force|
@@ -280,11 +328,15 @@ class MusicArtist(Folder):
     list
       of type :class:`embypy.objects.Audio`
     '''
-    return self.extras.get('songs') or self.songs_force
+    return self.extras.get('songs') or await self.songs_force
 
   @property
-  def songs_force(self):
-    items = self.connector.getJson('/Users/{UserId}/Items',
+  def songs_force_sync(self):
+    return self.connector.sync_run(self.songs_force)
+
+  @property
+  async def songs_force(self):
+    items = await self.connector.getJson('/Users/{UserId}/Items',
                                    remote            = False,
                                    format            = 'json',
                                    SortOrder         = 'Ascending',
@@ -294,7 +346,7 @@ class MusicArtist(Folder):
                                    IncludeItemTypes  = 'Audio',
                                    Fields            = 'Path,ParentId,Overview'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['songs'] = sorted(items, key=lambda x: x.index_number)
     return items
 

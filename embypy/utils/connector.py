@@ -31,7 +31,7 @@ class WebSocket:
     self.url        = url
     self.conn       = conn
     if type(ssl_str) == str:
-      self.ssl      = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+      self.ssl = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
       self.ssl.load_verify_locations(cafile=ssl_str)
     else:
       self.ssl = None
@@ -47,7 +47,18 @@ class WebSocket:
     while self.ws:
       message = await self.ws.recv()
       for handle in self.on_message:
-        await handle(message)
+        if asyncio.iscoroutinefunction(handle):
+          await handle(self, message)
+        else:
+          handle(self, message)
+
+  async def send(message):
+    if not self.ws:
+      return False
+    return await self.ws.send(message)
+
+  def send_sync(message):
+    return asyncio.get_event_loop().run_until_complete(self.send(message))
 
   def close(self):
     '''close connection to socket'''
@@ -113,8 +124,7 @@ class Connector:
     self.url       = urlparse(url)
     self.urlremote = urlparse(urlremote) if urlremote else urlremote
     self.token     = ''
-    conn           = aiohttp.TCPConnector(verify_ssl=self.ssl)
-    self.session   = Session()
+    self.session   = aiohttp.ClientSession()
 
     #connect to websocket is user wants to
     if 'ws' in kargs:
@@ -140,6 +150,36 @@ class Connector:
       self.session.headers.update(
              {'X-MediaBrowser-Token', self.token}
       )
+
+  def __del__(self):
+    try:
+      asyncio.get_event_loop().run_until_complete(self.session.close())
+    except:
+      pass
+
+  @staticmethod
+  def sync_run(self, f):
+    if asyncio.iscoroutinefunction(f):
+      f = f()
+
+    if asyncio.iscoroutine(f):
+      return asyncio.get_event_loop().run_until_complete(f)
+    elif callable(f):
+      return f()
+    else:
+      return f
+
+  def get_sync(self, *args, **kargs):
+    return self.sync_run(self.get(*args, **kargs))
+
+  def delete_sync(self, *args, **kargs):
+    return self.sync_run(self.delete(*args, **kargs))
+
+  def post_sync(self, *args, **kargs):
+    return self.sync_run(self.post(*args, **kargs))
+
+  def getJson_sync(self, *args, **kargs):
+    return self.sync_run(self.getJson(*args, **kargs))
 
   def get_url(self, path='/', websocket=False, remote=True,
               attach_api_key=True, userId=None, pass_uid=False, **query):
@@ -201,9 +241,9 @@ class Connector:
 
   def add_on_message(self, func):
     '''add function that handles websocket messages'''
-    self.ws.on_message.append(func)
+    return self.ws.on_message.append(func)
 
-  def get(self, path, **query):
+  async def get(self, path, **query):
     '''return a get request
 
     Parameters
@@ -227,9 +267,9 @@ class Connector:
 
     for i in range(self.tries):
       try:
-        return self.session.get(url,
-                                timeout=self.timeout,
-                                verify=self.ssl
+        return await self.session.get(url,
+                                      timeout=self.timeout,
+                                      verify=self.ssl
         )
       except exceptions.Timeout:
         if i>= self.tries-1:
@@ -238,7 +278,7 @@ class Connector:
         if i>= self.tries-1:
           raise exceptions.ConnectionError('Emby server is probably down')
 
-  def delete(self, path, **query):
+  async def delete(self, path, **query):
     '''send a delete request
 
     Parameters
@@ -261,9 +301,9 @@ class Connector:
 
     for i in range(self.tries):
       try:
-        return self.session.delete(url,
-                                   timeout=self.timeout,
-                                   verify=self.ssl
+        return await self.session.delete(url,
+                                         timeout=self.timeout,
+                                         verify=self.ssl
         )
       except exceptions.Timeout:
         if i>= self.tries-1:
@@ -272,7 +312,7 @@ class Connector:
         if i>= self.tries-1:
           raise exceptions.ConnectionError('Emby server is probably down')
 
-  def post(self, path, data={}, **params):
+  async def post(self, path, data={}, **params):
     '''sends post request
 
     Parameters
@@ -294,10 +334,10 @@ class Connector:
     url = self.get_url(path, **params)
     for i in range(self.tries):
       try:
-        return self.session.post(url,
-                                 json=data,
-                                 timeout=self.timeout,
-                                 verify=self.ssl
+        return await self.session.post(url,
+                                       json=data,
+                                       timeout=self.timeout,
+                                       verify=self.ssl
         )
       except exceptions.Timeout:
         if i>= self.tries-1:
@@ -307,7 +347,7 @@ class Connector:
           raise exceptions.ConnectionError('Emby server is probably down')
 
 
-  def getJson(self, path, **query):
+  async def getJson(self, path, **query):
     '''wrapper for get, parses response as json
 
     Parameters
@@ -327,4 +367,4 @@ class Connector:
     dict
       the response content as a dict
     '''
-    return self.get(path, **query).json()
+    return await (await self.get(path, **query)).json()

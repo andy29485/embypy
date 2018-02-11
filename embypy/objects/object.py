@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import embypy.utils.connector
+import asyncio
 
 class EmbyObject:
   '''Deafult EMby Object Template
@@ -12,10 +13,13 @@ class EmbyObject:
   connector: embypy.utils.connector.Connector
     connector object to make upstream api calls
   '''
+  known_objects = {}
+
   def __init__(self, object_dict, connector):
     self.connector   = connector
     self.object_dict = object_dict
     self.extras      = {}
+    EmbyObject.known_objects[object_dict.get('Id')] = self
 
   def __eq__(self, other):
     return isinstance(other, EmbyObject) and self.id == other.id
@@ -158,7 +162,11 @@ class EmbyObject:
     return self.object_dict.get('ParentId')
 
   @property
-  def parent(self):
+  def parent_sync(self):
+    return self.connector.sync_run(self.parent)
+
+  @property
+  async def parent(self):
     '''parent object as a subclass of EmbyObject
 
     See Also
@@ -166,7 +174,7 @@ class EmbyObject:
       parent :
     '''
     if self.parent_id:
-      return self.process(self.parent_id)
+      return await self.process(self.parent_id)
     else:
       return None
 
@@ -181,7 +189,13 @@ class EmbyObject:
     path = '/web/itemdetails.html?id={}'.format(self.id)
     return self.connector.get_url(path, attach_api_key=False)
 
-  def update(self):
+  def update_sync(self):
+    return self.connector.sync_run(self.update())
+
+  def refresh_sync(self):
+    return self.connector.sync_run(self.update())
+
+  async def update(self):
     '''reload object info from emby
 
     See Also
@@ -191,12 +205,15 @@ class EmbyObject:
       post :
     '''
     path = 'Users/{{UserId}}/Items/{}'.format(self.id)
-    info = self.connector.getJson(path, remote=False, Fields='Path,Overview')
+    info = await self.connector.getJson(path,
+                                        remote=False,
+                                        Fields='Path,Overview'
+    )
     self.object_dict.update(info)
     self.extras = {}
     return self
 
-  def refresh(self):
+  async def refresh(self):
     '''Same as update
 
     See Also
@@ -205,7 +222,13 @@ class EmbyObject:
     '''
     return self.update()
 
-  def send(self):
+  def send_sync(self):
+    return self.connector.sync_run(self.send())
+
+  def post_sync(self):
+    return self.connector.sync_run(self.send())
+
+  async def send(self):
     '''send data that was changed to emby
 
     This should be used after using any of the setter. Not necessarily
@@ -218,23 +241,23 @@ class EmbyObject:
       refresh :
     '''
     path = 'Items/{}'.format(self.id)
-    resp = self.connector.post(path, data=self.object_dict, remote=False)
+    resp = await self.connector.post(path, data=self.object_dict, remote=False)
     if resp.status_code == 400:
-      EmbyObject(self.object_dict, self.connector).update()
-      resp = self.connector.post(path, data=self.object_dict, remote=False)
+      await EmbyObject(self.object_dict, self.connector).update()
+      resp = await self.connector.post(path,data=self.object_dict,remote=False)
     return resp
 
-  def post(self):
+  async def post(self):
     '''Same as send
 
     See Also
     --------
       send :
     '''
-    return self.send()
+    return await self.send()
 
-  def process(self, object_dict):
-    '''[for internal use] convert json into python object
+  async def process(self, object_dict):
+    '''[for internal use] convert json/dict into python object
 
     Parameters
     ----------
@@ -253,32 +276,62 @@ class EmbyObject:
     list
       if input is a list, list is returned
     '''
+    # if ID was given, create dummy object and update it to get full dict
     try:
       if type(object_dict) == str:
+        existing = EmbyObject.known_objects.get(object_dict)
+        if existing:
+          existing.object_dict.update(object_dict)
+          return existing
+
         obj = EmbyObject({"Id":object_dict}, self.connector)
-        object_dict = obj.update().object_dict
+        object_dict = (await obj.update()).object_dict
     except:
       return None
 
+    # if nothing was given, return it back
+    # if already created object was given, return it back too
     if not object_dict or isinstance(object_dict, EmbyObject):
       return object_dict
 
+    # if a json dict that's really just a list was given,
+    #   convert to list
     if type(object_dict)       == dict and \
        set(object_dict.keys()) == {'Items', 'TotalRecordCount'}:
       object_dict = object_dict['Items']
 
+    # if a list was given,
+    #   process each item in list
     if type(object_dict) == list:
       items = []
       for item in object_dict:
-        item = self.process(item)
+        item = await self.process(item)
         if item:
           items.append(item)
       return items
+
+    # otherwise we probably have an object dict
+    #   so we should process that
+
+    # if dict has no id, it's a fake
+    if 'Id' not in object_dict:
+      return object_dict
+
+    # if object is already stored,
+    #   update with existing info and return
+    existing = EmbyObject.known_objects.get(object_dict.get('Id'))
+    if existing:
+      existing.object_dict.update(object_dict)
+      return existing
 
     import embypy.objects.folders
     import embypy.objects.videos
     import embypy.objects.misc
 
+    # if objectc is not already stored,
+    #   figure out its type (if unknown use this base class)
+    #   create an object with subclass of that type
+    #   return
     if object_dict['Type'] == 'Audio':
       return embypy.objects.misc.Audio(object_dict, self.connector)
     if object_dict['Type'] == 'Person':
