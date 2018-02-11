@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 
 import json
-from requests import Session, adapters, exceptions
 from requests.compat import urlparse, urlunparse, urlencode
 import asyncio
 import aiohttp
-import async_timeout
-from requests.compat import urlparse, urlunparse, urlencode
 import websockets
 import ssl
 
 from embypy import __version__
-
-adapters.DEFAULT_RETRIES = 5
 
 class WebSocket:
   '''Basic websocet that runs function when messages are recived
@@ -271,12 +266,11 @@ class Connector:
                                       timeout=self.timeout,
                                       verify=self.ssl
         )
-      except exceptions.Timeout:
+      except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
-          raise exceptions.Timeout('Timeout ', url)
-      except exceptions.ConnectionError:
-        if i>= self.tries-1:
-          raise exceptions.ConnectionError('Emby server is probably down')
+          raise aiohttp.ClientConnectionError(
+                        'Emby server is probably down'
+          )
 
   async def delete(self, path, **query):
     '''send a delete request
@@ -305,12 +299,11 @@ class Connector:
                                          timeout=self.timeout,
                                          verify=self.ssl
         )
-      except exceptions.Timeout:
+      except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
-          raise exceptions.Timeout('Timeout ', url)
-      except exceptions.ConnectionError:
-        if i>= self.tries-1:
-          raise exceptions.ConnectionError('Emby server is probably down')
+          raise aiohttp.ClientConnectionError(
+                        'Emby server is probably down'
+          )
 
   async def post(self, path, data={}, **params):
     '''sends post request
@@ -339,12 +332,11 @@ class Connector:
                                        timeout=self.timeout,
                                        verify=self.ssl
         )
-      except exceptions.Timeout:
+      except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
-          raise exceptions.Timeout('Timeout ', url)
-      except exceptions.ConnectionError:
-        if i>= self.tries-1:
-          raise exceptions.ConnectionError('Emby server is probably down')
+          raise aiohttp.ClientConnectionError(
+                        'Emby server is probably down'
+          )
 
 
   async def getJson(self, path, **query):
