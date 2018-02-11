@@ -313,12 +313,13 @@ class EmbyObject:
     #   so we should process that
 
     # if dict has no id, it's a fake
-    if 'Id' not in object_dict:
+    if 'Id' not in object_dict and 'ItemId' not in object_dict:
       return object_dict
 
     # if object is already stored,
     #   update with existing info and return
-    existing = EmbyObject.known_objects.get(object_dict.get('Id'))
+    itemId   = object_dict.get('Id', object_dict.get('ItemId'))
+    existing = EmbyObject.known_objects.get(itemId)
     if existing:
       existing.object_dict.update(object_dict)
       return existing
