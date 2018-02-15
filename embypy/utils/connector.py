@@ -327,7 +327,7 @@ class Connector:
     url = self.get_url(path, **params)
     for i in range(self.tries):
       try:
-        return await self.session.post(url, json=data, timeout=self.timeout)
+        return await self.session.post(url, data=data, timeout=self.timeout)
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
           raise aiohttp.ClientConnectionError(
