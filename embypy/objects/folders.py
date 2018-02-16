@@ -254,7 +254,7 @@ class MusicAlbum(Folder):
                                    IncludeItemTypes  = 'Audio',
                                    Fields            = 'Path,ParentId,Overview'
     )
-    items = self.process(items)
+    items = await self.process(items)
     self.extras['songs'] = sorted(items, key=lambda x: x.index_number)
     return items
 
