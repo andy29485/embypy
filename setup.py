@@ -10,7 +10,7 @@ with open('requirements.txt', 'r') as f:
   requirements = f.readlines()
 
 setup(name='EmbyPy',
-      version='0.3.0.4',
+      version='0.3.0.5',
       setup_requires=['setuptools-markdown'],
       long_description_markdown_filename='README.md',
       description='Python API wrapper for emby media browser',

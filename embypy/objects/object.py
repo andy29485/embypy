@@ -12,14 +12,19 @@ class EmbyObject:
     dictionary with json info returned from emby
   connector: embypy.utils.connector.Connector
     connector object to make upstream api calls
+  save : bool
+    if true, append to list of existing objects
+    saves space/increases speed/reduces issues
+    only set to false if creating a temp object that will be thrown out
   '''
   known_objects = {}
 
-  def __init__(self, object_dict, connector):
+  def __init__(self, object_dict, connector, save=True):
     self.connector   = connector
     self.object_dict = object_dict
     self.extras      = {}
-    EmbyObject.known_objects[object_dict.get('Id')] = self
+    if save:
+      EmbyObject.known_objects[object_dict.get('Id')] = self
 
   def __eq__(self, other):
     return isinstance(other, EmbyObject) and self.id == other.id
@@ -283,7 +288,7 @@ class EmbyObject:
         if existing:
           return existing
 
-        obj = EmbyObject({"Id":object_dict}, self.connector)
+        obj = EmbyObject({"Id":object_dict}, self.connector, save=False)
         object_dict = (await obj.update()).object_dict
     except:
       return None
