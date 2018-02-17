@@ -76,8 +76,8 @@ author = 'Andriy Zasypkin'
 #
 # The short X.Y version.
 version = ''
-with open('../embypy/__init__.py') as f:
-  version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+with open('../setup.py') as f:
+  version = re.search(r'^\s*version\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 # The full version, including alpha/beta/rc tags.
 release = version
