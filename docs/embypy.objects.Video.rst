@@ -7,11 +7,19 @@ EmbyPy Videos
 .. autosummary::
   Video.aspect_ratio
   Video.chapters
+
   Movie.premiere_date
-  Episode.premiere_date
+
   Episode.episode_number
+  Episode.premiere_date
   Episode.season
   Episode.series
+
+  Trailer
+
+  AdultVideo
+
+  MusicVideo
 
 .. autoclass:: Video
   :members:

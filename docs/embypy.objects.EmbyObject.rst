@@ -5,6 +5,7 @@ EmbyPy EmbyObject
   :show-inheritance:
 
 .. autosummary::
+  EmbyObject
   EmbyObject.id
   EmbyObject.name
   EmbyObject.path

@@ -33,6 +33,8 @@ class Emby(objects.EmbyObject):
   async def info(self, obj_id=None):
     '''Get info about object id
 
+    |coro|
+
     Parameters
     ----------
     obj_id : str, list
@@ -57,6 +59,8 @@ class Emby(objects.EmbyObject):
             sort_map = {'BoxSet':0,'Series':1,'Movie':2,'Audio':3,'Person':4},
             strict_sort = False):
     '''Sends a search request to emby, returns results
+
+    |coro|
 
     Parameters
     ----------
@@ -96,6 +100,8 @@ class Emby(objects.EmbyObject):
   async def latest(self, userId=None, itemTypes='', groupItems=False):
     '''returns list of latest items
 
+    |coro|
+
     Parameters
     ----------
     userId : str
@@ -125,6 +131,8 @@ class Emby(objects.EmbyObject):
   async def nextUp(self, userId=None):
     '''returns list of items marked as `next up`
 
+    |coro|
+
     Parameters
     ----------
     userId : str
@@ -152,6 +160,8 @@ class Emby(objects.EmbyObject):
     '''
     reload all cached information
 
+    |coro|
+
     Notes
     -----
     This is a slow process, and will remove the cache before updating.
@@ -173,6 +183,8 @@ class Emby(objects.EmbyObject):
 
   async def create_playlist(self, name, *songs):
     '''create a new playlist
+
+    |coro|
 
     Parameters
     ----------
@@ -203,6 +215,8 @@ class Emby(objects.EmbyObject):
     '''returns list of all albums.
 
     |force|
+
+    |coro|
 
     Returns
     -------
@@ -242,6 +256,8 @@ class Emby(objects.EmbyObject):
 
     |force|
 
+    |coro|
+
     Returns
     -------
     list
@@ -278,6 +294,8 @@ class Emby(objects.EmbyObject):
     '''returns list of all playlists.
 
     |force|
+
+    |coro|
 
     Returns
     -------
@@ -317,6 +335,8 @@ class Emby(objects.EmbyObject):
 
     |force|
 
+    |coro|
+
     Returns
     -------
     list
@@ -355,6 +375,8 @@ class Emby(objects.EmbyObject):
 
     |force|
 
+    |coro|
+
     Returns
     -------
     list
@@ -384,6 +406,46 @@ class Emby(objects.EmbyObject):
     return items
 
   @property
+  def series_sync(self):
+    return self.connector.sync_run(self.series)
+
+  @property
+  async def series(self):
+    '''returns a list of all series in emby.
+
+    |force|
+
+    |coro|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Series`
+    '''
+    return self.extras.get('series', []) or \
+                                    await self.series_force
+
+  @property
+  def series_force_sync(self):
+    return self.connector.sync_run(self.series_force)
+
+  @property
+  async def series_force(self):
+    items = await self.connector.getJson(
+                '/Users/{UserId}/Items',
+                remote            = False,
+                format            = 'json',
+                Recursive         = 'true',
+                IncludeItemTypes  = 'Series',
+                Fields            = 'Path,ParentId,Overview',
+                SortBy            = 'SortName',
+                SortOrder         = 'Ascending'
+    )
+    items = await self.process(items)
+    self.extras['series'] = items
+    return items
+
+  @property
   def episodes_sync(self):
     return self.connector.sync_run(self.episodes)
 
@@ -392,6 +454,8 @@ class Emby(objects.EmbyObject):
     '''returns a list of all episodes in emby.
 
     |force|
+
+    |coro|
 
     Returns
     -------

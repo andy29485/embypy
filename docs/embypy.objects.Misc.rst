@@ -9,8 +9,15 @@ EmbyPy MISC
   Audio.track_number
   Audio.album_artists
   Audio.artists
+  Audio.album_primary_image_tag
+
   Person.role
-  Person.premiere_date
+
+  Image
+
+  Game
+
+  Book
 
 .. autoclass:: Audio
     :members:

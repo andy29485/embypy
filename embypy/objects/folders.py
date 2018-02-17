@@ -37,6 +37,8 @@ class Folder(EmbyObject):
 
     |force|
 
+    |coro|
+
     Returns
     -------
     list
@@ -81,6 +83,8 @@ class Playlist(Folder):
 
     |force|
 
+    |coro|
+
     Returns
     -------
     list
@@ -123,6 +127,8 @@ class Playlist(Folder):
   async def add_items(self, *items):
     '''append items to the playlist
 
+    |coro|
+
     Parameters
     ----------
     items : array_like
@@ -145,6 +151,8 @@ class Playlist(Folder):
 
   async def remove_items(self, *items):
     '''remove items from the playlist
+
+    |coro|
 
     Parameters
     ----------
@@ -187,6 +195,8 @@ class BoxSet(Folder):
     '''list of movies in the collection
 
     |force|
+
+    |coro|
 
     Returns
     -------
@@ -232,6 +242,8 @@ class BoxSet(Folder):
     '''list of series in the collection
 
     |force|
+
+    |coro|
 
     Returns
     -------
@@ -284,7 +296,7 @@ class MusicAlbum(Folder):
   @property
   def album_artist_ids(self):
     '''emby id of album artist'''
-    return [a['Id'] for a in self.object_dict.get('AlbumArtists',[])]
+    return [a['Id'] for a in self.object_dict.get('AlbumArtists', [])]
 
   @property
   def album_artists_sync(self):
@@ -292,13 +304,22 @@ class MusicAlbum(Folder):
 
   @property
   async def album_artists(self):
-    '''album artist objects'''
+    '''
+    list of album artist objects
+
+    |coro|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.MusicArtist`
+    '''
     return await self.process(self.album_artist_ids)
 
   @property
   def artist_ids(self):
     '''list of emby artist ids for the song'''
-    return self.object_dict.get('Artists', [])
+    return [a['Id'] for a in self.object_dict.get('ArtistItems', [])]
 
   @property
   def artists_sync(self):
@@ -306,22 +327,16 @@ class MusicAlbum(Folder):
 
   @property
   async def artists(self):
-    '''list of song artist objects'''
+    '''list of song artist objects
+
+    |coro|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.MusicArtist`
+    '''
     return await self.process(self.artist_ids)
-
-  @property
-  def album_id(self):
-    '''emby id for the song's album'''
-    return self.object_dict.get('AlbumId')
-
-  @property
-  def album_name(self):
-    '''(str) album name'''
-    return self.object_dict.get('Album', '')
-
-  @album_name.setter
-  def album_name(self, value):
-    self.object_dict['Album'] = value
 
   @property
   def songs_sync(self):
@@ -332,6 +347,8 @@ class MusicAlbum(Folder):
     '''returns a list of songs in the album
 
     |force|
+
+    |coro|
 
     Returns
     -------
@@ -360,16 +377,6 @@ class MusicAlbum(Folder):
     self.extras['songs'] = sorted(items, key=lambda x: x.index_number)
     return items
 
-  @property
-  def album_primary_image_tag(self):
-    '''url for the song's cover image'''
-    return self.object_dict.get('AlbumPrimaryImageTag')
-
-  @property
-  def premiere_date(self):
-    '''date song was released'''
-    return self.object_dict.get('PremiereDate')
-
 class MusicArtist(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
@@ -387,6 +394,8 @@ class MusicArtist(Folder):
     '''list of album objects that include the artist
 
     |force|
+
+    |coro|
 
     Returns
     -------
@@ -424,6 +433,8 @@ class MusicArtist(Folder):
     '''list of song objects that include the artist
 
     |force|
+
+    |coro|
 
     Returns
     -------
@@ -490,7 +501,15 @@ class Season(Folder):
 
   @property
   async def series(self):
-    '''emby object representing the show'''
+    '''
+    emby object representing the show
+
+    |coro|
+
+    Returns
+    -------
+    :class:`embypy.objects.Series`
+    '''
     return await self.process(self.series_id)
 
   @property
@@ -516,6 +535,8 @@ class Season(Folder):
     '''returns a list of all episodes in this season.
 
     |force|
+
+    |coro|
 
     Returns
     -------
@@ -588,6 +609,8 @@ class Series(Folder):
 
     |force|
 
+    |coro|
+
     Returns
     -------
     list
@@ -624,6 +647,8 @@ class Series(Folder):
     '''list of episodes that are part of the show
 
     |force|
+
+    |coro|
 
     Returns
     -------

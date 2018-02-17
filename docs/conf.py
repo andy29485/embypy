@@ -54,6 +54,10 @@ extlinks = {
 rst_prolog = '''
 .. |force| replace:: This property will return a chached version,
                      append ``_force`` to the param name to force a refresh.
+.. |coro| replace:: This function is a |corourl|_.
+                     append ``_sync`` to run outside of an event loop
+.. |corourl| replace:: *coroutine*
+.. _corourl: https://docs.python.org/3/library/asyncio-task.html#coroutine
 '''
 
 # The suffix(es) of source filenames.
@@ -198,4 +202,3 @@ source_parsers = {
 }
 
 source_suffix = ['.rst', '.md']
-

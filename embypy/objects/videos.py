@@ -82,6 +82,7 @@ class Episode(Video):
 
   @property
   def episode_number(self):
+    '''the episode number (in the season)'''
     return self.index_number
 
   @episode_number.setter
@@ -103,7 +104,14 @@ class Episode(Video):
 
   @property
   async def season(self):
-    '''season object'''
+    '''Season that episode is a part of
+
+    |coro|
+
+    Returns
+    -------
+    :class:`embypy.objects.Season`
+    '''
     return await self.process(self.season_id)
 
   @property
@@ -117,7 +125,14 @@ class Episode(Video):
 
   @property
   async def series(self):
-    '''Series object for this episode'''
+    '''Series that episode is a part of
+
+    |coro|
+
+    Returns
+    -------
+    :class:`embypy.objects.Series`
+    '''
     return await self.process(self.series_id)
 
   @property

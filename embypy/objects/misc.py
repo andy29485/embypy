@@ -28,6 +28,14 @@ class Audio(EmbyObject):
 
   @property
   async def album(self):
+    '''The album that the song belongs to
+
+    |coro|
+
+    Returns
+    -------
+    :class:`embypy.objects.MusicAlbum`
+    '''
     return await self.process(self.album_id)
 
   @property
@@ -41,6 +49,7 @@ class Audio(EmbyObject):
 
   @property
   def track_number(self):
+    '''track number on disc'''
     return self.index_number
 
   @track_number.setter
@@ -63,13 +72,20 @@ class Audio(EmbyObject):
 
   @property
   async def album_artists(self):
+    '''
+
+    |coro|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.MusicArtist`
+    '''
     return await self.process(self.album_artist_ids)
 
   @property
   def artist_ids(self):
-    '''list of song artist ids'''
-    return [a['Id'] for a in
-                  self.object_dict.get('ArtistItems', [])]
+    return [a['Id'] for a in self.object_dict.get('ArtistItems', [])]
 
   @property
   def artist_names(self):
@@ -82,11 +98,20 @@ class Audio(EmbyObject):
 
   @property
   async def artists(self):
-    '''list of song artist objects'''
+    '''
+
+    |coro|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.MusicArtist`
+    '''
     return await self.process(self.artist_ids)
 
   @property
   def album_primary_image_tag(self):
+    '''The image of the album'''
     return self.object_dict.get('AlbumPrimaryImageTag')
 
   @property

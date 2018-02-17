@@ -8,20 +8,34 @@ EmbyPy Folders
   Folder.child_count
   Folder.cumulative_run_time
   Folder.items
+
   Playlist.songs
   Playlist.add_items
   Playlist.remove_items
-  MusicAlbum.album_artist
+
+  BoxSet.movies
+  BoxSet.series
+
+  MusicAlbum.album_artists
   MusicAlbum.artists
-  MusicAlbum.album_name
   MusicAlbum.songs
+
   MusicArtist.albums
   MusicArtist.songs
+
   Season.index_number
+  Season.played_percentage
+  Season.episodes
   Season.series
+
   Series.status
+  Series.air_days
+  Series.air_time
+  Series.premiere_date
   Series.seasons
   Series.episodes
+
+  GameSystem
 
 .. autoclass:: Folder
     :members:

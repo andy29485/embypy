@@ -101,6 +101,7 @@ class EmbyObject:
     See Also
     --------
       post :
+      tags :
     '''
     return self.object_dict.get('Genres', [])
 
@@ -115,6 +116,7 @@ class EmbyObject:
     See Also
     --------
       post :
+      genres :
     '''
     return self.object_dict.get('Tags', [])
 
@@ -174,9 +176,7 @@ class EmbyObject:
   async def parent(self):
     '''parent object as a subclass of EmbyObject
 
-    See Also
-    --------
-      parent :
+    |coro|
     '''
     if self.parent_id:
       return await self.process(self.parent_id)
@@ -203,6 +203,8 @@ class EmbyObject:
   async def update(self):
     '''reload object info from emby
 
+    |coro|
+
     See Also
     --------
       refresh : same thing
@@ -221,6 +223,8 @@ class EmbyObject:
   async def refresh(self):
     '''Same as update
 
+    |coro|
+
     See Also
     --------
       update :
@@ -235,6 +239,8 @@ class EmbyObject:
 
   async def send(self):
     '''send data that was changed to emby
+
+    |coro|
 
     This should be used after using any of the setter. Not necessarily
     immediately, but soon after.
@@ -255,6 +261,8 @@ class EmbyObject:
   async def post(self):
     '''Same as send
 
+    |coro|
+
     See Also
     --------
       send :
@@ -263,6 +271,8 @@ class EmbyObject:
 
   async def process(self, object_dict):
     '''[for internal use] convert json/dict into python object
+
+    |coro|
 
     Parameters
     ----------

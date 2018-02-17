@@ -1,4 +1,4 @@
-EmbyPy Videos
+EmbyPy Connector
 =====================
 
 .. automodule:: embypy.utils
@@ -6,4 +6,3 @@ EmbyPy Videos
 
 .. autoclass:: Connector
   :members:
-
