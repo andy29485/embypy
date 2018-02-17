@@ -50,8 +50,7 @@ class Audio(EmbyObject):
   @property
   def album_artist_ids(self):
     '''list of album artist ids'''
-    return [a['Id'] for a in
-                  self.object_dict.get('AlbumArtists', [])]
+    return [a['Id'] for a in self.object_dict.get('AlbumArtists', [])]
 
   @property
   def album_artist_names(self):

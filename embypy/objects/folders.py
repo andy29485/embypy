@@ -51,7 +51,7 @@ class Folder(EmbyObject):
   @property
   async def items_force(self):
     items = await self.connector.getJson(
-          'Playlists/{Id}/Items'.format(Id=self.id), remote=False
+          '/Users/{UserId}/Items', parentId=self.id, remote=False
     )
     items = await self.process(items)
     self.extras['items'] = sorted(items, key=lambda x: x.index_number)
@@ -72,7 +72,11 @@ class Playlist(Folder):
     super().__init__(object_dict, connector)
 
   @property
-  def songs(self):
+  def songs_sync(self):
+    return self.connector.sync_run(self.songs)
+
+  @property
+  async def songs(self):
     '''list of songs in the playlist
 
     |force|
@@ -83,11 +87,11 @@ class Playlist(Folder):
       of type :class:`embypy.objects.Audio`
     '''
     items = []
-    for i in self.items:
+    for i in await self.items:
       if i.type == 'Audio':
         items.append(i)
       elif hasattr(i, 'songs'):
-        items.extend(i.songs)
+        items.extend(await i.songs)
     return items
 
   @property
@@ -97,11 +101,20 @@ class Playlist(Folder):
   @property
   async def songs_force(self):
     items = []
-    for i in self.items_force:
+    for i in await self.items_force:
       if i.type == 'Audio':
         items.append(i)
       elif hasattr(i, 'songs'):
-        items.extend(i.songs)
+        items.extend(await i.songs)
+    return items
+
+  @property
+  async def items_force(self):
+    items = await self.connector.getJson(
+          'Playlists/{Id}/Items'.format(Id=self.id), remote=False
+    )
+    items = await self.process(items)
+    self.extras['items'] = sorted(items, key=lambda x: x.index_number)
     return items
 
   def add_items_sync(self, *items):
@@ -124,8 +137,7 @@ class Playlist(Folder):
       return
 
     self.connector.post('Playlists/{Id}/Items'.format(Id=self.id),
-      data={'Ids': ','.join(items)},
-      remote=False
+      data={'Ids': ','.join(items)}, remote=False
     )
 
   def remove_items_sync(self, *items):
@@ -166,6 +178,96 @@ class BoxSet(Folder):
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
 
+  @property
+  def movies_sync(self):
+    return self.connector.sync_run(self.movies)
+
+  @property
+  async def movies(self):
+    '''list of movies in the collection
+
+    |force|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Movie`
+    '''
+    items = []
+    for i in await self.items:
+      if i.type == 'Movie':
+        items.append(i)
+      elif hasattr(i, 'movies'):
+        items.extend(await i.movies)
+    return items
+
+  @property
+  def movies_force_sync(self):
+    return self.connector.sync_run(self.movies_force)
+
+  @property
+  async def movies_force(self):
+    items = []
+    for i in await self.items_force:
+      if i.type == 'Movie':
+        items.append(i)
+      elif hasattr(i, 'movies'):
+        items.extend(await i.movies)
+    return items
+
+  @property
+  def shows_sync(self):
+    return self.series_sync
+
+  @property
+  def series_sync(self):
+    return self.connector.sync_run(self.series)
+
+  @property
+  async def shows(self):
+    return await self.series
+
+  @property
+  async def series(self):
+    '''list of series in the collection
+
+    |force|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Series`
+    '''
+    items = []
+    for i in await self.items:
+      if i.type == 'Series':
+        items.append(i)
+      elif hasattr(i, 'series'):
+        items.extend(await i.series)
+    return items
+
+  @property
+  def shows_force_sync(self):
+    return self.series_force_sync
+
+  @property
+  def series_force_sync(self):
+    return self.connector.sync_run(self.series_force)
+
+  @property
+  async def shows(self):
+    return await self.series_force
+
+  @property
+  async def series_force(self):
+    items = []
+    for i in await self.items_force:
+      if i.type == 'Series':
+        items.append(i)
+      elif hasattr(i, 'series'):
+        items.extend(await i.series)
+    return items
+
 class MusicAlbum(Folder):
   '''Class representing emby music album objects
 
@@ -180,18 +282,18 @@ class MusicAlbum(Folder):
     super().__init__(object_dict, connector)
 
   @property
-  def album_artist_id(self):
+  def album_artist_ids(self):
     '''emby id of album artist'''
-    return self.object_dict.get('AlbumArtist')
+    return [a['Id'] for a in self.object_dict.get('AlbumArtists',[])]
 
   @property
-  def album_artist_sync(self):
-    return self.connector.sync_run(self.album_artist)
+  def album_artists_sync(self):
+    return self.connector.sync_run(self.album_artists)
 
   @property
-  async def album_artist(self):
-    '''album artist object'''
-    return await self.process(self.album_artist_id)
+  async def album_artists(self):
+    '''album artist objects'''
+    return await self.process(self.album_artist_ids)
 
   @property
   def artist_ids(self):
@@ -479,7 +581,7 @@ class Series(Folder):
   @property
   def seasons_sync(self):
     return self.connector.sync_run(self.seasons)
-  
+
   @property
   async def seasons(self):
     '''list of seasons that are part of the show
@@ -496,7 +598,7 @@ class Series(Folder):
   @property
   def seasons_force_sync(self):
     return self.connector.sync_run(self.seasons_force)
-  
+
   @property
   async def seasons_force(self):
     items = await self.connector.getJson(
