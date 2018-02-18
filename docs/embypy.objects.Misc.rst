@@ -10,6 +10,7 @@ EmbyPy MISC
   Audio.album_artists
   Audio.artists
   Audio.album_primary_image_tag
+  Audio.album_primary_image_url
 
   Person.role
 

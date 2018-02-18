@@ -111,8 +111,14 @@ class Audio(EmbyObject):
 
   @property
   def album_primary_image_tag(self):
-    '''The image of the album'''
+    '''The image tag of the album'''
     return self.object_dict.get('AlbumPrimaryImageTag')
+
+  @property
+  def album_primary_image_url(self):
+    '''The image of the album'''
+    path = '/Items/{}/Images/Primary'.format(self.album_id)
+    return self.connector.get_url(path, attach_api_key=False)
 
   @property
   def media_type(self):
