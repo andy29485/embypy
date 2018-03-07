@@ -200,10 +200,15 @@ class EmbyObject:
   def refresh_sync(self):
     return self.connector.sync_run(self.update())
 
-  async def update(self):
+  async def update(self, fields=''):
     '''reload object info from emby
 
     |coro|
+
+    Parameters
+    ----------
+    fields : str
+      additional fields to request when updating
 
     See Also
     --------
@@ -214,13 +219,13 @@ class EmbyObject:
     path = 'Users/{{UserId}}/Items/{}'.format(self.id)
     info = await self.connector.getJson(path,
                                         remote=False,
-                                        Fields='Path,Overview'
+                                        Fields='Path,Overview,'+fields
     )
     self.object_dict.update(info)
     self.extras = {}
     return self
 
-  async def refresh(self):
+  async def refresh(self, fields=''):
     '''Same as update
 
     |coro|
@@ -250,7 +255,13 @@ class EmbyObject:
       post: same thing
       update :
       refresh :
+
+    Returns
+    -------
+      aiohttp.ClientResponse or None if nothing needed updating
     '''
+    # Why does the whole dict need to be sent?
+    #   because emby is dumb, and will break if I don't
     path = 'Items/{}'.format(self.id)
     resp = await self.connector.post(path, data=self.object_dict, remote=False)
     if resp.status == 400:
