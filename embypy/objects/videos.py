@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from embypy.objects.object import *
+import re
 import asyncio
 
 # Generic class
@@ -91,8 +92,24 @@ class Episode(Video):
 
   @property
   def season_id(self):
-    '''season number'''
-    return self.object_dict.get('SeasonId', 1)
+    '''season name'''
+    return self.object_dict.get('SeasonName')
+
+  @property
+  def season_name(self):
+    '''season name'''
+    return self.object_dict.get('SeasonName')
+
+  @property
+  def season_number(self):
+    '''season name'''
+    match = re.match(r'^[Ss]eason\s+(\d+)', self.season_name)
+    return match and int(match.group(1))
+
+  @property
+  def season_id(self):
+    '''season id'''
+    return self.object_dict.get('SeasonId')
 
   @season_id.setter
   def season_id(self, value):
