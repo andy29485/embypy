@@ -75,6 +75,56 @@ class EmbyObject:
     return self.object_dict.get('Path', '')
 
   @property
+  def watched(self):
+    return self.object_dict.get('UserData', {}).get('Played')
+
+  @property
+  def played(self):
+    return self.watched
+
+  @property
+  def percentage_played(self):
+    played = self.object_dict.get('UserData', {}).get('PlaybackPositionTicks')
+    total  = self.object_dict.get('RunTimeTicks') or 1
+    return (played or 0)/total
+
+  @property
+  def play_count(self):
+    return self.object_dict.get('UserData', {}).get('PlayCount')
+
+  @property
+  def favorite(self):
+    return self.object_dict.get('UserData', {}).get('IsFavorite')
+
+  def setWatched_sync(self, value=True):
+    self.connector.sync_run(self.setWatched(value))
+
+  def setUnwatched_sync(self):
+    self.connector.sync_run(self.setWatched(False))
+
+  def toggleWatched_sync(self):
+    self.connector.sync_run(self.setWatched(not self.watched))
+
+  async def _mark(self, type, value):
+    url = '/Users/{{UserId}}/{type}/{Id}'.format(type=type, id=self.id)
+    if value:
+      await self.connector.post(url)
+    else:
+      await self.connector.delete(url)
+
+  async def setFavorite(self, value=True):
+    await self._mark('FavoriteItems', value)
+
+  async def setWatched(self, value=True):
+    await self._mark('PlayedItems', value)
+
+  async def setUnwatched(self):
+    await self.setWatched(False)
+
+  async def toggleWatched(self):
+    await self.setWatched(not self.watched)
+
+  @property
   def type(self):
     '''get the object type (general)
 

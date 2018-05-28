@@ -112,7 +112,7 @@ class Connector:
     self.api_key   = kargs.get('api_key')
     self.username  = kargs.get('username')
     self.password  = kargs.get('password')
-    self.device_id = kargs.get('device_id')
+    self.device_id = kargs.get('device_id', 'EmbyPy')
     self.timeout   = kargs.get('timeout', 30)
     self.tries     = kargs.get('tries', 3)
     self.loop      = kargs.get('loop', asyncio.get_event_loop())
@@ -126,10 +126,10 @@ class Connector:
 
     conn = aiohttp.TCPConnector(ssl_context=self.ssl)
 
-    self.session   = aiohttp.ClientSession(
+    self.session = aiohttp.ClientSession(
       headers={
         'Authorization':
-        'MediaBrowser Client="{0}", Device="{0}", DeviceId="{1}", Version="{2}"'
+        'MediaBrowser Client="{0}",Device="{0}",DeviceId="{1}",Version="{2}"'
         .format('EmbyPy', self.device_id, __version__)
       },
       connector=conn
@@ -142,15 +142,7 @@ class Connector:
 
     # authenticate to emby if password was given
     if self.password and self.username:
-      data = self.post('/Users/AuthenticateByName',
-                                 data=pw(self.password),
-                                 format='json',
-                                 username=self.username
-      ).json()
-      self.token = data['AccessToken']
-      self.session._default_headers.update(
-             {'X-MediaBrowser-Token', self.token}
-      )
+      self.login_sync()
 
   def __del__(self):
     try:
@@ -181,6 +173,28 @@ class Connector:
 
   def getJson_sync(self, *args, **kargs):
     return self.sync_run(self.getJson(*args, **kargs))
+
+  def login_sync(self):
+    return self.sync_run(self.login())
+
+  async def login(self):
+    data = self.post_sync('/Users/AuthenticateByName',
+                          data={
+                            'username':self.username,
+                            'pw':self.password,
+                          },
+                          send_raw=True,
+                          format='json',
+    )
+    data = self.sync_run(data.json())
+
+    self.token     = data.get('AccessToken', '')
+    self.userid    = data.get('User', {}).get('Id')
+    self.api_key   = self.token
+
+    self.session._default_headers.update(
+           {'X-MediaBrowser-Token': self.token}
+    )
 
   def get_url(self, path='/', websocket=False, remote=True,
               attach_api_key=True, userId=None, pass_uid=False, **query):
@@ -215,7 +229,7 @@ class Connector:
     full url
     '''
     userId = userId or self.userid
-    if attach_api_key:
+    if attach_api_key and self.api_key:
       query.update({'api_key':self.api_key, 'deviceId': self.device_id})
     if pass_uid:
       query['userId'] = userId
@@ -305,7 +319,7 @@ class Connector:
                         'Emby server is probably down'
           )
 
-  async def post(self, path, data={}, **params):
+  async def post(self, path, data={}, send_raw=False, **params):
     '''sends post request
 
     Parameters
@@ -324,11 +338,15 @@ class Connector:
     requests.models.Response
       the response that was given
     '''
-    url = self.get_url(path, **params)
-    jsonStr = json.dumps(data)
+    url  = self.get_url(path, **params)
+    jstr = json.dumps(data)
+
     for i in range(self.tries):
       try:
-        return await self.session.post(url, data=jsonStr, timeout=self.timeout)
+        if send_raw:
+          return await self.session.post(url, data=data, timeout=self.timeout)
+        else:
+          return await self.session.post(url, data=jstr, timeout=self.timeout)
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
           raise aiohttp.ClientConnectionError(
