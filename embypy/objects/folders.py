@@ -555,7 +555,7 @@ class Season(Folder):
                             '/Shows/{}/Episodes'.format(self.series_id),
                             remote            = False,
                             format            = 'json',
-                            Season            = self.id,
+                            Season            = self.index_number,
                             pass_uid          = True,
                             SortOrder         = 'Ascending',
                             Recursive         = 'true',

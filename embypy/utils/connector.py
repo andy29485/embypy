@@ -178,7 +178,7 @@ class Connector:
     return self.sync_run(self.login())
 
   async def login(self):
-    data = self.post_sync('/Users/AuthenticateByName',
+    data = await self.post('/Users/AuthenticateByName',
                           data={
                             'username':self.username,
                             'pw':self.password,
@@ -186,7 +186,7 @@ class Connector:
                           send_raw=True,
                           format='json',
     )
-    data = self.sync_run(data.json())
+    data = await data.json()
 
     self.token     = data.get('AccessToken', '')
     self.userid    = data.get('User', {}).get('Id')

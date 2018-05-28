@@ -13,10 +13,16 @@ class Emby(objects.EmbyObject):
   ----------
   url : str
     url to the server (e.g. http://127.0.0.1:8096/)
+
   api_key : str, optional
     key obtained from server dashboard
   device_id : str, optional
     device id to pass to emby
+
+  username : str, optional
+    username to login, this+password can be used instead of an apikey
+  password : str, optional
+    password for user to login as
 
   Attributes
   ----------
