@@ -10,10 +10,10 @@ GPLv3, see LICENSE.txt for more details.
 
 __title__ = 'EmbyPy'
 __author__ = 'Andriy Zasypkin'
-__license__ = 'GPLv3'
-__copyright__ = 'Copyright 2017, Andriy Zasypkin'
+__license__ = 'LGPLv3'
+__copyright__ = 'Copyright 2018, Andriy Zasypkin'
 
-from pkg_resources import get_distribution, DistributionNotFound
+from pkg_resources import require, get_distribution, DistributionNotFound
 import os.path
 
 try:
@@ -25,11 +25,13 @@ try:
     # not installed, but there is another version that *is*
     raise DistributionNotFound
 except DistributionNotFound:
-  __version__ = 'Please install this project with setup.py'
+  try:
+    __version__ = require("embypy")[0].version
+  except:
+    __version__ = 'Please install this project with setup.py'
 else:
   __version__ = _dist.version
 
 import embypy.utils
 import embypy.objects
 from embypy.emby import Emby
-

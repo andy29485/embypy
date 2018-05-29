@@ -34,7 +34,7 @@ class WebSocket:
   def connect(self):
     '''Establish a connection'''
     #TODO - authenticate to emby
-    asyncio.get_event_loop().create_task(self.handler())
+    self.loop.create_task(self.handler())
 
   async def handler(self):
     '''Handle loop, get and process messages'''
@@ -53,7 +53,7 @@ class WebSocket:
     return await self.ws.send(message)
 
   def send_sync(message):
-    return asyncio.get_event_loop().run_until_complete(self.send(message))
+    return self.loop.run_until_complete(self.send(message))
 
   def close(self):
     '''close connection to socket'''
@@ -146,7 +146,7 @@ class Connector:
 
   def __del__(self):
     try:
-      asyncio.get_event_loop().run_until_complete(self.session.close())
+      self.loop.run_until_complete(self.session.close())
     except:
       pass
 
