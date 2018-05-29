@@ -142,7 +142,7 @@ class Playlist(Folder):
     if not items:
       return
 
-    self.connector.post('Playlists/{Id}/Items'.format(Id=self.id),
+    await self.connector.post('Playlists/{Id}/Items'.format(Id=self.id),
       data={'Ids': ','.join(items)}, remote=False
     )
 

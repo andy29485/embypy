@@ -108,7 +108,7 @@ class EmbyObject:
     self.connector.sync_run(self.setWatched(value))
 
   async def _mark(self, type, value):
-    url = '/Users/{{UserId}}/{type}/{Id}'.format(type=type, id=self.id)
+    url = '/Users/{{UserId}}/{type}/{id}'.format(type=type, id=self.id)
     if value:
       await self.connector.post(url)
     else:

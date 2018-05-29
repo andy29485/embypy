@@ -146,9 +146,9 @@ class Connector:
 
   def __del__(self):
     try:
-      self.loop.run_until_complete(self.session.close())
+      Connector.sync_run(self.session.close())
     except:
-      pass
+      self.loop.run_until_complete(self.session.close())
 
   @staticmethod
   def sync_run(f):
