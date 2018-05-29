@@ -110,9 +110,9 @@ class EmbyObject:
   async def _mark(self, type, value):
     url = '/Users/{{UserId}}/{type}/{id}'.format(type=type, id=self.id)
     if value:
-      await self.connector.post(url)
+      (await self.connector.post(url)).close()
     else:
-      await self.connector.delete(url)
+      (await self.connector.delete(url)).close()
 
   async def setFavorite(self, value=True):
     await self._mark('FavoriteItems', value)
