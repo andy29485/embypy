@@ -13,7 +13,7 @@ with open('requirements.txt', 'r') as f:
   requirements = f.readlines()
 
 setup(name='EmbyPy',
-      version='0.4.2.4',
+      version='0.4.2.5',
       author='Andriy Zasypkin',
       author_email='AndriyZasypkin@gmail.com',
       description='Python API wrapper for Emby Media Browser',

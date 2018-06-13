@@ -562,7 +562,7 @@ class Season(Folder):
                             IncludeItemTypes  = 'Episode',
                             Fields            = 'Path,ParentId,Overview'
     )
-    items = await self.process(items)
+    items   = await self.process(items)
     sortkey = lambda x: (x.season_number, x.index_number)
     self.extras['episodes'] = sorted(items, key=sortkey)
     return items
@@ -664,8 +664,8 @@ class Series(Folder):
 
   @property
   async def episodes_force(self):
-    items = await s.connector.getJson_sync(
-                            '/Shows/{}/Episodes'.format(s.id),
+    items = await self.connector.getJson_sync(
+                            '/Shows/{}/Episodes'.format(self.id),
                             remote            = False,
                             format            = 'json',
                             SortOrder         = 'Ascending',
@@ -674,7 +674,7 @@ class Series(Folder):
                             pass_uid          = True,
                             Fields            = 'Path,ParentId,Overview'
     )
-    items   = await s.process(items)
+    items   = await self.process(items)
     sortkey = lambda x: (x.season_number, x.index_number)
     self.extras['episodes'] = sorted(items, key=sortkey)
     return items
