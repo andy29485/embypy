@@ -53,7 +53,7 @@ class Folder(EmbyObject):
   @property
   async def items_force(self):
     items = await self.connector.getJson(
-          '/Users/{UserId}/Items', parentId=self.id, remote=False
+          '/Users/{UserId}/Items', parentId=self.id, remote=False,
           SortOrder='Ascending', SortBy='SortName',
     )
     items = await self.process(items)
