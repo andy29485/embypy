@@ -664,7 +664,7 @@ class Series(Folder):
 
   @property
   async def episodes_force(self):
-    items = await self.connector.getJson_sync(
+    items = await self.connector.getJson(
                             '/Shows/{}/Episodes'.format(self.id),
                             remote            = False,
                             format            = 'json',
