@@ -54,9 +54,10 @@ class Folder(EmbyObject):
   async def items_force(self):
     items = await self.connector.getJson(
           '/Users/{UserId}/Items', parentId=self.id, remote=False
+          SortOrder='Ascending', SortBy='SortName',
     )
     items = await self.process(items)
-    self.extras['items'] = sorted(items, key=lambda x: x.index_number)
+    self.extras['items'] = items
     return items
 
 # Folders
@@ -115,10 +116,11 @@ class Playlist(Folder):
   @property
   async def items_force(self):
     items = await self.connector.getJson(
-          'Playlists/{Id}/Items'.format(Id=self.id), remote=False
+          'Playlists/{Id}/Items'.format(Id=self.id),
+          remote=False, SortOrder='Ascending', SortBy='SortName',
     )
     items = await self.process(items)
-    self.extras['items'] = sorted(items, key=lambda x: x.index_number)
+    self.extras['items'] = items
     return items
 
   def add_items_sync(self, *items):
@@ -374,7 +376,7 @@ class MusicAlbum(Folder):
                                    Fields            = 'Path,ParentId,Overview'
     )
     items = await self.process(items)
-    self.extras['songs'] = sorted(items, key=lambda x: x.index_number)
+    self.extras['songs'] = items
     return items
 
 class MusicArtist(Folder):
@@ -421,7 +423,7 @@ class MusicArtist(Folder):
                                    Fields            = 'Path,ParentId,Overview'
     )
     items = await self.process(items)
-    self.extras['albums'] = sorted(items, key=lambda x: x.index_number)
+    self.extras['albums'] = items
     return items
 
   @property
@@ -460,7 +462,7 @@ class MusicArtist(Folder):
                                    Fields            = 'Path,ParentId,Overview'
     )
     items = await self.process(items)
-    self.extras['songs'] = sorted(items, key=lambda x: x.index_number)
+    self.extras['songs'] = items
     return items
 
 class Season(Folder):
@@ -562,9 +564,10 @@ class Season(Folder):
                             IncludeItemTypes  = 'Episode',
                             Fields            = 'Path,ParentId,Overview'
     )
-    items   = await self.process(items)
-    sortkey = lambda x: (x.season_number, x.index_number)
-    self.extras['episodes'] = sorted(items, key=sortkey)
+    items = await self.process(items)
+    #sortkey = lambda x: (x.season_number, x.index_number)
+    #items   = sorted(items, key=sortkey)
+    self.extras['episodes'] = items
     return items
 
 class Series(Folder):
@@ -636,7 +639,7 @@ class Series(Folder):
                                   Fields            = 'Path,ParentId,Overview'
     )
     items = await self.process(items)
-    self.extras['seasons'] = sorted(items, key=lambda x: x.index_number)
+    self.extras['seasons'] = items
     return items
 
   @property
@@ -674,9 +677,8 @@ class Series(Folder):
                             pass_uid          = True,
                             Fields            = 'Path,ParentId,Overview'
     )
-    items   = await self.process(items)
-    sortkey = lambda x: (x.season_number, x.index_number)
-    self.extras['episodes'] = sorted(items, key=sortkey)
+    items = await self.process(items)
+    self.extras['episodes'] = items
     return items
 
 # Game
