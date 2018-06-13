@@ -292,7 +292,7 @@ class Connector:
     for i in range(self.tries):
       try:
         resp = await self.session.get(url, timeout=self.timeout)
-        if self._process_resp(resp):
+        if await self._process_resp(resp):
           return resp
         else:
           continue
@@ -326,7 +326,7 @@ class Connector:
     for i in range(self.tries):
       try:
         resp = await self.session.delete(url, timeout=self.timeout)
-        if self._process_resp(resp):
+        if await self._process_resp(resp):
           return resp
         else:
           continue
@@ -364,7 +364,7 @@ class Connector:
           resp = await self.session.post(url, data=data, timeout=self.timeout)
         else:
           resp = await self.session.post(url, data=jstr, timeout=self.timeout)
-          if self._process_resp(resp):
+          if await self._process_resp(resp):
             return resp
           else:
             continue
