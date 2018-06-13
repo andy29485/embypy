@@ -102,9 +102,8 @@ class Episode(Video):
 
   @property
   def season_number(self):
-    '''season name'''
-    match = re.match(r'^[Ss]eason\s+(\d+)', self.season_name)
-    return match and int(match.group(1))
+    '''season index'''
+    return self.object_dict.get('ParentIndexNumber')
 
   @property
   def season_id(self):

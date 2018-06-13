@@ -256,6 +256,13 @@ class Connector:
 
     return url[:-1] if url[-1] == '?' else url
 
+  async def _process_resp(resp):
+    if resp.status == 401 and self.username:
+      await self.login()
+      self.sync_run(resp.close())
+      return False
+    return True
+
   def add_on_message(self, func):
     '''add function that handles websocket messages'''
     return self.ws.on_message.append(func)
@@ -285,11 +292,10 @@ class Connector:
     for i in range(self.tries):
       try:
         resp = await self.session.get(url, timeout=self.timeout)
-        if resp.status == 401 and self.username:
-          await self.login()
-          self.sync_run(resp.close())
+        if self._process_resp(resp):
+          return resp
+        else:
           continue
-        return resp
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
           raise aiohttp.ClientConnectionError(
@@ -320,11 +326,10 @@ class Connector:
     for i in range(self.tries):
       try:
         resp = await self.session.delete(url, timeout=self.timeout)
-        if resp.status == 401 and self.username:
-          await self.login()
-          self.sync_run(resp.close())
+        if self._process_resp(resp):
+          return resp
+        else:
           continue
-        return resp
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
           raise aiohttp.ClientConnectionError(
@@ -359,11 +364,10 @@ class Connector:
           resp = await self.session.post(url, data=data, timeout=self.timeout)
         else:
           resp = await self.session.post(url, data=jstr, timeout=self.timeout)
-        if resp.status == 401 and self.username:
-          await self.login()
-          self.sync_run(resp.close())
-          continue
-        return resp
+          if self._process_resp(resp):
+            return resp
+          else:
+            continue
       except aiohttp.ClientConnectionError:
         if i>= self.tries-1:
           raise aiohttp.ClientConnectionError(
