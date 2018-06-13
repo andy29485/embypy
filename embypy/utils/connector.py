@@ -256,7 +256,7 @@ class Connector:
 
     return url[:-1] if url[-1] == '?' else url
 
-  async def _process_resp(resp):
+  async def _process_resp(self, resp):
     if resp.status == 401 and self.username:
       await self.login()
       self.sync_run(resp.close())
