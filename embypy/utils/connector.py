@@ -257,9 +257,9 @@ class Connector:
     return url[:-1] if url[-1] == '?' else url
 
   async def _process_resp(self, resp):
-    if resp.status == 401 and self.username:
+    if (not resp or resp.status == 401) and self.username:
       await self.login()
-      self.sync_run(resp.close())
+      await resp.close()
       return False
     return True
 
@@ -297,7 +297,7 @@ class Connector:
         else:
           continue
       except aiohttp.ClientConnectionError:
-        if i>= self.tries-1:
+        if i > self.tries:
           raise aiohttp.ClientConnectionError(
                         'Emby server is probably down'
           )
@@ -331,7 +331,7 @@ class Connector:
         else:
           continue
       except aiohttp.ClientConnectionError:
-        if i>= self.tries-1:
+        if i > self.tries:
           raise aiohttp.ClientConnectionError(
                         'Emby server is probably down'
           )
@@ -364,12 +364,12 @@ class Connector:
           resp = await self.session.post(url, data=data, timeout=self.timeout)
         else:
           resp = await self.session.post(url, data=jstr, timeout=self.timeout)
-          if await self._process_resp(resp):
-            return resp
-          else:
-            continue
+        if await self._process_resp(resp):
+          return resp
+        else:
+          continue
       except aiohttp.ClientConnectionError:
-        if i>= self.tries-1:
+        if i > self.tries:
           raise aiohttp.ClientConnectionError(
                         'Emby server is probably down'
           )
