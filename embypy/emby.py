@@ -239,14 +239,14 @@ class Emby(objects.EmbyObject):
   @property
   async def albums_force(self):
     items = await self.connector.getJson(
-              '/Users/{UserId}/Items',
-              remote            = False,
-              format            = 'json',
-              Recursive         = 'true',
-              IncludeItemTypes  = 'MusicAlbum',
-              Fields            = 'Path,ParentId,Overview',
-              SortBy            = 'SortName',
-              SortOrder         = 'Ascending'
+            '/Users/{UserId}/Items',
+            remote            = False,
+            format            = 'json',
+            Recursive         = 'true',
+            IncludeItemTypes  = 'MusicAlbum',
+            Fields            = 'Path,ParentId,Overview,Genres,Tags,Artists',
+            SortBy            = 'SortName',
+            SortOrder         = 'Ascending'
     )
     items = await self.process(items)
     self.extras['albums'] = items
@@ -278,14 +278,14 @@ class Emby(objects.EmbyObject):
   @property
   async def songs_force(self):
     items = await self.connector.getJson(
-                '/Users/{UserId}/Items',
-                remote            = False,
-                format            = 'json',
-                Recursive         = 'true',
-                IncludeItemTypes  = 'Audio',
-                Fields            = 'Path,ParentId,Overview',
-                SortBy            = 'SortName',
-                SortOrder         = 'Ascending'
+            '/Users/{UserId}/Items',
+            remote            = False,
+            format            = 'json',
+            Recursive         = 'true',
+            IncludeItemTypes  = 'Audio',
+            Fields            = 'Path,ParentId,Overview,Genres,Tags,Artists',
+            SortBy            = 'SortName',
+            SortOrder         = 'Ascending'
     )
     items = await self.process(items)
     self.extras['songs'] = items
@@ -363,7 +363,7 @@ class Emby(objects.EmbyObject):
                 format            = 'json',
                 Recursive         = 'true',
                 IncludeItemTypes  = 'MusicArtist',
-                Fields            = 'Path,ParentId,Overview',
+                Fields            = 'Path,ParentId,Overview,Genres,Tags',
                 SortBy            = 'SortName',
                 SortOrder         = 'Ascending'
     )
@@ -403,7 +403,7 @@ class Emby(objects.EmbyObject):
                 format            = 'json',
                 Recursive         = 'true',
                 IncludeItemTypes  = 'Movie',
-                Fields            = 'Path,ParentId,Overview',
+                Fields            = 'Path,ParentId,Overview,Genres,Tags',
                 SortBy            = 'SortName',
                 SortOrder         = 'Ascending'
     )
@@ -443,7 +443,7 @@ class Emby(objects.EmbyObject):
                 format            = 'json',
                 Recursive         = 'true',
                 IncludeItemTypes  = 'Series',
-                Fields            = 'Path,ParentId,Overview',
+                Fields            = 'Path,ParentId,Overview,Genres,Tags',
                 SortBy            = 'SortName',
                 SortOrder         = 'Ascending'
     )
@@ -483,7 +483,7 @@ class Emby(objects.EmbyObject):
                 format            = 'json',
                 Recursive         = 'true',
                 IncludeItemTypes  = 'Episode',
-                Fields            = 'Path,ParentId,Overview',
+                Fields            = 'Path,ParentId,Overview,Genres,Tags',
                 SortBy            = 'SortName',
                 SortOrder         = 'Ascending'
     )
