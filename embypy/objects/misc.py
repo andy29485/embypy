@@ -219,3 +219,41 @@ class Book(EmbyObject):
   '''
   def __init__(self, object_dict, connector):
     super().__init__(object_dict, connector)
+
+# Device
+class Device(EmbyObject):
+  '''Class representing emby device objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
+  def __init__(self, object_dict, connector):
+    super().__init__(object_dict, connector)
+
+  @property
+  def last_user_name(self):
+    return self.object_dict.get('LastUserName')
+
+  @property
+  def last_user_id(self):
+    return self.object_dict.get('LastUserId')
+
+  @property
+  def app_name(self):
+    return self.object_dict.get('AppName')
+
+  @property
+  def app_version(self):
+    return self.object_dict.get('AppVersion')
+
+  @property
+  def date_last_activity(self):
+    return self.object_dict.get('DateLastActivity')
+
+  @property
+  def icon_url(self):
+    return self.object_dict.get('IconUrl')

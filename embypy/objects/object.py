@@ -404,46 +404,51 @@ class EmbyObject:
     #   figure out its type (if unknown use this base class)
     #   create an object with subclass of that type
     #   return
-    if object_dict['Type'] == 'Audio':
-      return embypy.objects.misc.Audio(object_dict, self.connector)
-    if object_dict['Type'] == 'Person':
-      return embypy.objects.misc.Person(object_dict, self.connector)
-    if object_dict['Type'] == 'Video':
-      return embypy.objects.videos.Video(object_dict, self.connector)
-    if object_dict['Type'] == 'Movie':
-      return embypy.objects.videos.Movie(object_dict, self.connector)
-    if object_dict['Type'] == 'Trailer':
-      return embypy.objects.videos.Trailer(object_dict, self.connector)
-    if object_dict['Type'] == 'AdultVideo':
-      return embypy.objects.videos.AdultVideo(object_dict, self.connector)
-    if object_dict['Type'] == 'MusicVideo':
-      return embypy.objects.videos.MusicVideo(object_dict, self.connector)
-    if object_dict['Type'] == 'Episode':
-      return embypy.objects.videos.Episode(object_dict, self.connector)
-    if object_dict['Type'] == 'Folder':
-      return embypy.objects.folders.Folder(object_dict, self.connector)
-    if object_dict['Type'] == 'Playlist':
-      return embypy.objects.folders.Playlist(object_dict, self.connector)
-    if object_dict['Type'] == 'BoxSet':
-      return embypy.objects.folders.BoxSet(object_dict, self.connector)
-    if object_dict['Type'] == 'MusicAlbum':
-      return embypy.objects.folders.MusicAlbum(object_dict, self.connector)
-    if object_dict['Type'] == 'MusicArtist':
-      return embypy.objects.folders.MusicArtist(object_dict, self.connector)
-    if object_dict['Type'] == 'Season':
-      return embypy.objects.folders.Season(object_dict, self.connector)
-    if object_dict['Type'] == 'Series':
-      return embypy.objects.folders.Series(object_dict, self.connector)
-    if object_dict['Type'] == 'Game':
-      return embypy.objects.misc.Game(object_dict, self.connector)
-    if object_dict['Type'] == 'GameSystem':
-      return embypy.objects.folders.GameSystem(object_dict, self.connector)
-    if object_dict['Type'] == 'Photo':
-      return embypy.objects.misc.Photo(object_dict, self.connector)
-    if object_dict['Type'] == 'Book':
-      return embypy.objects.misc.Book(object_dict, self.connector)
-    if object_dict['Type'] == 'Image':
-      return embypy.objects.misc.Image(object_dict, self.connector)
+    if 'Type' in object_dict:
+        if object_dict['Type'] == 'Audio':
+          return embypy.objects.misc.Audio(object_dict, self.connector)
+        if object_dict['Type'] == 'Person':
+          return embypy.objects.misc.Person(object_dict, self.connector)
+        if object_dict['Type'] == 'Video':
+          return embypy.objects.videos.Video(object_dict, self.connector)
+        if object_dict['Type'] == 'Movie':
+          return embypy.objects.videos.Movie(object_dict, self.connector)
+        if object_dict['Type'] == 'Trailer':
+          return embypy.objects.videos.Trailer(object_dict, self.connector)
+        if object_dict['Type'] == 'AdultVideo':
+          return embypy.objects.videos.AdultVideo(object_dict, self.connector)
+        if object_dict['Type'] == 'MusicVideo':
+          return embypy.objects.videos.MusicVideo(object_dict, self.connector)
+        if object_dict['Type'] == 'Episode':
+          return embypy.objects.videos.Episode(object_dict, self.connector)
+        if object_dict['Type'] == 'Folder':
+          return embypy.objects.folders.Folder(object_dict, self.connector)
+        if object_dict['Type'] == 'Playlist':
+          return embypy.objects.folders.Playlist(object_dict, self.connector)
+        if object_dict['Type'] == 'BoxSet':
+          return embypy.objects.folders.BoxSet(object_dict, self.connector)
+        if object_dict['Type'] == 'MusicAlbum':
+          return embypy.objects.folders.MusicAlbum(object_dict, self.connector)
+        if object_dict['Type'] == 'MusicArtist':
+          return embypy.objects.folders.MusicArtist(object_dict, self.connector)
+        if object_dict['Type'] == 'Season':
+          return embypy.objects.folders.Season(object_dict, self.connector)
+        if object_dict['Type'] == 'Series':
+          return embypy.objects.folders.Series(object_dict, self.connector)
+        if object_dict['Type'] == 'Game':
+          return embypy.objects.misc.Game(object_dict, self.connector)
+        if object_dict['Type'] == 'GameSystem':
+          return embypy.objects.folders.GameSystem(object_dict, self.connector)
+        if object_dict['Type'] == 'Photo':
+          return embypy.objects.misc.Photo(object_dict, self.connector)
+        if object_dict['Type'] == 'Book':
+          return embypy.objects.misc.Book(object_dict, self.connector)
+        if object_dict['Type'] == 'Image':
+          return embypy.objects.misc.Image(object_dict, self.connector)
+    else:
+        if 'AppName' in object_dict:
+            return embypy.objects.misc.Device(object_dict, self.connector)
+
     return EmbyObject(object_dict, self.connector)
 
   def __str__(self):
