@@ -490,3 +490,34 @@ class Emby(objects.EmbyObject):
     items = await self.process(items)
     self.extras['episodes'] = items
     return items
+
+  @property
+  def devices_sync(self):
+    return self.connector.sync_run(self.devices)
+
+  @property
+  async def devices(self):
+    '''returns a list of all devices connected to emby.
+
+    |force|
+
+    |coro|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Devices`
+    '''
+    return self.extras.get('devices', []) or \
+                                    await self.devices_force
+
+  @property
+  def devices_force_sync(self):
+    return self.connector.sync_run(self.devices_force)
+
+  @property
+  async def devices_force(self):
+    items = await self.connector.getJson('/Devices', remote = False)
+    items = await self.process(items)
+    self.extras['devices'] = items
+    return items
