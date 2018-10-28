@@ -257,3 +257,44 @@ class Device(EmbyObject):
   @property
   def icon_url(self):
     return self.object_dict.get('IconUrl')
+
+class User(EmbyObject):
+  '''Class representing emby user objects
+
+  Parameters
+  ----------
+    object_dict : dict
+      same as for `EmbyObject`
+    connector : embypy.utils.connector.Connector
+      same as for `EmbyObject`
+  '''
+  def __init__(self, object_dict, connector):
+    super().__init__(object_dict, connector)
+
+  @property
+  def id(self):
+    return self.object_dict.get('Id')
+
+  @property
+  def name(self):
+    return self.object_dict.get('Name')
+
+  @property
+  def has_password(self):
+    return self.object_dict.get('HasPassword')
+
+  @property
+  def has_configured_password(self):
+    return self.object_dict.get('HasConfiguredPassword')
+
+  @property
+  def has__configured_easy_password(self):
+    return self.object_dict.get('HasConfiguredEasyPassword')
+
+  @property
+  def configuration(self):
+    return self.object_dict.get('Configuration')
+
+  @property
+  def policy(self):
+    return self.object_dict.get('Policy')
