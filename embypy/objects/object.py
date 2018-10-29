@@ -445,9 +445,10 @@ class EmbyObject:
           return embypy.objects.misc.Book(object_dict, self.connector)
         if object_dict['Type'] == 'Image':
           return embypy.objects.misc.Image(object_dict, self.connector)
-    else:
-        if 'AppName' in object_dict:
+    elif 'AppName' in object_dict:
             return embypy.objects.misc.Device(object_dict, self.connector)
+    elif 'HasPassword' in object_dict:
+            return embypy.objects.misc.User(object_dict, self.connector)
 
     return EmbyObject(object_dict, self.connector)
 
