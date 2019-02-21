@@ -289,7 +289,7 @@ class Connector:
     '''
     url = self.get_url(path, **query)
 
-    for i in range(self.tries):
+    for i in range(self.tries+1):
       try:
         resp = await self.session.get(url, timeout=self.timeout)
         if await self._process_resp(resp):
@@ -297,7 +297,7 @@ class Connector:
         else:
           continue
       except aiohttp.ClientConnectionError:
-        if i > self.tries:
+        if i >= self.tries:
           raise aiohttp.ClientConnectionError(
                         'Emby server is probably down'
           )
@@ -323,7 +323,7 @@ class Connector:
     '''
     url = self.get_url(path, **query)
 
-    for i in range(self.tries):
+    for i in range(self.tries+1):
       try:
         resp = await self.session.delete(url, timeout=self.timeout)
         if await self._process_resp(resp):
@@ -331,7 +331,7 @@ class Connector:
         else:
           continue
       except aiohttp.ClientConnectionError:
-        if i > self.tries:
+        if i >= self.tries:
           raise aiohttp.ClientConnectionError(
                         'Emby server is probably down'
           )
@@ -358,7 +358,7 @@ class Connector:
     url  = self.get_url(path, **params)
     jstr = json.dumps(data)
 
-    for i in range(self.tries):
+    for i in range(self.tries+1):
       try:
         if send_raw:
           resp = await self.session.post(url, data=data, timeout=self.timeout)
@@ -369,7 +369,7 @@ class Connector:
         else:
           continue
       except aiohttp.ClientConnectionError:
-        if i > self.tries:
+        if i >= self.tries:
           raise aiohttp.ClientConnectionError(
                         'Emby server is probably down'
           )
@@ -395,4 +395,9 @@ class Connector:
     dict
       the response content as a dict
     '''
-    return await (await self.get(path, **query)).json()
+    for i in range(self.tries+1):
+      try:
+        return await (await self.get(path, **query)).json()
+      except:
+        if i >= self.tries:
+          raise
