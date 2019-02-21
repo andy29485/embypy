@@ -521,3 +521,35 @@ class Emby(objects.EmbyObject):
     items = await self.process(items)
     self.extras['devices'] = items
     return items
+
+
+  @property
+  def users_sync(self):
+    return self.connector.sync_run(self.users)
+
+  @property
+  async def users(self):
+    '''returns a list of all users.
+
+    |force|
+
+    |coro|
+
+    Returns
+    -------
+    list
+      of type :class:`embypy.objects.Users`
+    '''
+    return self.extras.get('users', []) or \
+                                    await self.users_force
+
+  @property
+  def users_force_sync(self):
+    return self.connector.sync_run(self.users_force)
+
+  @property
+  async def users_force(self):
+    items = await self.connector.getJson('/Users', remote = False)
+    items = await self.process(items)
+    self.extras['users'] = items
+    return items
