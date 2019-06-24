@@ -104,9 +104,9 @@ class Connector:
   username/password authentication is not supported as of yet
   '''
   def __init__(self, url, **kargs):
-    if ('api_key'  not in kargs or 'device_id' not in kargs) and \
+    if ('api_key'  not in kargs or 'userid' not in kargs) and \
        ('username' not in kargs or 'password'  not in kargs):
-      raise ValueError('provide api key and device id or username/password')
+      raise ValueError('provide api key and userid or username/password')
 
     urlremote      = kargs.get('address-remote')
     self.ssl       = kargs.get('ssl', True)
