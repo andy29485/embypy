@@ -245,7 +245,6 @@ class Connector:
       scheme = {'http':'ws', 'https':'wss'}[url.scheme]
     else:
       scheme = url.scheme
-    netloc = url.netloc + '/emby'
 
     url = urlunparse((scheme, netloc, path, '', '{params}', '')).format(
       UserId   = userId,
