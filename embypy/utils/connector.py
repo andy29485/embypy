@@ -246,7 +246,7 @@ class Connector:
     else:
       scheme = url.scheme
 
-    url = urlunparse((scheme, netloc, path, '', '{params}', '')).format(
+    url = urlunparse((scheme, url.netloc, path, '', '{params}', '')).format(
       UserId   = userId,
       ApiKey   = self.api_key,
       DeviceId = self.device_id,
