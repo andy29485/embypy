@@ -288,7 +288,7 @@ class User(EmbyObject):
         same as for `EmbyObject`
     '''
     def __init__(self, object_dict, connector):
-      super().__init__(object_dict, connector)
+        super().__init__(object_dict, connector)
 
     @property
     def id(self):

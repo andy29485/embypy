@@ -57,11 +57,8 @@ class Emby(objects.EmbyObject):
                     'Error object with that id does not exist',
                     obj_id
                 )
-          else:
-              return await self.connector.getJson(
-                  '/system/info/public',
-                  remote=False
-              )
+        else:
+            return await self.connector.info()
 
     def search_sync(
         self, query,

@@ -233,14 +233,24 @@ class EmbyObject:
             return None
 
     @property
-    def url(self):
+    def url_sync(self):
+        return self.connector.sync_run(self.url)
+
+    @property
+    async def url(self):
         '''url of the item
+
+        |coro|
 
         Notes
         -----
           if remote-adderes was given, then that is used as the base
         '''
-        path = '/web/itemdetails.html?id={}'.format(self.id)
+        if await self.connector.is_jellyfin:
+            path = '/web/index.html#!/itemdetails.html?id={}'
+        else:
+            path = '/web/itemdetails.html?id={}'
+        path = path.format(self.id)
         return self.connector.get_url(path, attach_api_key=False)
 
     def update_sync(self):
