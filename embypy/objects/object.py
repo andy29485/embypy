@@ -384,8 +384,8 @@ class EmbyObject:
 
         # if a json dict that's really just a list was given,
         #   convert to list
-        if type(object_dict)       == dict and \
-           set(object_dict.keys()) == {'Items', 'TotalRecordCount'}:
+        if type(object_dict) == dict and \
+           set(object_dict.keys()).issuperset({'Items', 'TotalRecordCount'}):
             object_dict = object_dict['Items']
 
         # if a list was given,
