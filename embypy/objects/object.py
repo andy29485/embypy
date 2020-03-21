@@ -461,9 +461,10 @@ class EmbyObject:
             'User':		embypy.objects.misc.User,
             'Default':		EmbyObject,
         }
-        return objects[
-            object_dict.get('Type', 'Default')
-        ](object_dict, self.connector)
+        return objects.get(
+            object_dict.get('Type', 'Default'),
+            EmbyObject
+        )(object_dict, self.connector)
 
     def __str__(self):
         return self.name
