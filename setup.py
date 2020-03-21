@@ -16,7 +16,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='EmbyPy',
-    version='0.5.0.0',
+    version='0.5.0.1',
     author='Andriy Zasypkin',
     author_email='AndriyZasypkin@gmail.com',
     description='Python API wrapper for Emby Media Browser',
@@ -36,6 +36,6 @@ setup(
       'Framework :: AsyncIO',
       'Intended Audience :: Developers',
       'Topic :: Software Development :: Libraries :: Python Modules',
-      'License::OSI Approved::GNU Lesser General Public License v3 (LGPLv3)',
+      'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
     ],
 )
