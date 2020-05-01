@@ -454,9 +454,8 @@ class Connector:
         dict
           the response content as a dict
         '''
-        for i in range(self.tries+1):
-            try:
-                return await (await self.get(path, **query)).json()
-            except:
-                if i >= self.tries:
-                    raise
+        try:
+            resp = await self.get(path, **query)
+            return await resp.json()
+        except aiohttp.client_exceptions.ContentTypeError:
+            raise RuntimeError('unexpected output:' + (await resp.text())
