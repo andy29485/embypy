@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-
 from embypy.objects.object import EmbyObject
-import asyncio
+from embypy.utils.asyncio import async_func
 
 
 # Generic class
@@ -24,10 +22,7 @@ class Audio(EmbyObject):
         return self.object_dict.get('AlbumId')
 
     @property
-    def album_sync(self):
-        return self.connector.sync_run(self.album)
-
-    @property
+    @async_func
     async def album(self):
         '''The album that the song belongs to
 
@@ -68,10 +63,7 @@ class Audio(EmbyObject):
         return self.object_dict.get('AlbumArtist', '').split(';')
 
     @property
-    def album_artists_sync(self):
-        return self.connector.sync_run(self.album_artists)
-
-    @property
+    @async_func
     async def album_artists(self):
         '''
 
@@ -94,10 +86,7 @@ class Audio(EmbyObject):
         return self.object_dict.get('Artists', [])
 
     @property
-    def artists_sync(self):
-        return self.connector.sync_run(self.artists)
-
-    @property
+    @async_func
     async def artists(self):
         '''
 

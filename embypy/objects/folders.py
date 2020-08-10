@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
-
 from embypy.objects.object import EmbyObject
-import asyncio
+from embypy.utils.asyncio import async_func
 
 
 # Generic class
@@ -29,10 +27,7 @@ class Folder(EmbyObject):
         return self.object_dict.get('CumulativeRunTimeTicks', 0)
 
     @property
-    def items_sync(self):
-        return self.connector.sync_run(self.items)
-
-    @property
+    @async_func
     async def items(self):
         '''list of emby objects contained in the folder
 
@@ -48,10 +43,7 @@ class Folder(EmbyObject):
         return self.extras.get('items', []) or await self.items_force
 
     @property
-    def items_force_sync(self):
-        return self.connector.sync_run(self.items_force)
-
-    @property
+    @async_func
     async def items_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items', parentId=self.id, remote=False,
@@ -77,10 +69,7 @@ class Playlist(Folder):
         super().__init__(object_dict, connector)
 
     @property
-    def songs_sync(self):
-        return self.connector.sync_run(self.songs)
-
-    @property
+    @async_func
     async def songs(self):
         '''list of songs in the playlist
 
@@ -102,10 +91,7 @@ class Playlist(Folder):
         return items
 
     @property
-    def songs_force_sync(self):
-        return self.connector.sync_run(self.songs_force)
-
-    @property
+    @async_func
     async def songs_force(self):
         items = []
         for i in await self.items_force:
@@ -116,6 +102,7 @@ class Playlist(Folder):
         return items
 
     @property
+    @async_func
     async def items_force(self):
         items = await self.connector.getJson(
             'Playlists/{Id}/Items'.format(Id=self.id),
@@ -125,9 +112,7 @@ class Playlist(Folder):
         self.extras['items'] = items
         return items
 
-    def add_items_sync(self, *items):
-        return self.connector.sync_run(self.add_items_sync(*items))
-
+    @async_func
     async def add_items(self, *items):
         '''append items to the playlist
 
@@ -151,9 +136,7 @@ class Playlist(Folder):
             data={'Ids': ','.join(items)}, remote=False
         )
 
-    def remove_items_sync(self, *items):
-        return self.connector.sync_run(self.remove_items_sync(*items))
-
+    @async_func
     async def remove_items(self, *items):
         '''remove items from the playlist
 
@@ -197,10 +180,7 @@ class BoxSet(Folder):
         super().__init__(object_dict, connector)
 
     @property
-    def movies_sync(self):
-        return self.connector.sync_run(self.movies)
-
-    @property
+    @async_func
     async def movies(self):
         '''list of movies in the collection
 
@@ -222,10 +202,7 @@ class BoxSet(Folder):
         return items
 
     @property
-    def movies_force_sync(self):
-        return self.connector.sync_run(self.movies_force)
-
-    @property
+    @async_func
     async def movies_force(self):
         items = []
         for i in await self.items_force:
@@ -236,18 +213,12 @@ class BoxSet(Folder):
         return items
 
     @property
-    def shows_sync(self):
-        return self.series_sync
-
-    @property
-    def series_sync(self):
-        return self.connector.sync_run(self.series)
-
-    @property
+    @async_func
     async def shows(self):
         return await self.series
 
     @property
+    @async_func
     async def series(self):
         '''list of series in the collection
 
@@ -269,18 +240,12 @@ class BoxSet(Folder):
         return items
 
     @property
-    def shows_force_sync(self):
-        return self.series_force_sync
-
-    @property
-    def series_force_sync(self):
-        return self.connector.sync_run(self.series_force)
-
-    @property
-    async def shows(self):
+    @async_func
+    async def shows_force(self):
         return await self.series_force
 
     @property
+    @async_func
     async def series_force(self):
         items = []
         for i in await self.items_force:
@@ -310,10 +275,7 @@ class MusicAlbum(Folder):
         return [a['Id'] for a in self.object_dict.get('AlbumArtists', [])]
 
     @property
-    def album_artists_sync(self):
-        return self.connector.sync_run(self.album_artists)
-
-    @property
+    @async_func
     async def album_artists(self):
         '''
         list of album artist objects
@@ -333,10 +295,7 @@ class MusicAlbum(Folder):
         return [a['Id'] for a in self.object_dict.get('ArtistItems', [])]
 
     @property
-    def artists_sync(self):
-        return self.connector.sync_run(self.artists)
-
-    @property
+    @async_func
     async def artists(self):
         '''list of song artist objects
 
@@ -350,10 +309,7 @@ class MusicAlbum(Folder):
         return await self.process(self.artist_ids)
 
     @property
-    def songs_sync(self):
-        return self.connector.sync_run(self.songs)
-
-    @property
+    @async_func
     async def songs(self):
         '''returns a list of songs in the album
 
@@ -369,10 +325,7 @@ class MusicAlbum(Folder):
         return self.extras.get('songs') or await self.songs_force
 
     @property
-    def songs_force_sync(self):
-        return self.connector.sync_run(self.songs_force)
-
-    @property
+    @async_func
     async def songs_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -399,10 +352,7 @@ class MusicArtist(Folder):
         return self.object_dict.get('PremiereDate')
 
     @property
-    def albums_sync(self):
-        return self.connector.sync_run(self.albums)
-
-    @property
+    @async_func
     async def albums(self):
         '''list of album objects that include the artist
 
@@ -418,10 +368,7 @@ class MusicArtist(Folder):
         return self.extras.get('albums') or await self.albums_force
 
     @property
-    def albums_force_sync(self):
-        return self.connector.sync_run(self.albums_force)
-
-    @property
+    @async_func
     async def albums_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -439,10 +386,7 @@ class MusicArtist(Folder):
         return items
 
     @property
-    def songs_sync(self):
-        return self.connector.sync_run(self.songs)
-
-    @property
+    @async_func
     async def songs(self):
         '''list of song objects that include the artist
 
@@ -458,10 +402,7 @@ class MusicArtist(Folder):
         return self.extras.get('songs') or await self.songs_force
 
     @property
-    def songs_force_sync(self):
-        return self.connector.sync_run(self.songs_force)
-
-    @property
+    @async_func
     async def songs_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -512,10 +453,7 @@ class Season(Folder):
         return self.object_dict.get('SeriesId')
 
     @property
-    def series_sync(self):
-        return self.connector.sync_run(self.series)
-
-    @property
+    @async_func
     async def series(self):
         '''
         emby object representing the show
@@ -529,10 +467,7 @@ class Season(Folder):
         return await self.process(self.series_id)
 
     @property
-    def show_sync(self):
-        return self.connector.sync_run(self.series)
-
-    @property
+    @async_func
     async def show(self):
         '''same as `series`'''
         return await self.series
@@ -543,10 +478,7 @@ class Season(Folder):
         return self.object_dict.get('SeriesName', '')
 
     @property
-    def episodes_sync(self):
-        return self.connector.sync_run(self.episodes)
-
-    @property
+    @async_func
     async def episodes(self):
         '''returns a list of all episodes in this season.
 
@@ -562,10 +494,7 @@ class Season(Folder):
         return self.extras.get('episodes', []) or await self.episodes_force
 
     @property
-    def episodes_force_sync(self):
-        return self.connector.sync_run(self.episodes_force)
-
-    @property
+    @async_func
     async def episodes_force(self):
         items = await self.connector.getJson(
             '/Shows/{}/Episodes'.format(self.series_id),
@@ -619,10 +548,7 @@ class Series(Folder):
         return self.object_dict.get('PremiereDate')
 
     @property
-    def seasons_sync(self):
-        return self.connector.sync_run(self.seasons)
-
-    @property
+    @async_func
     async def seasons(self):
         '''list of seasons that are part of the show
 
@@ -638,10 +564,7 @@ class Series(Folder):
         return self.extras.get('seasons') or await self.seasons_force
 
     @property
-    def seasons_force_sync(self):
-        return self.connector.sync_run(self.seasons_force)
-
-    @property
+    @async_func
     async def seasons_force(self):
         items = await self.connector.getJson(
             '/Shows/{}/Seasons'.format(self.id),
@@ -658,10 +581,7 @@ class Series(Folder):
         return items
 
     @property
-    def episodes_sync(self):
-        return self.connector.sync_run(self.episodes)
-
-    @property
+    @async_func
     async def episodes(self):
         '''list of episodes that are part of the show
 
@@ -677,10 +597,7 @@ class Series(Folder):
         return self.extras.get('episodes') or await self.episodes_force
 
     @property
-    def episodes_force_sync(self):
-        return self.connector.sync_run(self.episodes_force)
-
-    @property
+    @async_func
     async def episodes_force(self):
         items = await self.connector.getJson(
             '/Shows/{}/Episodes'.format(self.id),

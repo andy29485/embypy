@@ -1,8 +1,5 @@
-#!/usr/bin/env python3
-
 from embypy.objects.object import EmbyObject
-import re
-import asyncio
+from embypy.utils.asyncio import async_func
 
 
 # Generic class
@@ -95,7 +92,7 @@ class Episode(Video):
     @property
     def season_id(self):
         '''season name'''
-        return self.object_dict.get('SeasonName')
+        return self.object_dict.get('SeasonId')
 
     @property
     def season_name(self):
@@ -107,20 +104,12 @@ class Episode(Video):
         '''season index'''
         return self.object_dict.get('ParentIndexNumber')
 
-    @property
-    def season_id(self):
-        '''season id'''
-        return self.object_dict.get('SeasonId')
-
     @season_id.setter
     def season_id(self, value):
         self.object_dict['SeasonId'] = value
 
     @property
-    def season_sync(self):
-        return self.connector.sync_run(self.season)
-
-    @property
+    @async_func
     async def season(self):
         '''Season that episode is a part of
 
@@ -138,10 +127,7 @@ class Episode(Video):
         return self.object_dict.get('SeriesId')
 
     @property
-    def series_sync(self):
-        return self.connector.sync_run(self.series)
-
-    @property
+    @async_func
     async def series(self):
         '''Series that episode is a part of
 
@@ -154,10 +140,7 @@ class Episode(Video):
         return await self.process(self.series_id)
 
     @property
-    def show_sync(self):
-        return self.connector.sync_run(self.series)
-
-    @property
+    @async_func
     async def show(self):
         return await self.series
 

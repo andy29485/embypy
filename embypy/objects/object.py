@@ -1,10 +1,7 @@
-#!/usr/bin/env python3
-
-import embypy.utils.connector
-import asyncio
+from embypy.utils.asyncio import async_func
 
 
-class EmbyObject:
+class EmbyObject(object):
     '''Deafult EMby Object Template
 
     Parameters
@@ -29,6 +26,16 @@ class EmbyObject:
 
     def __eq__(self, other):
         return isinstance(other, EmbyObject) and self.id == other.id
+
+    def __setattr__(self, name, value):
+        if name.endswith('_sync'):
+            return self.__setattr__(name[:-5], value)
+        super().__setattr__(name, value)
+
+    def __getattr__(self, name):
+        if name.endswith('_sync'):
+            return self.__getattr__(name[:-5])
+        return self.__getattribute__(name)
 
     @property
     def id(self):
@@ -104,12 +111,7 @@ class EmbyObject:
         '''returns True if user favorited item'''
         return self.object_dict.get('UserData', {}).get('IsFavorite', False)
 
-    def setFavorite_sync(self, value=True):
-        self.connector.sync_run(self.setFavorite(value))
-
-    def setWatched_sync(self, value=True):
-        self.connector.sync_run(self.setWatched(value))
-
+    @async_func
     async def _mark(self, type, value):
         url = '/Users/{{UserId}}/{type}/{id}'.format(type=type, id=self.id)
         if value:
@@ -117,9 +119,11 @@ class EmbyObject:
         else:
             (await self.connector.delete(url)).close()
 
+    @async_func
     async def setFavorite(self, value=True):
         await self._mark('FavoriteItems', value)
 
+    @async_func
     async def setWatched(self, value=True):
         await self._mark('PlayedItems', value)
 
@@ -171,7 +175,7 @@ class EmbyObject:
 
     @tags.setter
     def tags(self, tags: list):
-      self.object_dict['Tags'] = tags
+        self.object_dict['Tags'] = tags
 
     @property
     def overview(self):
@@ -218,10 +222,7 @@ class EmbyObject:
         return self.object_dict.get('ParentId')
 
     @property
-    def parent_sync(self):
-        return self.connector.sync_run(self.parent)
-
-    @property
+    @async_func
     async def parent(self):
         '''parent object as a subclass of EmbyObject
 
@@ -233,10 +234,7 @@ class EmbyObject:
             return None
 
     @property
-    def url_sync(self):
-        return self.connector.sync_run(self.url)
-
-    @property
+    @async_func
     async def url(self):
         '''url of the item
 
@@ -253,12 +251,7 @@ class EmbyObject:
         path = path.format(self.id)
         return self.connector.get_url(path, attach_api_key=False)
 
-    def update_sync(self):
-        return self.connector.sync_run(self.update())
-
-    def refresh_sync(self):
-        return self.connector.sync_run(self.update())
-
+    @async_func
     async def update(self, fields=''):
         '''reload object info from emby
 
@@ -285,6 +278,7 @@ class EmbyObject:
         self.extras = {}
         return self
 
+    @async_func
     async def refresh(self, fields=''):
         '''Same as update
 
@@ -296,12 +290,8 @@ class EmbyObject:
         '''
         return await self.update()
 
-    def send_sync(self):
-        return self.connector.sync_run(self.send())
 
-    def post_sync(self):
-        return self.connector.sync_run(self.send())
-
+    @async_func
     async def send(self):
         '''send data that was changed to emby
 
@@ -337,6 +327,7 @@ class EmbyObject:
             )
         return resp
 
+    @async_func
     async def post(self):
         '''Same as send
 
@@ -348,6 +339,7 @@ class EmbyObject:
         '''
         return await self.send()
 
+    @async_func
     async def process(self, object_dict):
         '''[for internal use] convert json/dict into python object
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import json
 from requests.compat import urlparse, urlunparse, urlencode
 import asyncio
@@ -8,6 +6,7 @@ import websockets
 import ssl
 
 from embypy import __version__
+from embypy.utils.asyncio import async_func
 
 
 class WebSocket:
@@ -32,11 +31,22 @@ class WebSocket:
         else:
             self.ssl = ssl_str
 
+    def __setattr__(self, name, value):
+        if name.endswith('_sync'):
+            return self.__setattr__(name[:-5], value)
+        super().__setattr__(name, value)
+
+    def __getattr__(self, name):
+        if name.endswith('_sync'):
+            return self.__getattr__(name[:-5])
+        return self.__getattribute__(name)
+
     def connect(self):
         '''Establish a connection'''
         # TODO - authenticate to emby
-        self.loop.create_task(self.handler())
+        #self.loop.create_task(self.handler())
 
+    @async_func
     async def handler(self):
         '''Handle loop, get and process messages'''
         self.ws = await websockets.connect(self.url, ssl=self.ssl)
@@ -48,13 +58,11 @@ class WebSocket:
                 else:
                     handle(self, message)
 
-    async def send(message):
+    @async_func
+    async def send(self, message):
         if not self.ws:
             return False
         return await self.ws.send(message)
-
-    def send_sync(message):
-        return self.loop.run_until_complete(self.send(message))
 
     def close(self):
         '''close connection to socket'''
@@ -89,8 +97,6 @@ class Connector:
       number of seconds to wait before timeout for a request
     tries : int
       number of times to try a request before throwing an error
-    loop : asyncio.AbstractEventLoop
-      if given all calls should be awaitable
     jellyfin : bool
       if this is a jellyfin (false = emby) server
 
@@ -110,6 +116,12 @@ class Connector:
     [or None (default) for auto-detect]
     '''
     def __init__(self, url, **kargs):
+        try:
+            asyncio.get_event_loop()
+        except:
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            print('It happened')
+
         if ('api_key'  not in kargs or 'userid'   not in kargs) and \
            ('username' not in kargs or 'password' not in kargs):
             raise ValueError(
@@ -127,7 +139,6 @@ class Connector:
         self.timeout	= kargs.get('timeout', 30)
         self.tries	= kargs.get('tries', 3)
         self.jellyfin	= kargs.get('jellyfin')
-        self.loop	= kargs.get('loop', asyncio.get_event_loop())
         self.url	= urlparse(url)
         self.urlremote	= urlparse(urlremote) if urlremote else urlremote
 
@@ -155,51 +166,27 @@ class Connector:
         else:
             self.ws = None
 
-    def __del__(self):
-        try:
-            Connector.sync_run(self.session.close())
-        except:
-            self.loop.run_until_complete(self.session.close())
+    def __setattr__(self, name, value):
+        if name.endswith('_sync'):
+            return self.__setattr__(name[:-5], value)
+        super().__setattr__(name, value)
 
-    @staticmethod
-    def sync_run(f):
-        if asyncio.iscoroutinefunction(f):
-            f = f()
+    def __getattr__(self, name):
+        if name.endswith('_sync'):
+            return self.__getattr__(name[:-5])
+        return self.__getattribute__(name)
 
-        if asyncio.iscoroutine(f):
-            return asyncio.get_event_loop().run_until_complete(f)
-        elif callable(f):
-            return f()
-        else:
-            return f
+    async def with_timeout(self, coro):
+        return await asyncio.wait_for(asyncio.create_task(coro), self.timeout)
 
-    def info_sync(self):
-        return self.sync_run(self.info())
 
-    @property
-    def is_jellyfin_sync(self):
-        return self.sync_run(self.is_jellyfin)
-
-    def login_sync(self):
-        return self.sync_run(self.login())
-
-    def get_sync(self, *args, **kargs):
-        return self.sync_run(self.get(*args, **kargs))
-
-    def delete_sync(self, *args, **kargs):
-        return self.sync_run(self.delete(*args, **kargs))
-
-    def post_sync(self, *args, **kargs):
-        return self.sync_run(self.post(*args, **kargs))
-
-    def getJson_sync(self, *args, **kargs):
-        return self.sync_run(self.getJson(*args, **kargs))
-
+    @async_func
     async def login_if_needed(self):
         # authenticate to emby if password was given
         if self.password and self.username and not self.token:
             await self.login()
 
+    @async_func
     async def info(self):
         return await self.getJson(
             '/system/info/public',
@@ -207,6 +194,7 @@ class Connector:
         )
 
     @property
+    @async_func
     async def is_jellyfin(self):
         if self.jellyfin is None:
             info = await self.info()
@@ -214,6 +202,7 @@ class Connector:
             self.jellyfin = 'jellyfin' in product.lower()
         return self.jellyfin
 
+    @async_func
     async def login(self):
         if not self.username or self.attempt_login:
             return
@@ -305,6 +294,7 @@ class Connector:
 
         return url[:-1] if url[-1] == '?' else url
 
+    @async_func
     async def _process_resp(self, resp):
         if (not resp or resp.status == 401) and self.username:
             await self.login()
@@ -316,6 +306,7 @@ class Connector:
         '''add function that handles websocket messages'''
         return self.ws.on_message.append(func)
 
+    @async_func
     async def get(self, path, **query):
         '''return a get request
 
@@ -341,7 +332,7 @@ class Connector:
         for i in range(self.tries+1):
             await self.login_if_needed()
             try:
-                resp = await self.session.get(url, timeout=self.timeout)
+                resp = await self.with_timeout(self.session.get(url))
                 if await self._process_resp(resp):
                     return resp
                 else:
@@ -352,6 +343,7 @@ class Connector:
                         'Emby server is probably down'
                     )
 
+    @async_func
     async def delete(self, path, **query):
         '''send a delete request
 
@@ -387,6 +379,7 @@ class Connector:
                         'Emby server is probably down'
                     )
 
+    @async_func
     async def post(self, path, data={}, send_raw=False, **params):
         '''sends post request
 
@@ -434,6 +427,7 @@ class Connector:
                         'Emby server is probably down'
                     )
 
+    @async_func
     async def getJson(self, path, **query):
         '''wrapper for get, parses response as json
 

@@ -55,7 +55,7 @@ rst_prolog = '''
 .. |force| replace:: This property will return a chached version,
                      append ``_force`` to the param name to force a refresh.
 .. |coro| replace:: This function is a |corourl|_.
-                     append ``_sync`` to run outside of an event loop
+                     use ``await`` when runnin in an event loop
 .. |corourl| replace:: *coroutine*
 .. _corourl: https://docs.python.org/3/library/asyncio-task.html#coroutine
 '''

@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
-
-from embypy.utils import Connector
-from embypy import objects
 from simplejson.scanner import JSONDecodeError
-import asyncio
+
+from embypy import objects
+from embypy.utils import Connector
+from embypy.utils.asyncio import async_func
 
 
 class Emby(objects.EmbyObject):
@@ -34,9 +33,7 @@ class Emby(objects.EmbyObject):
         connector = Connector(url, **kargs)
         super().__init__({'ItemId': '', 'Name': ''}, connector)
 
-    def info_sync(self, obj_id=None):
-        return self.connector.sync_run(self.info(obj_id))
-
+    @async_func
     async def info(self, obj_id=None):
         '''Get info about object id
 
@@ -60,17 +57,11 @@ class Emby(objects.EmbyObject):
         else:
             return await self.connector.info()
 
-    def search_sync(
-        self, query,
-        sort_map = {'BoxSet':0,'Series':1,'Movie':2,'Audio':3,'Person':4},
-        strict_sort = False
-    ):
-        return self.connector.sync_run(self.search(query, sort_map, strict_sort))
-
+    @async_func
     async def search(
         self, query,
-        sort_map = {'BoxSet':0,'Series':1,'Movie':2,'Audio':3,'Person':4},
-        strict_sort = False
+        sort_map={'BoxSet':0, 'Series':1, 'Movie':2, 'Audio':3, 'Person':4},
+        strict_sort=False
     ):
         '''Sends a search request to emby, returns results
 
@@ -100,17 +91,15 @@ class Emby(objects.EmbyObject):
         if strict_sort:
             search_params['IncludeItemTypes'] = ','.join(sort_map.keys())
 
-        json  = await self.connector.getJson('/Search/Hints/', **search_params)
+        json = await self.connector.getJson('/Search/Hints/', **search_params)
         items = await self.process(json["SearchHints"])
 
         m_size = len(sort_map)
-        items  = sorted(items, key = lambda x : sort_map.get(x.type, m_size))
+        items = sorted(items, key=lambda x: sort_map.get(x.type, m_size))
 
         return items
 
-    def latest_sync(self, userId=None, itemTypes='', groupItems=False):
-        return self.connector.sync_run(self.latest(userId, itemTypes, groupItems))
-
+    @async_func
     async def latest(self, userId=None, itemTypes='', groupItems=False):
         '''returns list of latest items
 
@@ -140,9 +129,7 @@ class Emby(objects.EmbyObject):
         )
         return await self.process(json)
 
-    def nextUp_sync(self, userId=None):
-        return self.connector.sync_run(self.nextUp(userId))
-
+    @async_func
     async def nextUp(self, userId=None):
         '''returns list of items marked as `next up`
 
@@ -168,10 +155,7 @@ class Emby(objects.EmbyObject):
         )
         return await self.process(json)
 
-
-    def update_sync(self):
-        self.connector.sync_run(self.update())
-
+    @async_func
     async def update(self):
         '''
         reload all cached information
@@ -194,9 +178,7 @@ class Emby(objects.EmbyObject):
             except:
                 pass
 
-    def create_playlist_sync(self, name, *songs):
-        return self.connector.sync_run(self.create_playlist(name, *songs))
-
+    @async_func
     async def create_playlist(self, name, *songs):
         '''create a new playlist
 
@@ -224,10 +206,7 @@ class Emby(objects.EmbyObject):
         )
 
     @property
-    def albums_sync(self):
-      return self.connector.sync_run(self.albums)
-
-    @property
+    @async_func
     async def albums(self):
         '''returns list of all albums.
 
@@ -240,14 +219,10 @@ class Emby(objects.EmbyObject):
         list
           of type :class:`embypy.objects.Album`
         '''
-        return self.extras.get('albums') or \
-               await self.albums_force
+        return self.extras.get('albums') or await self.albums_force
 
     @property
-    def albums_force_sync(self):
-        return self.connector.sync_run(self.albums_force)
-
-    @property
+    @async_func
     async def albums_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -264,10 +239,7 @@ class Emby(objects.EmbyObject):
         return items
 
     @property
-    def songs_sync(self):
-        return self.connector.sync_run(self.songs)
-
-    @property
+    @async_func
     async def songs(self):
         '''returns list of all songs.
 
@@ -283,10 +255,7 @@ class Emby(objects.EmbyObject):
         return self.extras.get('songs') or await self.songs_force
 
     @property
-    def songs_force_sync(self):
-        return self.connector.sync_run(self.songs_force)
-
-    @property
+    @async_func
     async def songs_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -303,10 +272,7 @@ class Emby(objects.EmbyObject):
         return items
 
     @property
-    def playlists_sync(self):
-        return self.connector.sync_run(self.playlists)
-
-    @property
+    @async_func
     async def playlists(self):
         '''returns list of all playlists.
 
@@ -319,14 +285,10 @@ class Emby(objects.EmbyObject):
         list
           of type :class:`embypy.objects.Playlist`
         '''
-        return self.extras.get('playlists') or \
-               await self.playlists_force
+        return self.extras.get('playlists') or await self.playlists_force
 
     @property
-    def playlists_force_sync(self):
-        return self.connector.sync_run(self.playlists_force)
-
-    @property
+    @async_func
     async def playlists_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -343,10 +305,7 @@ class Emby(objects.EmbyObject):
         return items
 
     @property
-    def artists_sync(self):
-        return self.connector.sync_run(self.artists)
-
-    @property
+    @async_func
     async def artists(self):
         '''returns list of all song artists.
 
@@ -359,14 +318,10 @@ class Emby(objects.EmbyObject):
         list
           of type :class:`embypy.objects.Artist`
         '''
-        return self.extras.get('artists', []) or \
-                                       await self.artists_force
+        return self.extras.get('artists', []) or await self.artists_force
 
     @property
-    def artists_force_sync(self):
-        return self.connector.sync_run(self.artists_force)
-
-    @property
+    @async_func
     async def artists_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -383,10 +338,7 @@ class Emby(objects.EmbyObject):
         return items
 
     @property
-    def movies_sync(self):
-        return self.connector.sync_run(self.movies)
-
-    @property
+    @async_func
     async def movies(self):
         '''returns list of all movies.
 
@@ -399,14 +351,10 @@ class Emby(objects.EmbyObject):
         list
           of type :class:`embypy.objects.Movie`
         '''
-        return self.extras.get('movies', []) or \
-               await self.movies_force
+        return self.extras.get('movies', []) or await self.movies_force
 
     @property
-    def movies_force_sync(self):
-        return self.connector.sync_run(self.movies_force)
-
-    @property
+    @async_func
     async def movies_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -423,10 +371,7 @@ class Emby(objects.EmbyObject):
         return items
 
     @property
-    def series_sync(self):
-        return self.connector.sync_run(self.series)
-
-    @property
+    @async_func
     async def series(self):
         '''returns a list of all series in emby.
 
@@ -439,14 +384,10 @@ class Emby(objects.EmbyObject):
         list
           of type :class:`embypy.objects.Series`
         '''
-        return self.extras.get('series', []) or \
-               await self.series_force
+        return self.extras.get('series', []) or await self.series_force
 
     @property
-    def series_force_sync(self):
-        return self.connector.sync_run(self.series_force)
-
-    @property
+    @async_func
     async def series_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -463,10 +404,7 @@ class Emby(objects.EmbyObject):
         return items
 
     @property
-    def episodes_sync(self):
-        return self.connector.sync_run(self.episodes)
-
-    @property
+    @async_func
     async def episodes(self):
         '''returns a list of all episodes in emby.
 
@@ -479,14 +417,10 @@ class Emby(objects.EmbyObject):
         list
           of type :class:`embypy.objects.Episode`
         '''
-        return self.extras.get('episodes', []) or \
-               await self.episodes_force
+        return self.extras.get('episodes', []) or await self.episodes_force
 
     @property
-    def episodes_force_sync(self):
-        return self.connector.sync_run(self.episodes_force)
-
-    @property
+    @async_func
     async def episodes_force(self):
         items = await self.connector.getJson(
             '/Users/{UserId}/Items',
@@ -503,10 +437,7 @@ class Emby(objects.EmbyObject):
         return items
 
     @property
-    def devices_sync(self):
-        return self.connector.sync_run(self.devices)
-
-    @property
+    @async_func
     async def devices(self):
         '''returns a list of all devices connected to emby.
 
@@ -519,26 +450,18 @@ class Emby(objects.EmbyObject):
         list
           of type :class:`embypy.objects.Devices`
         '''
-        return self.extras.get('devices', []) or \
-               await self.devices_force
+        return self.extras.get('devices', []) or await self.devices_force
 
     @property
-    def devices_force_sync(self):
-        return self.connector.sync_run(self.devices_force)
-
-    @property
+    @async_func
     async def devices_force(self):
-        items = await self.connector.getJson('/Devices', remote = False)
+        items = await self.connector.getJson('/Devices', remote=False)
         items = await self.process(items)
         self.extras['devices'] = items
         return items
 
-
     @property
-    def users_sync(self):
-        return self.connector.sync_run(self.users)
-
-    @property
+    @async_func
     async def users(self):
         '''returns a list of all users.
 
@@ -551,16 +474,12 @@ class Emby(objects.EmbyObject):
         list
           of type :class:`embypy.objects.Users`
         '''
-        return self.extras.get('users', []) or \
-               await self.users_force
+        return self.extras.get('users', []) or await self.users_force
 
     @property
-    def users_force_sync(self):
-        return self.connector.sync_run(self.users_force)
-
-    @property
+    @async_func
     async def users_force(self):
-        items = await self.connector.getJson('/Users', remote = False)
+        items = await self.connector.getJson('/Users', remote=False)
         items = await self.process(items)
         self.extras['users'] = items
         return items
