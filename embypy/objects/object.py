@@ -234,6 +234,10 @@ class EmbyObject(object):
             return None
 
     @property
+    def download_url(self):
+        return self.connector.get_url('/Items/{}/Download'.format(self.id))
+
+    @property
     @async_func
     async def url(self):
         '''url of the item
