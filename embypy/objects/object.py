@@ -249,7 +249,7 @@ class EmbyObject(object):
           if remote-adderes was given, then that is used as the base
         '''
         if await self.connector.is_jellyfin:
-            path = '/web/index.html#!/itemdetails.html?id={}'
+            path = '/web/index.html#!/details?id={}'
         else:
             path = '/web/itemdetails.html?id={}'
         path = path.format(self.id)
@@ -313,12 +313,12 @@ class EmbyObject(object):
         # Why does the whole dict need to be sent?
         #   because emby is dumb, and will break if I don't
         path = 'Items/{}'.format(self.id)
-        status, _ =  self.connector.post(
+        status, _ = self.connector.post(
             path,
             data=self.object_dict,
             remote=False
         )
-        if resp.status == 400:
+        if status == 400:
             await EmbyObject(self.object_dict, self.connector).update()
             await self.connector.post(
                 path,
