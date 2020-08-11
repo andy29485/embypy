@@ -197,8 +197,8 @@ class Emby(objects.EmbyObject):
         if ids:
             data['Ids'] = ','.join(ids)
 
-        # TODO - return playlist not status
-        return await self.connector.post(
+        # TODO - return playlist(s?)
+        await self.connector.post(
             '/Playlists',
             data=data,
             pass_uid=True,

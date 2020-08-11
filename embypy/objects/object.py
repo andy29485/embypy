@@ -305,27 +305,22 @@ class EmbyObject(object):
           post: same thing
           update :
           refresh :
-
-        Returns
-        -------
-          aiohttp.ClientResponse or None if nothing needed updating
         '''
         # Why does the whole dict need to be sent?
         #   because emby is dumb, and will break if I don't
         path = 'Items/{}'.format(self.id)
-        resp = await self.connector.post(
+        status, _ =  self.connector.post(
             path,
             data=self.object_dict,
             remote=False
         )
         if resp.status == 400:
             await EmbyObject(self.object_dict, self.connector).update()
-            resp = await self.connector.post(
+            await self.connector.post(
                 path,
                 data=self.object_dict,
                 remote=False
             )
-        return resp
 
     @async_func
     async def post(self):

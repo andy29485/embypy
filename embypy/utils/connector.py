@@ -142,23 +142,14 @@ class Connector:
         self.urlremote	= urlparse(urlremote) if urlremote else urlremote
 
         self.attempt_login = False
+        self._session_locks = {}
+        self._session_uses = {}
+        self._sessions = {}
 
         if self.ssl and type(self.ssl) == str:
             self.ssl = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
             self.ssl.load_verify_locations(cafile=self.ssl)
 
-        conn = aiohttp.TCPConnector(ssl_context=self.ssl)
-
-        self.session = aiohttp.ClientSession(
-            headers={
-                'Authorization': (
-                    'MediaBrowser Client="{0}",Device="{0}",'
-                    'DeviceId="{1}",'
-                    'Version="{2}"'
-                ).format('EmbyPy', self.device_id, __version__)
-            },
-            connector=conn
-        )
         # connect to websocket is user wants to
         if 'ws' in kargs:
             self.ws = WebSocket(self, self.get_url(websocket=True), self.ssl)
@@ -175,15 +166,47 @@ class Connector:
             return self.__getattr__(name[:-5])
         return self.__getattribute__(name)
 
-    async def with_timeout(self, coro):
-        return await asyncio.wait_for(asyncio.create_task(coro), self.timeout)
+    async def _get_session(self):
+        loop = asyncio.get_running_loop()
+        loop_id = hash(loop)
+        headers = {
+            'Authorization': (
+                'MediaBrowser Client="{0}",Device="{0}",'
+                'DeviceId="{1}",'
+                'Version="{2}"'
+            ).format('EmbyPy', self.device_id, __version__),
+        }
 
+        if self.token:
+            headers.update({'X-MediaBrowser-Token': self.token})
 
-    @async_func
-    async def login_if_needed(self):
-        # authenticate to emby if password was given
-        if self.password and self.username and not self.token:
-            await self.login()
+        async with await self._get_session_lock():
+            session = self._sessions.get(loop_id)
+            if not session:
+                session = aiohttp.ClientSession(
+                    headers=headers,
+                    connector=aiohttp.TCPConnector(ssl_context=self.ssl),
+                )
+                self._sessions[loop_id] = session
+                self._session_uses[loop_id] = 1
+            else:
+                self._session_uses[loop_id] += 1
+            return session
+
+    async def _end_session(self):
+        loop = asyncio.get_running_loop()
+        loop_id = hash(loop)
+        async with await self._get_session_lock():
+            self._session_uses[loop_id] -= 1
+            session = self._sessions.get(loop_id)
+            if session and self._session_uses[loop_id] <= 0:
+                await session.close()
+                self._sessions[loop_id] = None
+
+    async def _get_session_lock(self):
+        loop = asyncio.get_running_loop()
+        self._sessions[loop] = None
+        return self._session_locks.setdefault(loop, asyncio.Lock(loop=loop))
 
     @async_func
     async def info(self):
@@ -202,13 +225,19 @@ class Connector:
         return self.jellyfin
 
     @async_func
+    async def login_if_needed(self):
+        # authenticate to emby if password was given
+        if self.password and self.username and not self.token:
+            return await self.login()
+
+    @async_func
     async def login(self):
         if not self.username or self.attempt_login:
             return
 
         self.attempt_login = True
         try:
-            data = await self.post(
+            data = await self.postJson(
                 '/Users/AuthenticateByName',
                 data={
                     'username': self.username,
@@ -217,17 +246,16 @@ class Connector:
                 send_raw=True,
                 format='json',
             )
-            data = await data.json()
 
-            self.token		= data.get('AccessToken', '')
-            self.userid		= data.get('User', {}).get('Id')
-            self.api_key	= self.token
+            self.token = data.get('AccessToken', '')
+            self.userid = data.get('User', {}).get('Id')
+            self.api_key = self.token
 
-            self.session._default_headers.update(
-                {'X-MediaBrowser-Token': self.token}
-            )
+            session = await self._get_session()
+            session._default_headers['X-MediaBrowser-Token'] = self.token
+            await self._end_session()
         finally:
-            self.attempt_login = True
+            self.attempt_login = False
 
     def get_url(
         self, path='/', websocket=False, remote=True,
@@ -297,13 +325,42 @@ class Connector:
     async def _process_resp(self, resp):
         if (not resp or resp.status == 401) and self.username:
             await self.login()
-            await resp.close()
             return False
         return True
+
+    @staticmethod
+    @async_func
+    async def resp_to_json(resp):
+        try:
+            return await resp.json()
+        except aiohttp.client_exceptions.ContentTypeError:
+            raise RuntimeError(
+                'Unexpected JSON output (status: {}): "{}"'.format(
+                    resp.status,
+                    await resp.text(),
+                )
+            )
 
     def add_on_message(self, func):
         '''add function that handles websocket messages'''
         return self.ws.on_message.append(func)
+
+    @async_func
+    async def _req(self, method, path, params={}, **query):
+        await self.login_if_needed()
+        for i in range(self.tries):
+            url = self.get_url(path, **query)
+            try:
+                resp = await method(url, timeout=self.timeout, **params)
+                if await self._process_resp(resp):
+                    return resp
+                else:
+                    continue
+            except aiohttp.ClientConnectionError:
+                pass
+        raise aiohttp.ClientConnectionError(
+            'Emby server is probably down'
+        )
 
     @async_func
     async def get(self, path, **query):
@@ -326,21 +383,16 @@ class Connector:
         requests.models.Response
           the response that was given
         '''
-        url = self.get_url(path, **query)
-
-        for i in range(self.tries+1):
-            await self.login_if_needed()
-            try:
-                resp = await self.with_timeout(self.session.get(url))
-                if await self._process_resp(resp):
-                    return resp
-                else:
-                    continue
-            except aiohttp.ClientConnectionError:
-                if i >= self.tries:
-                    raise aiohttp.ClientConnectionError(
-                        'Emby server is probably down'
-                    )
+        try:
+            session = await self._get_session()
+            async with await self._req(
+                session.get,
+                path,
+                **query
+            ) as resp:
+                return resp.status, await resp.text()
+        finally:
+            await self._end_session()
 
     @async_func
     async def delete(self, path, **query):
@@ -362,24 +414,19 @@ class Connector:
         requests.models.Response
           the response that was given
         '''
-        url = self.get_url(path, **query)
-
-        for i in range(self.tries+1):
-            await self.login_if_needed()
-            try:
-                resp = await self.session.delete(url, timeout=self.timeout)
-                if await self._process_resp(resp):
-                    return resp
-                else:
-                    continue
-            except aiohttp.ClientConnectionError:
-                if i >= self.tries:
-                    raise aiohttp.ClientConnectionError(
-                        'Emby server is probably down'
-                    )
+        try:
+            session = await self._get_session()
+            async with await self._req(
+                session.delete,
+                path,
+                **query
+            ) as resp:
+                return resp.status
+        finally:
+            await self._end_session()
 
     @async_func
-    async def post(self, path, data={}, send_raw=False, **params):
+    async def post(self, path, data={}, send_raw=False, **query):
         '''sends post request
 
         Parameters
@@ -395,6 +442,7 @@ class Connector:
 
         See Also
         --------
+          postJson :
           get_url :
 
         Returns
@@ -402,33 +450,86 @@ class Connector:
         requests.models.Response
           the response that was given
         '''
-        url = self.get_url(path, **params)
-        jstr = json.dumps(data)
+        return await self._post(
+            path,
+            return_json=False,
+            data=data,
+            send_raw=send_raw,
+            **query,
+        )
 
-        for i in range(self.tries+1):
-            await self.login_if_needed()
-            try:
-                if send_raw:
-                    resp = await self.session.post(
-                        url,
-                        data=data,
-                        timeout=self.timeout
-                    )
+    @async_func
+    async def postJson(self, path, data={}, send_raw=False, **query):
+        '''sends post request
+
+        Parameters
+        ----------
+        path : str
+          same as get_url
+        data : dict
+          post data to send
+        send_raw : bool
+          if true send data as post data, otherwise send as a json string
+        query : kargs dict
+          additional info to pass to get_url
+
+        See Also
+        --------
+          post :
+          get_url :
+
+        Returns
+        -------
+        requests.models.Response
+          the response that was given
+        '''
+        return await self._post(
+            path,
+            return_json=True,
+            data=data,
+            send_raw=send_raw,
+            **query,
+        )
+
+    @async_func
+    async def _post(self, path, return_json, data, send_raw, **query):
+        '''sends post request
+
+        Parameters
+        ----------
+        path : str
+          same as get_url
+        query : kargs dict
+          additional info to pass to get_url
+
+        See Also
+        --------
+          get_url :
+
+        Returns
+        -------
+        requests.models.Response
+          the response that was given
+        '''
+        jstr = json.dumps(data)
+        try:
+            session = await self._get_session()
+            if send_raw:
+                params = {"data": data}
+            else:
+                params = {"data": jstr}
+            async with await self._req(
+                session.post,
+                path,
+                params=params,
+                **query
+            ) as resp:
+                if return_json:
+                    return await Connector.resp_to_json(resp)
                 else:
-                    resp = await self.session.post(
-                        url,
-                        data=jstr,
-                        timeout=self.timeout
-                    )
-                if await self._process_resp(resp):
-                    return resp
-                else:
-                    continue
-            except aiohttp.ClientConnectionError:
-                if i >= self.tries:
-                    raise aiohttp.ClientConnectionError(
-                        'Emby server is probably down'
-                    )
+                    return resp.status, await resp.text()
+        finally:
+            await self._end_session()
 
     @async_func
     async def getJson(self, path, **query):
@@ -452,7 +553,12 @@ class Connector:
           the response content as a dict
         '''
         try:
-            resp = await self.get(path, **query)
-            return await resp.json()
-        except aiohttp.client_exceptions.ContentTypeError:
-            raise RuntimeError('unexpected output:' + (await resp.text()))
+            session = await self._get_session()
+            async with await self._req(
+                session.get,
+                path,
+                **query
+            ) as resp:
+                return await Connector.resp_to_json(resp)
+        finally:
+            await self._end_session()
