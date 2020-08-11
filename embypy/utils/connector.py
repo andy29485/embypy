@@ -219,9 +219,14 @@ class Connector:
     @async_func
     async def is_jellyfin(self):
         if self.jellyfin is None:
+            self.jellyfin = False
             info = await self.info()
-            product = info.get('ProductName', '')
-            self.jellyfin = 'jellyfin' in product.lower()
+            try:
+                ver = tuple(map(int, info.get('Version', '0.0.0').split('.')))
+                if len(ver) == 3 and ver[0] >= 10:
+                    self.jellyfin = True
+            except ValueError:
+                pass
         return self.jellyfin
 
     @async_func
