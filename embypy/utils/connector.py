@@ -118,9 +118,8 @@ class Connector:
     def __init__(self, url, **kargs):
         try:
             asyncio.get_event_loop()
-        except:
+        except RuntimeError:
             asyncio.set_event_loop(asyncio.new_event_loop())
-            print('It happened')
 
         if ('api_key'  not in kargs or 'userid'   not in kargs) and \
            ('username' not in kargs or 'password' not in kargs):
@@ -190,7 +189,7 @@ class Connector:
     async def info(self):
         return await self.getJson(
             '/system/info/public',
-            remote=False
+            remote=False,
         )
 
     @property
