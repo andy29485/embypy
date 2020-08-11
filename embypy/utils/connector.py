@@ -386,6 +386,10 @@ class Connector:
         ----------
         path : str
           same as get_url
+        data : dict
+          post data to send
+        send_raw : bool
+          if true send data as post data, otherwise send as a json string
         query : kargs dict
           additional info to pass to get_url
 
