@@ -452,4 +452,4 @@ class Connector:
             resp = await self.get(path, **query)
             return await resp.json()
         except aiohttp.client_exceptions.ContentTypeError:
-            raise RuntimeError('unexpected output:' + (await resp.text())
+            raise RuntimeError('unexpected output:' + (await resp.text()))
