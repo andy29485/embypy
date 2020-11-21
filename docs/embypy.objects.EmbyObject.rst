@@ -24,4 +24,4 @@ EmbyPy EmbyObject
   EmbyObject.process
 
 .. autoclass:: EmbyObject
-    :members:
+   :members:

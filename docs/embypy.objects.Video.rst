@@ -2,39 +2,39 @@ EmbyPy Videos
 =====================
 
 .. automodule:: embypy.objects
-  :show-inheritance:
+   :show-inheritance:
 
 .. autosummary::
-  Video.aspect_ratio
-  Video.chapters
+   Video.aspect_ratio
+   Video.chapters
 
-  Movie.premiere_date
+   Movie.premiere_date
 
-  Episode.episode_number
-  Episode.premiere_date
-  Episode.season
-  Episode.series
+   Episode.episode_number
+   Episode.premiere_date
+   Episode.season
+   Episode.series
 
-  Trailer
+   Trailer
 
-  AdultVideo
+   AdultVideo
 
-  MusicVideo
+   MusicVideo
 
 .. autoclass:: Video
-  :members:
+   :members:
 
 .. autoclass:: Movie
-  :members:
+   :members:
 
 .. autoclass:: Episode
-  :members:
+   :members:
 
 .. autoclass:: Trailer
-  :members:
+   :members:
 
 .. autoclass:: AdultVideo
-  :members:
+   :members:
 
 .. autoclass:: MusicVideo
-  :members:
+   :members:

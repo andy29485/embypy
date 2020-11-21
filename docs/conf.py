@@ -71,7 +71,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'EmbyPy'
-copyright = '2018, Andriy Zasypkin'
+copyright = '2020, Andriy Zasypkin'
 author = 'Andriy Zasypkin'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -81,7 +81,11 @@ author = 'Andriy Zasypkin'
 # The short X.Y version.
 version = ''
 with open('../setup.py') as f:
-  version = re.search(r'^\s*version\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
+    version = re.search(
+        r'^\s*version\s*=\s*[\'"]([^\'"]*)[\'"]',
+        f.read(),
+        re.MULTILINE
+    ).group(1)
 
 # The full version, including alpha/beta/rc tags.
 release = version

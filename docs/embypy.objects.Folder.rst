@@ -2,61 +2,61 @@ EmbyPy Folders
 =====================
 
 .. automodule:: embypy.objects
-  :show-inheritance:
+   :show-inheritance:
 
 .. autosummary::
-  Folder.child_count
-  Folder.cumulative_run_time
-  Folder.items
+   Folder.child_count
+   Folder.cumulative_run_time
+   Folder.items
 
-  Playlist.songs
-  Playlist.add_items
-  Playlist.remove_items
+   Playlist.songs
+   Playlist.add_items
+   Playlist.remove_items
 
-  BoxSet.movies
-  BoxSet.series
+   BoxSet.movies
+   BoxSet.series
 
-  MusicAlbum.album_artists
-  MusicAlbum.artists
-  MusicAlbum.songs
+   MusicAlbum.album_artists
+   MusicAlbum.artists
+   MusicAlbum.songs
 
-  MusicArtist.albums
-  MusicArtist.songs
+   MusicArtist.albums
+   MusicArtist.songs
 
-  Season.index_number
-  Season.played_percentage
-  Season.episodes
-  Season.series
+   Season.index_number
+   Season.played_percentage
+   Season.episodes
+   Season.series
 
-  Series.status
-  Series.air_days
-  Series.air_time
-  Series.premiere_date
-  Series.seasons
-  Series.episodes
+   Series.status
+   Series.air_days
+   Series.air_time
+   Series.premiere_date
+   Series.seasons
+   Series.episodes
 
-  GameSystem
+   GameSystem
 
 .. autoclass:: Folder
-    :members:
+   :members:
 
 .. autoclass:: Playlist
-    :members:
+   :members:
 
 .. autoclass:: BoxSet
-    :members:
+   :members:
 
 .. autoclass:: Series
-    :members:
+   :members:
 
 .. autoclass:: Season
-    :members:
+   :members:
 
 .. autoclass:: MusicArtist
-    :members:
+   :members:
 
 .. autoclass:: MusicAlbum
-    :members:
+   :members:
 
 .. autoclass:: GameSystem
-    :members:
+   :members:

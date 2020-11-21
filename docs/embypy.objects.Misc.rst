@@ -2,35 +2,35 @@ EmbyPy MISC
 =====================
 
 .. automodule:: embypy.objects
-  :show-inheritance:
+   :show-inheritance:
 
 .. autosummary::
-  Audio.album
-  Audio.track_number
-  Audio.album_artists
-  Audio.artists
-  Audio.album_primary_image_tag
-  Audio.album_primary_image_url
+   Audio.album
+   Audio.track_number
+   Audio.album_artists
+   Audio.artists
+   Audio.album_primary_image_tag
+   Audio.album_primary_image_url
 
-  Person.role
+   Person.role
 
-  Image
+   Image
 
-  Game
+   Game
 
-  Book
+   Book
 
 .. autoclass:: Audio
-    :members:
+   :members:
 
 .. autoclass:: Person
-    :members:
+   :members:
 
 .. autoclass:: Image
-    :members:
+   :members:
 
 .. autoclass:: Game
-    :members:
+   :members:
 
 .. autoclass:: Book
-    :members:
+   :members:

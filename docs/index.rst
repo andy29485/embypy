@@ -9,14 +9,14 @@ Start with the :class:`embypy.Emby` class, it should be the main thing that your
 make requests to.
 
 .. toctree::
-    :maxdepth: 4
-    :caption: Contents:
+   :maxdepth: 4
+   :caption: Contents:
 
-    embypy
-    embypy.objects
-    embypy.utils
+   embypy
+   embypy.objects
+   embypy.utils
 
-    license
+   license
 
 
 Indices and tables
