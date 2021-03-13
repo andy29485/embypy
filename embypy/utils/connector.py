@@ -251,6 +251,7 @@ class Connector:
                     'Username': self.username,
                     'Pw': self.password,
                 },
+                send_raw=True,
                 format='json',
             )
 
@@ -525,9 +526,9 @@ class Connector:
         try:
             session = await self._get_session()
             if send_raw:
-                params = {"data": data}
-            else:
                 params = {"json": data}
+            else:
+                params = {"data": json.dumps(data)}
             async with await self._req(
                 session.post,
                 path,
