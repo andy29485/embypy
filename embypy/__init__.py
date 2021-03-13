@@ -27,8 +27,8 @@ try:
 except DistributionNotFound:
     try:
         __version__ = require("embypy")[0].version
-    except:
-        __version__ = 'Please install this project with setup.py'
+    except Exception:
+        __version__ = '0.0.0.0'
 else:
     __version__ = _dist.version
 

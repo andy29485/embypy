@@ -169,12 +169,15 @@ class Connector:
     async def _get_session(self):
         loop = asyncio.get_running_loop()
         loop_id = hash(loop)
+        auth_header = 'MediaBrowser Client="{0}",Device="{0}",' \
+                      'DeviceId="{1}",Version="{2}"'
+        auth_header = auth_header.format('EmbyPy', self.device_id, __version__)
+        if self.token:
+            auth_header += f',Token="{self.token}"'
+
         headers = {
-            'Authorization': (
-                'MediaBrowser Client="{0}",Device="{0}",'
-                'DeviceId="{1}",'
-                'Version="{2}"'
-            ).format('EmbyPy', self.device_id, __version__),
+            'Authorization': auth_header,
+            'X-Emby-Authorization': auth_header,
         }
 
         if self.token:
@@ -245,10 +248,9 @@ class Connector:
             data = await self.postJson(
                 '/Users/AuthenticateByName',
                 data={
-                    'username': self.username,
-                    'pw': self.password,
+                    'Username': self.username,
+                    'Pw': self.password,
                 },
-                send_raw=True,
                 format='json',
             )
 
@@ -257,7 +259,11 @@ class Connector:
             self.api_key = self.token
 
             session = await self._get_session()
+            auth_header = session._default_headers['X-Emby-Authorization']
+            auth_header += f',Token="{self.token}"'
             session._default_headers['X-MediaBrowser-Token'] = self.token
+            session._default_headers['Authorization'] = auth_header
+            session._default_headers['X-Emby-Authorization'] = auth_header
             await self._end_session()
         finally:
             self.attempt_login = False
@@ -516,13 +522,12 @@ class Connector:
         requests.models.Response
           the response that was given
         '''
-        jstr = json.dumps(data)
         try:
             session = await self._get_session()
             if send_raw:
                 params = {"data": data}
             else:
-                params = {"data": jstr}
+                params = {"json": data}
             async with await self._req(
                 session.post,
                 path,
