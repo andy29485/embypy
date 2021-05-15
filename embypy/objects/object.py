@@ -99,7 +99,7 @@ class EmbyObject(object):
             'UserData', {}
         ).get('PlaybackPositionTicks')
         total = self.object_dict.get('RunTimeTicks') or 1
-        return (played or 0)/total
+        return (played or 0) / total
 
     @property
     def play_count(self):
@@ -276,7 +276,7 @@ class EmbyObject(object):
         info = await self.connector.getJson(
             path,
             remote=False,
-            Fields='Path,Overview,'+fields
+            Fields='Path,Overview,' + fields
         )
         self.object_dict.update(info)
         self.extras = {}
@@ -293,7 +293,6 @@ class EmbyObject(object):
           update :
         '''
         return await self.update()
-
 
     @async_func
     async def send(self):
@@ -386,7 +385,7 @@ class EmbyObject(object):
         # if a json dict that's really just a list was given,
         #   convert to list
         if type(object_dict) == dict and \
-           set(object_dict.keys()).issuperset({'Items', 'TotalRecordCount'}):
+                set(object_dict.keys()).issuperset({'Items', 'TotalRecordCount'}):
             object_dict = object_dict['Items']
 
         # if a list was given,
@@ -428,29 +427,29 @@ class EmbyObject(object):
             object_dict['Type'] = 'User'
 
         objects = {
-            'Audio':		embypy.objects.misc.Audio,
-            'Person':		embypy.objects.misc.Person,
-            'Video':		embypy.objects.videos.Video,
-            'Movie':		embypy.objects.videos.Movie,
-            'Trailer':		embypy.objects.videos.Trailer,
-            'AdultVideo':	embypy.objects.videos.AdultVideo,
-            'MusicVideo':	embypy.objects.videos.MusicVideo,
-            'Episode':		embypy.objects.videos.Episode,
-            'Folder':		embypy.objects.folders.Folder,
-            'Playlist':		embypy.objects.folders.Playlist,
-            'BoxSet':		embypy.objects.folders.BoxSet,
-            'MusicAlbum':	embypy.objects.folders.MusicAlbum,
-            'MusicArtist':	embypy.objects.folders.MusicArtist,
-            'Season':		embypy.objects.folders.Season,
-            'Series':		embypy.objects.folders.Series,
-            'Game':		embypy.objects.misc.Game,
-            'GameSystem':	embypy.objects.folders.GameSystem,
-            'Photo':		embypy.objects.misc.Photo,
-            'Book':		embypy.objects.misc.Book,
-            'Image':		embypy.objects.misc.Image,
-            'Device':		embypy.objects.misc.Device,
-            'User':		embypy.objects.misc.User,
-            'Default':		EmbyObject,
+            'Audio': embypy.objects.misc.Audio,
+            'Person': embypy.objects.misc.Person,
+            'Video': embypy.objects.videos.Video,
+            'Movie': embypy.objects.videos.Movie,
+            'Trailer': embypy.objects.videos.Trailer,
+            'AdultVideo': embypy.objects.videos.AdultVideo,
+            'MusicVideo': embypy.objects.videos.MusicVideo,
+            'Episode': embypy.objects.videos.Episode,
+            'Folder': embypy.objects.folders.Folder,
+            'Playlist': embypy.objects.folders.Playlist,
+            'BoxSet': embypy.objects.folders.BoxSet,
+            'MusicAlbum': embypy.objects.folders.MusicAlbum,
+            'MusicArtist': embypy.objects.folders.MusicArtist,
+            'Season': embypy.objects.folders.Season,
+            'Series': embypy.objects.folders.Series,
+            'Game': embypy.objects.misc.Game,
+            'GameSystem': embypy.objects.folders.GameSystem,
+            'Photo': embypy.objects.misc.Photo,
+            'Book': embypy.objects.misc.Book,
+            'Image': embypy.objects.misc.Image,
+            'Device': embypy.objects.misc.Device,
+            'User': embypy.objects.misc.User,
+            'Default': EmbyObject,
         }
         return objects.get(
             object_dict.get('Type', 'Default'),
@@ -462,3 +461,16 @@ class EmbyObject(object):
 
     def __repr__(self):
         return '<{} {}>'.format(self.type, self.id)
+
+    @property
+    def provider_ids(self):
+        res = self.object_dict.get("ProviderIds", {})
+        return res
+
+    @property
+    def tmdbid(self):
+        return self.provider_ids.get("Tmdb")
+
+    @property
+    def imdbid(self):
+        return self.provider_ids.get("Imdb")
