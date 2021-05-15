@@ -362,7 +362,7 @@ class Emby(objects.EmbyObject):
             format            = 'json',
             Recursive         = 'true',
             IncludeItemTypes  = 'Movie',
-            Fields            = 'Path,ParentId,Overview,Genres,Tags',
+            Fields            = 'Path,ParentId,Overview,Genres,Tags,ProviderIds',
             SortBy            = 'SortName',
             SortOrder         = 'Ascending'
         )

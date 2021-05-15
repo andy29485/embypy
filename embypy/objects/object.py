@@ -99,7 +99,7 @@ class EmbyObject(object):
             'UserData', {}
         ).get('PlaybackPositionTicks')
         total = self.object_dict.get('RunTimeTicks') or 1
-        return (played or 0)/total
+        return (played or 0) / total
 
     @property
     def play_count(self):
@@ -293,7 +293,6 @@ class EmbyObject(object):
           update :
         '''
         return await self.update()
-
 
     @async_func
     async def send(self):
