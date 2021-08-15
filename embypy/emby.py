@@ -95,9 +95,7 @@ class Emby(objects.EmbyObject):
         items = await self.process(json["SearchHints"])
 
         m_size = len(sort_map)
-        items = sorted(items, key=lambda x: sort_map.get(x.type, m_size))
-
-        return items
+        return sorted(items, key=lambda x: sort_map.get(x.type, m_size))
 
     @async_func
     async def latest(self, userId=None, itemTypes='', groupItems=False):
@@ -205,6 +203,38 @@ class Emby(objects.EmbyObject):
             remote=False
         )
 
+    async def _get_list(
+        self,
+        types,
+        path='/Users/{UserId}/Items',
+        extra_fields='',
+        **params
+    ):
+        start = 0
+        limit = 100
+        resp = {}
+        items = []
+        fields = 'Path,ParentId,Overview'
+        if extra_fields:
+            fields = f'{fields},{extra_fields}'
+        while resp.get('TotalRecordCount', -1) != len(items):
+            resp = await self.connector.getJson(
+                '/Users/{UserId}/Items',
+                remote			= False,
+                format			= 'json',
+                recursive		= 'true',
+                includeItemTypes	= types,
+                fields			= fields,
+                sortBy			= 'SortName',
+                sortOrder		= 'Ascending',
+                startIndex		= start,
+                limit			= limit,
+                **params
+            )
+            items.extend(await self.process(resp))
+            start += limit
+        return items
+
     @property
     @async_func
     async def albums(self):
@@ -224,17 +254,7 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def albums_force(self):
-        items = await self.connector.getJson(
-            '/Users/{UserId}/Items',
-            remote            = False,
-            format            = 'json',
-            Recursive         = 'true',
-            IncludeItemTypes  = 'MusicAlbum',
-            Fields            = 'Path,ParentId,Overview,Genres,Tags,Artists',
-            SortBy            = 'SortName',
-            SortOrder         = 'Ascending'
-        )
-        items = await self.process(items)
+        items = await self._get_list('MusicAlbum', extra_fields='Genres,Tags,Artists')
         self.extras['albums'] = items
         return items
 
@@ -257,17 +277,7 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def songs_force(self):
-        items = await self.connector.getJson(
-            '/Users/{UserId}/Items',
-            remote            = False,
-            format            = 'json',
-            Recursive         = 'true',
-            IncludeItemTypes  = 'Audio',
-            Fields            = 'Path,ParentId,Overview,Genres,Tags,Artists',
-            SortBy            = 'SortName',
-            SortOrder         = 'Ascending'
-        )
-        items = await self.process(items)
+        items = await self._get_list('Audio', extra_fields='Genres,Tags,Artists')
         self.extras['songs'] = items
         return items
 
@@ -290,17 +300,7 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def playlists_force(self):
-        items = await self.connector.getJson(
-            '/Users/{UserId}/Items',
-            remote            = False,
-            format            = 'json',
-            Recursive         = 'true',
-            IncludeItemTypes  = 'Playlist',
-            Fields            = 'Path,ParentId,Overview',
-            SortBy            = 'SortName',
-            SortOrder         = 'Ascending'
-        )
-        items = await self.process(items)
+        items = await self._get_list('Playlist')
         self.extras['playlists'] = items
         return items
 
@@ -323,17 +323,7 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def artists_force(self):
-        items = await self.connector.getJson(
-            '/Users/{UserId}/Items',
-            remote            = False,
-            format            = 'json',
-            Recursive         = 'true',
-            IncludeItemTypes  = 'MusicArtist',
-            Fields            = 'Path,ParentId,Overview,Genres,Tags',
-            SortBy            = 'SortName',
-            SortOrder         = 'Ascending'
-        )
-        items = await self.process(items)
+        items = await self._get_list('MusicArtist', extra_fields='Genres,Tags')
         self.extras['artists'] = items
         return items
 
@@ -356,17 +346,7 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def movies_force(self):
-        items = await self.connector.getJson(
-            '/Users/{UserId}/Items',
-            remote            = False,
-            format            = 'json',
-            Recursive         = 'true',
-            IncludeItemTypes  = 'Movie',
-            Fields            = 'Path,ParentId,Overview,Genres,Tags,ProviderIds',
-            SortBy            = 'SortName',
-            SortOrder         = 'Ascending'
-        )
-        items = await self.process(items)
+        items = await self._get_list('Movie', extra_fields='Genres,Tags,ProviderIds')
         self.extras['movies'] = items
         return items
 
@@ -389,17 +369,7 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def series_force(self):
-        items = await self.connector.getJson(
-            '/Users/{UserId}/Items',
-            remote            = False,
-            format            = 'json',
-            Recursive         = 'true',
-            IncludeItemTypes  = 'Series',
-            Fields            = 'Path,ParentId,Overview,Genres,Tags',
-            SortBy            = 'SortName',
-            SortOrder         = 'Ascending'
-        )
-        items = await self.process(items)
+        items = await self._get_list('Series', extra_fields='Genres,Tags')
         self.extras['series'] = items
         return items
 
@@ -422,17 +392,7 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def episodes_force(self):
-        items = await self.connector.getJson(
-            '/Users/{UserId}/Items',
-            remote            = False,
-            format            = 'json',
-            Recursive         = 'true',
-            IncludeItemTypes  = 'Episode',
-            Fields            = 'Path,ParentId,Overview,Genres,Tags',
-            SortBy            = 'SortName',
-            SortOrder         = 'Ascending'
-        )
-        items = await self.process(items)
+        items = await self._get_list('Episode', extra_fields='Genres,Tags')
         self.extras['episodes'] = items
         return items
 
