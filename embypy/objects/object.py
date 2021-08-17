@@ -313,7 +313,7 @@ class EmbyObject(object):
         # Why does the whole dict need to be sent?
         #   because emby is dumb, and will break if I don't
         path = 'Items/{}'.format(self.id)
-        status, _ = self.connector.post(
+        status, _ = await self.connector.post(
             path,
             data=self.object_dict,
             remote=False
