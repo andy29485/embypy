@@ -211,13 +211,18 @@ class Emby(objects.EmbyObject):
         **params
     ):
         start = 0
-        limit = 100
+        # more requests = slower
+        # bigger requests = more chances of failure
+        # 200 items/request seems to be a nice sweetspot where I'm
+        # not getting failures
+        limit = 200
         resp = {}
+        last = -1
         items = []
         fields = 'Path,ParentId,Overview'
         if extra_fields:
             fields = f'{fields},{extra_fields}'
-        while resp.get('TotalRecordCount', -1) != len(items):
+        while len(items) not in (resp.get('TotalRecordCount', -1), last):
             resp = await self.connector.getJson(
                 '/Users/{UserId}/Items',
                 remote			= False,
@@ -231,8 +236,11 @@ class Emby(objects.EmbyObject):
                 limit			= limit,
                 **params
             )
-            items.extend(await self.process(resp))
+            last = len(items)
             start += limit
+            # assuming no duplicates returned by jellyfin/emby, otherwise:
+            #items.extend(i for i in await self.process(resp) if i not in items)
+            items.extend(await self.process(resp))
         return items
 
     @property
