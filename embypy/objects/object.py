@@ -276,7 +276,7 @@ class EmbyObject(object):
         info = await self.connector.getJson(
             path,
             remote=False,
-            Fields='Path,Overview,'+fields
+            Fields='Path,Overview'+(',' if fields else '')+fields
         )
         self.object_dict.update(info)
         self.extras = {}
@@ -316,14 +316,17 @@ class EmbyObject(object):
         status, _ = await self.connector.post(
             path,
             data=self.object_dict,
-            remote=False
+            remote=False,
+            send_raw=True,
+            headers={'Content-Type': 'application/json'},
         )
-        if status == 400:
+        if status in (400, 415):
             await EmbyObject(self.object_dict, self.connector).update()
             await self.connector.post(
                 path,
                 data=self.object_dict,
-                remote=False
+                remote=False,
+                headers={'Content-Type': 'application/json'},
             )
 
     @async_func
