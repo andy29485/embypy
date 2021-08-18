@@ -312,7 +312,7 @@ class EmbyObject(object):
         # Why does the whole dict need to be sent?
         #   because emby is dumb, and will break if I don't
         path = 'Items/{}'.format(self.id)
-        status, _ = await self.connector.post(
+        status, resp = await self.connector.post(
             path,
             data=self.object_dict,
             remote=False,
@@ -321,12 +321,14 @@ class EmbyObject(object):
         )
         if status in (400, 415):
             await EmbyObject(self.object_dict, self.connector).update()
-            await self.connector.post(
+            status, resp = await self.connector.post(
                 path,
                 data=self.object_dict,
                 remote=False,
+                send_raw=False,
                 headers={'Content-Type': 'application/json'},
             )
+        return status, resp
 
     @async_func
     async def post(self):
