@@ -276,7 +276,7 @@ class EmbyObject(object):
         info = await self.connector.getJson(
             path,
             remote=False,
-            Fields='Path,Overview,' + fields
+            Fields='Path,Overview'+(',' if fields else '')+fields
         )
         self.object_dict.update(info)
         self.extras = {}
@@ -312,17 +312,20 @@ class EmbyObject(object):
         # Why does the whole dict need to be sent?
         #   because emby is dumb, and will break if I don't
         path = 'Items/{}'.format(self.id)
-        status, _ = self.connector.post(
+        status, _ = await self.connector.post(
             path,
             data=self.object_dict,
-            remote=False
+            remote=False,
+            send_raw=True,
+            headers={'Content-Type': 'application/json'},
         )
-        if status == 400:
+        if status in (400, 415):
             await EmbyObject(self.object_dict, self.connector).update()
             await self.connector.post(
                 path,
                 data=self.object_dict,
-                remote=False
+                remote=False,
+                headers={'Content-Type': 'application/json'},
             )
 
     @async_func
@@ -385,7 +388,7 @@ class EmbyObject(object):
         # if a json dict that's really just a list was given,
         #   convert to list
         if type(object_dict) == dict and \
-                set(object_dict.keys()).issuperset({'Items', 'TotalRecordCount'}):
+           set(object_dict.keys()).issuperset({'Items', 'TotalRecordCount'}):
             object_dict = object_dict['Items']
 
         # if a list was given,
@@ -427,29 +430,29 @@ class EmbyObject(object):
             object_dict['Type'] = 'User'
 
         objects = {
-            'Audio': embypy.objects.misc.Audio,
-            'Person': embypy.objects.misc.Person,
-            'Video': embypy.objects.videos.Video,
-            'Movie': embypy.objects.videos.Movie,
-            'Trailer': embypy.objects.videos.Trailer,
-            'AdultVideo': embypy.objects.videos.AdultVideo,
-            'MusicVideo': embypy.objects.videos.MusicVideo,
-            'Episode': embypy.objects.videos.Episode,
-            'Folder': embypy.objects.folders.Folder,
-            'Playlist': embypy.objects.folders.Playlist,
-            'BoxSet': embypy.objects.folders.BoxSet,
-            'MusicAlbum': embypy.objects.folders.MusicAlbum,
-            'MusicArtist': embypy.objects.folders.MusicArtist,
-            'Season': embypy.objects.folders.Season,
-            'Series': embypy.objects.folders.Series,
-            'Game': embypy.objects.misc.Game,
-            'GameSystem': embypy.objects.folders.GameSystem,
-            'Photo': embypy.objects.misc.Photo,
-            'Book': embypy.objects.misc.Book,
-            'Image': embypy.objects.misc.Image,
-            'Device': embypy.objects.misc.Device,
-            'User': embypy.objects.misc.User,
-            'Default': EmbyObject,
+            'Audio':		embypy.objects.misc.Audio,
+            'Person':		embypy.objects.misc.Person,
+            'Video':		embypy.objects.videos.Video,
+            'Movie':		embypy.objects.videos.Movie,
+            'Trailer':		embypy.objects.videos.Trailer,
+            'AdultVideo':	embypy.objects.videos.AdultVideo,
+            'MusicVideo':	embypy.objects.videos.MusicVideo,
+            'Episode':		embypy.objects.videos.Episode,
+            'Folder':		embypy.objects.folders.Folder,
+            'Playlist':		embypy.objects.folders.Playlist,
+            'BoxSet':		embypy.objects.folders.BoxSet,
+            'MusicAlbum':	embypy.objects.folders.MusicAlbum,
+            'MusicArtist':	embypy.objects.folders.MusicArtist,
+            'Season':		embypy.objects.folders.Season,
+            'Series':		embypy.objects.folders.Series,
+            'Game':		embypy.objects.misc.Game,
+            'GameSystem':	embypy.objects.folders.GameSystem,
+            'Photo':		embypy.objects.misc.Photo,
+            'Book':		embypy.objects.misc.Book,
+            'Image':		embypy.objects.misc.Image,
+            'Device':		embypy.objects.misc.Device,
+            'User':		embypy.objects.misc.User,
+            'Default':		EmbyObject,
         }
         return objects.get(
             object_dict.get('Type', 'Default'),
