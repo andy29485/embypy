@@ -23,8 +23,13 @@ class Folder(EmbyObject):
 
     @property
     def cumulative_run_time(self):
-        '''total run time of items'''
+        '''total run time of items in ticks'''
         return self.object_dict.get('CumulativeRunTimeTicks', 0)
+
+    @property
+    def cumulative_duration(self):
+        '''total run time of items in seconds'''
+        return self.object_dict.get('CumulativeRunTimeTicks', 0) / (10**7)
 
     @property
     @async_func

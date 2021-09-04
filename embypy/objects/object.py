@@ -98,8 +98,13 @@ class EmbyObject(object):
         played = self.object_dict.get(
             'UserData', {}
         ).get('PlaybackPositionTicks')
-        total = self.object_dict.get('RunTimeTicks') or 1
+        total = self.object_dict.get('RunTimeTicks') or played or 1
         return (played or 0) / total
+
+    @property
+    def duration(self):
+        '''returns duration of item in seconds'''
+        return self.object_dict.get('RunTimeTicks', 0) / (10**7)
 
     @property
     def play_count(self):
