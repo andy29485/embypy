@@ -1,8 +1,12 @@
 import json
+import time
 from requests.compat import urlparse, urlunparse, urlencode
 import asyncio
 import aiohttp
+import datetime
+from collections import deque
 import websockets
+import random
 import ssl
 
 from embypy import __version__
@@ -338,6 +342,11 @@ class Connector:
         if (not resp or resp.status == 401) and self.username:
             await self.login()
             return False
+        if not resp:
+            return False
+        if resp.status in (502, 504):
+            await asyncio.sleep(random.random()*4+0.2)
+            return False
         return True
 
     @staticmethod
@@ -366,8 +375,9 @@ class Connector:
                 resp = await method(url, timeout=self.timeout, **params)
                 if await self._process_resp(resp):
                     return resp
-                else:
-                    continue
+                await asyncio.sleep(random.random()*i+0.2)
+            except asyncio.exceptions.TimeoutError:
+                pass
             except aiohttp.ClientConnectionError:
                 pass
         raise aiohttp.ClientConnectionError(

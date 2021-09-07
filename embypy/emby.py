@@ -32,6 +32,7 @@ class Emby(objects.EmbyObject):
     def __init__(self, url, **kargs):
         connector = Connector(url, **kargs)
         super().__init__({'ItemId': '', 'Name': ''}, connector)
+        self._partial_cache = {}
 
     @async_func
     async def info(self, obj_id=None):
@@ -208,23 +209,26 @@ class Emby(objects.EmbyObject):
         types,
         path='/Users/{UserId}/Items',
         extra_fields='',
+        limit=200,
         **params
     ):
-        start = 0
+        # Note: assumes no duplicates returned by jellyfin/emby
+        # ---
         # more requests = slower
         # bigger requests = more chances of failure
         # 200 items/request seems to be a nice sweetspot where I'm
         # not getting failures
-        limit = 200
-        resp = {}
+        total = -1
         last = -1
-        items = []
         fields = 'Path,ParentId,Overview'
         if extra_fields:
             fields = f'{fields},{extra_fields}'
-        while len(items) not in (resp.get('TotalRecordCount', -1), last):
+        hash = (types, path, extra_fields)
+        items = self._partial_cache.get(hash, [])
+
+        while len(items) != last and (len(items) < total or total == -1):
             resp = await self.connector.getJson(
-                '/Users/{UserId}/Items',
+                path,
                 remote			= False,
                 format			= 'json',
                 recursive		= 'true',
@@ -232,16 +236,19 @@ class Emby(objects.EmbyObject):
                 fields			= fields,
                 sortBy			= 'SortName',
                 sortOrder		= 'Ascending',
-                startIndex		= start,
+                startIndex		= len(items),
                 limit			= limit,
                 **params
             )
+            total = resp.get('TotalRecordCount', -1)
             last = len(items)
-            start += limit
-            # assuming no duplicates returned by jellyfin/emby, otherwise:
-            #items.extend(i for i in await self.process(resp) if i not in items)
-            items.extend(await self.process(resp))
-        return items
+            items.extend(resp['Items'])
+            self._partial_cache[hash] = items
+        # do all the item fetching after we get the full list of item ids
+        try:
+            return await self.process(items)
+        finally:
+            del self._partial_cache[hash]
 
     @property
     @async_func
@@ -285,7 +292,11 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def songs_force(self):
-        items = await self._get_list('Audio', extra_fields='Genres,Tags,Artists')
+        items = await self._get_list(
+            'Audio',
+            extra_fields='Genres,Tags,Artists',
+            limit=300,
+        )
         self.extras['songs'] = items
         return items
 
@@ -354,7 +365,11 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def movies_force(self):
-        items = await self._get_list('Movie', extra_fields='Genres,Tags,ProviderIds')
+        items = await self._get_list(
+            'Movie',
+            extra_fields='Genres,Tags,ProviderIds',
+            limit=100,
+        )
         self.extras['movies'] = items
         return items
 
@@ -400,7 +415,11 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def episodes_force(self):
-        items = await self._get_list('Episode', extra_fields='Genres,Tags')
+        items = await self._get_list(
+            'Episode',
+            extra_fields='Genres,Tags',
+            limit=500,
+        )
         self.extras['episodes'] = items
         return items
 

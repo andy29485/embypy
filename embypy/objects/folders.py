@@ -89,7 +89,9 @@ class Playlist(Folder):
         '''
         items = []
         for i in await self.items:
-            if i.type == 'Audio':
+            if type(i) == str:
+                items.append(await self.process(i))
+            elif i.type == 'Audio':
                 items.append(i)
             elif hasattr(i, 'songs'):
                 items.extend(await i.songs)
@@ -100,7 +102,9 @@ class Playlist(Folder):
     async def songs_force(self):
         items = []
         for i in await self.items_force:
-            if i.type == 'Audio':
+            if type(i) == str:
+                items.append(await self.process(i))
+            elif i.type == 'Audio':
                 items.append(i)
             elif hasattr(i, 'songs'):
                 items.extend(await i.songs)
@@ -200,7 +204,9 @@ class BoxSet(Folder):
         '''
         items = []
         for i in await self.items:
-            if i.type == 'Movie':
+            if type(i) == str:
+                items.append(await self.process(i))
+            elif i.type == 'Movie':
                 items.append(i)
             elif hasattr(i, 'movies'):
                 items.extend(await i.movies)
@@ -211,7 +217,9 @@ class BoxSet(Folder):
     async def movies_force(self):
         items = []
         for i in await self.items_force:
-            if i.type == 'Movie':
+            if type(i) == str:
+                items.append(await self.process(i))
+            elif i.type == 'Movie':
                 items.append(i)
             elif hasattr(i, 'movies'):
                 items.extend(await i.movies)
@@ -238,7 +246,9 @@ class BoxSet(Folder):
         '''
         items = []
         for i in await self.items:
-            if i.type == 'Series':
+            if type(i) == str:
+                items.append(await self.process(i))
+            elif i.type == 'Series':
                 items.append(i)
             elif hasattr(i, 'series'):
                 items.extend(await i.series)
@@ -254,7 +264,9 @@ class BoxSet(Folder):
     async def series_force(self):
         items = []
         for i in await self.items_force:
-            if i.type == 'Series':
+            if type(i) == str:
+                items.append(await self.process(i))
+            elif i.type == 'Series':
                 items.append(i)
             elif hasattr(i, 'series'):
                 items.extend(await i.series)
