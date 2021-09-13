@@ -281,7 +281,7 @@ class EmbyObject(object):
         info = await self.connector.getJson(
             path,
             remote=False,
-            Fields='Path,Overview'+(',' if fields else '')+fields
+            Fields='Path,Overview,PremiereDate'+(',' if fields else '')+fields
         )
         self.object_dict.update(info)
         self.extras = {}

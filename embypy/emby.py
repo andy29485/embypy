@@ -1,5 +1,7 @@
 from simplejson.scanner import JSONDecodeError
 
+import asyncio
+
 from embypy import objects
 from embypy.utils import Connector
 from embypy.utils.asyncio import async_func
@@ -33,6 +35,7 @@ class Emby(objects.EmbyObject):
         connector = Connector(url, **kargs)
         super().__init__({'ItemId': '', 'Name': ''}, connector)
         self._partial_cache = {}
+        self._cache_lock = asyncio.Condition()
 
     @async_func
     async def info(self, obj_id=None):
@@ -167,14 +170,21 @@ class Emby(objects.EmbyObject):
         Thus it is recomended to use the `*_force` properties, which will
         only update the cache after data is retrived.
         '''
+        raise RuntimeError('why was this called?')
         keys = self.extras.keys()
         self.extras = {}
         for key in keys:
             try:
                 func = getattr(self, key, None)
-                if callable(func):
+                if asyncio.iscoroutinefunction(func):
+                    await func()
+                elif asyncio.iscoroutine(func):
+                    await func
+                elif callable(func):
                     func()
-            except:
+            except asyncio.CancelledError:
+                raise
+            except Exception:
                 pass
 
     @async_func
@@ -220,35 +230,63 @@ class Emby(objects.EmbyObject):
         # not getting failures
         total = -1
         last = -1
-        fields = 'Path,ParentId,Overview'
+        fields = 'Path,ParentId,Overview,PremiereDate'
         if extra_fields:
             fields = f'{fields},{extra_fields}'
         hash = (types, path, extra_fields)
-        items = self._partial_cache.get(hash, [])
+        async with self._cache_lock:
+            count, event, items = self._partial_cache.get(hash, (0, None, []))
+
+            if count == 0:
+                event = asyncio.Event()
+                self._partial_cache[hash] = (1, event, items)
+            else:
+                self._partial_cache[hash] = (count + 1, event, items)
+
+        if count != 0:
+            waiting = True
+            while waiting:
+                await event.wait()
+                async with self._cache_lock:
+                    if event.is_set():
+                        event.clear()
+                        waiting = False
 
         while len(items) != last and (len(items) < total or total == -1):
-            resp = await self.connector.getJson(
-                path,
-                remote			= False,
-                format			= 'json',
-                recursive		= 'true',
-                includeItemTypes	= types,
-                fields			= fields,
-                sortBy			= 'SortName',
-                sortOrder		= 'Ascending',
-                startIndex		= len(items),
-                limit			= limit,
-                **params
-            )
-            total = resp.get('TotalRecordCount', -1)
-            last = len(items)
-            items.extend(resp['Items'])
-            self._partial_cache[hash] = items
+            try:
+                resp = await self.connector.getJson(
+                    path,
+                    remote			= False,
+                    format			= 'json',
+                    recursive		= 'true',
+                    includeItemTypes	= types,
+                    fields			= fields,
+                    sortBy			= 'SortName',
+                    sortOrder		= 'Ascending',
+                    startIndex		= len(items),
+                    limit			= limit,
+                    **params
+                )
+                total = resp.get('TotalRecordCount', -1)
+                last = len(items)
+                items.extend(resp['Items'])
+                async with self._cache_lock:
+                    count, event, _ = self._partial_cache[hash]
+                    self._partial_cache[hash] = (count, event, items)
+            except Exception:
+                event.set()
+                raise
         # do all the item fetching after we get the full list of item ids
         try:
             return await self.process(items)
         finally:
-            del self._partial_cache[hash]
+            async with self._cache_lock:
+                count, event, _ = self._partial_cache[hash]
+                event.set()
+                if count <= 1:
+                    del self._partial_cache[hash]
+                else:
+                    self._partial_cache[hash] = (count - 1, event, items)
 
     @property
     @async_func
