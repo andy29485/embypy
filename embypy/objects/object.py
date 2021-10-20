@@ -217,6 +217,47 @@ class EmbyObject(object):
         return self.connector.get_url(path, attach_api_key=False)
 
     @property
+    def date(self):
+        """alias of premier_date"""
+        return self.premier_date
+
+    @date.setter
+    def date(self, value):
+        self.premier_date = value
+
+    @property
+    def premier_date(self):
+        """datetime of when the item premiered (aired/released) (or None)"""
+        ts = self.object_dict.get('PremiereDate')
+        if not ts:
+            return None
+        return arrow.get(ts).datetime
+
+    @premier_date.setter
+    def premier_date(self, value):
+        if isinstance(value, datetime.datetime):
+            value = value.strftime("%Y-%m-%dT%H:%M:%SZ")
+        elif not isinstance(value, str):
+            raise ValueError('value must be datetime or str')
+        self.object_dict['PremiereDate'] = value
+
+    @property
+    def date_created(self):
+        """datetime of when the item was added to the server (or None)"""
+        ts = self.object_dict.get('DateCreated')
+        if not ts:
+            return None
+        return arrow.get(ts).datetime
+
+    @date_created.setter
+    def date_created(self, value):
+        if isinstance(value, datetime.datetime):
+            value = value.strftime("%Y-%m-%dT%H:%M:%SZ")
+        elif not isinstance(value, str):
+            raise ValueError('value must be datetime or str')
+        self.object_dict['DateCreated'] = value
+
+    @property
     def parent_id(self):
         '''id of the parent object
 

@@ -22,6 +22,11 @@ class Audio(EmbyObject):
         return self.object_dict.get('AlbumId')
 
     @property
+    def album_name(self):
+        '''name of album '''
+        return self.object_dict.get('Album', '')
+
+    @property
     @async_func
     async def album(self):
         '''The album that the song belongs to
