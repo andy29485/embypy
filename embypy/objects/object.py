@@ -1,5 +1,56 @@
 from embypy.utils.asyncio import async_func
 
+import arrow
+import datetime
+
+_EMPTY_OBJ = {
+    "Id": "",
+    "Name": "",
+    "OriginalTitle": "",
+    "ForcedSortName": "",
+    "CommunityRating": "",
+    "CriticRating": "",
+    "IndexNumber": "",
+    "AirsBeforeSeasonNumber": "",
+    "AirsAfterSeasonNumber": "",
+    "AirsBeforeEpisodeNumber": "",
+    "ParentIndexNumber": None,
+    "DisplayOrder": "",
+    "Album": "",
+    "AlbumArtists": [],
+    "ArtistItems": [],
+    "Overview": "",
+    "Status": "",
+    "AirDays": [],
+    "AirTime": "",
+    "Genres": [],
+    "Tags": [],
+    "Studios": [],
+    "PremiereDate": "",
+    "DateCreated": "",
+    "EndDate": None,
+    "ProductionYear": "",
+    "AspectRatio": "",
+    "Video3DFormat": "",
+    "OfficialRating": "",
+    "CustomRating": "",
+    "People": [],
+    "LockData": False,
+    "LockedFields": [],
+    "ProviderIds": {
+        "MusicBrainzReleaseGroup": "",
+        "MusicBrainzAlbumArtist": "",
+        "MusicBrainzAlbum": "",
+        "MusicBrainzArtist": "",
+        "MusicBrainzTrack": "",
+        "AudioDbAlbum": "",
+        "AudioDbArtist": ""
+    },
+    "PreferredMetadataLanguage": "",
+    "PreferredMetadataCountryCode": "",
+    "Taglines": []
+}
+
 
 class EmbyObject(object):
     '''Deafult EMby Object Template
@@ -357,10 +408,12 @@ class EmbyObject(object):
         '''
         # Why does the whole dict need to be sent?
         #   because emby is dumb, and will break if I don't
+        data = {**_EMPTY_OBJ, **self.object_dict}
+
         path = 'Items/{}'.format(self.id)
         status, resp = await self.connector.post(
             path,
-            data=self.object_dict,
+            data=data,
             remote=False,
             send_raw=True,
             headers={'Content-Type': 'application/json'},
@@ -369,7 +422,7 @@ class EmbyObject(object):
             await EmbyObject(self.object_dict, self.connector).update()
             status, resp = await self.connector.post(
                 path,
-                data=self.object_dict,
+                data=data,
                 remote=False,
                 send_raw=False,
                 headers={'Content-Type': 'application/json'},
