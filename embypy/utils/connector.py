@@ -344,7 +344,7 @@ class Connector:
             return False
         if not resp:
             return False
-        if resp.status in (502, 504):
+        if resp.status in (502, 503, 504):
             await asyncio.sleep(random.random()*4+0.2)
             return False
         return True
@@ -375,7 +375,7 @@ class Connector:
                 resp = await method(url, timeout=self.timeout, **params)
                 if await self._process_resp(resp):
                     return resp
-                await asyncio.sleep(random.random()*i+0.2)
+                await asyncio.sleep(random.random()*i + 0.2)
             except asyncio.exceptions.TimeoutError:
                 pass
             except aiohttp.ClientConnectionError:
