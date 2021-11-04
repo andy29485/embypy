@@ -64,7 +64,13 @@ class Emby(objects.EmbyObject):
     @async_func
     async def search(
         self, query,
-        sort_map={'BoxSet':0, 'Series':1, 'Movie':2, 'Audio':3, 'Person':4},
+        sort_map={
+            'BoxSet': 0,
+            'Series': 1,
+            'Movie': 2,
+            'Audio': 3,
+            'Person': 4
+        },
         strict_sort=False
     ):
         '''Sends a search request to emby, returns results
@@ -230,18 +236,16 @@ class Emby(objects.EmbyObject):
         # not getting failures
         total = -1
         last = -1
-        fields = 'Path,ParentId,Overview,PremiereDate'
+        fields = 'Path,ParentId,Overview,PremiereDate,DateCreated'
         if extra_fields:
             fields = f'{fields},{extra_fields}'
         hash = (types, path, extra_fields)
         async with self._cache_lock:
             count, event, items = self._partial_cache.get(hash, (0, None, []))
 
-            if count == 0:
+            if event is None:
                 event = asyncio.Event()
-                self._partial_cache[hash] = (1, event, items)
-            else:
-                self._partial_cache[hash] = (count + 1, event, items)
+            self._partial_cache[hash] = (count + 1, event, items)
 
         if count != 0:
             waiting = True
@@ -256,24 +260,26 @@ class Emby(objects.EmbyObject):
             try:
                 resp = await self.connector.getJson(
                     path,
-                    remote			= False,
-                    format			= 'json',
+                    remote		= False,
+                    format		= 'json',
                     recursive		= 'true',
                     includeItemTypes	= types,
-                    fields			= fields,
-                    sortBy			= 'SortName',
+                    fields		= fields,
+                    sortBy		= 'SortName',
                     sortOrder		= 'Ascending',
                     startIndex		= len(items),
-                    limit			= limit,
+                    limit		= limit,
                     **params
                 )
-                total = resp.get('TotalRecordCount', -1)
+                total = int(resp.get('TotalRecordCount', -1))
                 last = len(items)
                 items.extend(resp['Items'])
                 async with self._cache_lock:
                     count, event, _ = self._partial_cache[hash]
                     self._partial_cache[hash] = (count, event, items)
             except Exception:
+                async with self._cache_lock:
+                    self._partial_cache[hash] = (count - 1, event, items)
                 event.set()
                 raise
         # do all the item fetching after we get the full list of item ids
@@ -307,7 +313,10 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def albums_force(self):
-        items = await self._get_list('MusicAlbum', extra_fields='Genres,Tags,Artists')
+        items = await self._get_list(
+            'MusicAlbum',
+            extra_fields='Genres,Tags,Artists',
+        )
         self.extras['albums'] = items
         return items
 
@@ -380,7 +389,10 @@ class Emby(objects.EmbyObject):
     @property
     @async_func
     async def artists_force(self):
-        items = await self._get_list('MusicArtist', extra_fields='Genres,Tags')
+        items = await self._get_list(
+            'MusicArtist',
+            extra_fields='Genres,Tags',
+        )
         self.extras['artists'] = items
         return items
 
