@@ -213,7 +213,7 @@ class Connector:
     async def _get_session_lock(self):
         loop = asyncio.get_running_loop()
         self._sessions[loop] = None
-        return self._session_locks.setdefault(loop, asyncio.Lock(loop=loop))
+        return self._session_locks.setdefault(loop, asyncio.Lock())
 
     @async_func
     async def info(self):

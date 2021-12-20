@@ -16,7 +16,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='EmbyPy',
-    version='0.6.6.3',
+    version='0.6.6.4',
     author='Andriy Zasypkin',
     author_email='AndriyZasypkin@gmail.com',
     description='Python API wrapper for Emby Media Browser',
